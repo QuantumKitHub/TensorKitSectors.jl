@@ -6,7 +6,6 @@ Basic utility for testing sectors.
 module TestSetup
 
 export smallset, randsector, hasfusiontensor
-export @include
 
 using TensorKitSectors, Test, Random
 using TestExtras
@@ -42,14 +41,6 @@ function hasfusiontensor(I::Type{<:Sector})
             rethrow(e)
         end
     end
-end
-
-# include file as-is in local scope
-macro include(filename::String)
-    dir = dirname(string(__source__.file))
-    filepath = joinpath(dir, filename)
-    source = "quote; " * read(filepath, String) * "; end"
-    return esc(Meta.parse(source).args[1])
 end
 
 end # module TestSetup

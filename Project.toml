@@ -19,7 +19,7 @@ Random = "1"
 Reexport = "1"
 TensorOperations = "5"
 Test = "1"
-TestExtras = "0.2"
+TestExtras = "0.3"
 WignerSymbols = "1,2"
 
 [extras]
