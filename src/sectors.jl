@@ -25,9 +25,6 @@ and optionally
 *   `Bsymbol(a::I, b::I, c::I)`: B-symbol: scalar (in case of
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
 *   `twist(a::I)` -> twist of sector `a`
-and optionally, if `FusionStyle(I) isa GenericFusion`
-*   `vertex_ind2label(i::Int, a::I, b::I, c::I)` -> a custom label for the `i`th copy of
-    `c` appearing in `a ⊗ b`
 
 Furthermore, `iterate` and `Base.IteratorSize` should be made to work for the singleton type
 [`SectorValues{I}`](@ref).
@@ -190,31 +187,6 @@ it is a rank 4 array of size
 `(Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))`.
 """
 function Fsymbol end
-
-# If a I::Sector with `fusion(I) == GenericFusion` fusion wants to have custom vertex
-# labels, a specialized method for `vertindex2label` should be added
-"""
-    vertex_ind2label(k::Int, a::I, b::I, c::I) where {I<:Sector}
-
-Convert the index `k` of the fusion vertex (a,b)->c into a label. For
-`FusionStyle(I) == UniqueFusion()` or `FusionStyle(I) == MultipleFusion()`, where every
-fusion output occurs only once and `k == 1`, the default is to suppress vertex labels by
-setting them equal to `nothing`. For `FusionStyle(I) == GenericFusion()`, the default is to
-just use `k`, unless a specialized method is provided.
-"""
-function vertex_ind2label(k::Int, a::I, b::I, c::I) where {I<:Sector}
-    return _ind2label(FusionStyle(I), k::Int, a::I, b::I, c::I)
-end
-_ind2label(::UniqueFusion, k, a, b, c) = nothing
-_ind2label(::SimpleFusion, k, a, b, c) = nothing
-_ind2label(::GenericFusion, k, a, b, c) = k
-
-"""
-    vertex_labeltype(I::Type{<:Sector}) -> Type
-
-Return the type of labels for the fusion vertices of sectors of type `I`.
-"""
-vertex_labeltype(I::Type{<:Sector}) = typeof(vertex_ind2label(1, one(I), one(I), one(I)))
 
 # properties that can be determined in terms of the F symbol
 # TODO: find mechanism for returning these numbers with custom type T<:AbstractFloat
