@@ -16,7 +16,7 @@ export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
        MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
-export SectorSet, SectorValues, findindex, vertex_ind2label, vertex_labeltype
+export SectorSet, SectorValues, findindex
 
 export pentagon_equation, hexagon_equation
 
