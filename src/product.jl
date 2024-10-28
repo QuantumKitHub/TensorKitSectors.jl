@@ -169,9 +169,13 @@ Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
 function Base.isless(p1::ProductSector{T}, p2::ProductSector{T}) where {T<:SectorTuple}
     I1 = findindex.(values.(_sectors(T)), p1.sectors)
     I2 = findindex.(values.(_sectors(T)), p2.sectors)
-    d1 = reverse(cumsum(I1 .- 1))
-    d2 = reverse(cumsum(I2 .- 1))
-    return isless(d1, d2)
+    d1 = cumsum(I1 .- 1)
+    d2 = cumsum(I2 .- 1)
+    n = length(d1)
+    n == 0 && return false
+    d1[n] < d2[n] && return true
+    d1[n] > d2[n] && return false
+    return isless(Base.front(d1), Base.front(d2))
 end
 
 # Default construction from tensor product of sectors
