@@ -166,8 +166,12 @@ dim(p::ProductSector) = *(dim.(p.sectors)...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
-function Base.isless(p1::P, p2::P) where {P<:ProductSector}
-    return isless(findindex(values(P), p1), findindex(values(P), p2))
+function Base.isless(p1::ProductSector{T}, p2::ProductSector{T}) where {T<:SectorTuple}
+    I1 = findindex.(values.(_sectors(T)), p1.sectors)
+    I2 = findindex.(values.(_sectors(T)), p2.sectors)
+    d1 = reverse(cumsum(I1 .- 1))
+    d2 = reverse(cumsum(I2 .- 1))
+    return isless(d1, d2)
 end
 
 # Default construction from tensor product of sectors
