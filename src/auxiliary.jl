@@ -31,7 +31,7 @@ end
 end
 
 @inline localoffset(d, I::Tuple{Int}, sz::Tuple{Int}) = 0
-@inline function localoffset(d, I, sz)
+@inline function localoffset(d, I::NTuple{N,Int}, sz::Tuple{N,Int}) where {N}
     offset = 0
     for i in 1:(I[1] - 1)
         offset += num_manhattan_points(d - i + 1, Base.tail(sz))
@@ -55,7 +55,7 @@ end
 
 # inverse mapping
 @inline invertlocaloffset(d, offset, sz::Tuple{Int}) = (d + 1,)
-@inline function invertlocaloffset(d, offset, sz)
+@inline function invertlocaloffset(d, offset, sz::Tuple{Int,Int,Vararg{Int}})
     i₁ = 1
     while i₁ < sz[1]
         jump = num_manhattan_points(d - i₁ + 1, Base.tail(sz))
