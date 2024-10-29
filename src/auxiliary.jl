@@ -31,7 +31,7 @@ end
 end
 
 @inline localoffset(d, I::Tuple{Int}, sz::Tuple{Int}) = 0
-@inline function localoffset(d, I::NTuple{N,Int}, sz::Tuple{N,Int}) where {N}
+@inline function localoffset(d, I::NTuple{N,Int}, sz::NTuple{N,Int}) where {N}
     offset = 0
     for i in 1:(I[1] - 1)
         offset += num_manhattan_points(d - i + 1, Base.tail(sz))
