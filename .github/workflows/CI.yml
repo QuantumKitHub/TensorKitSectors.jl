@@ -22,8 +22,8 @@ jobs:
       fail-fast: false
       matrix:
         version:
-          - '1.10' # replace with LTS once it is released
-          # - '1' # automatically expands to the latest stable 1.x release of Julia
+          - 'lts' # current lts release
+          - '1' # latest stable release
         os:
           - ubuntu-latest
           - macOS-latest
