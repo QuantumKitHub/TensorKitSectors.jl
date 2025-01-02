@@ -46,14 +46,43 @@ instance is obtained as `values(I)`. For a new `I::Sector`, the following should
 If `IteratorSize(I) == HasLength()`, also the following must be implemented:
 *   `Base.length(::SectorValues{I})`: the number of different values
 *   `Base.getindex(::SectorValues{I}, i::Int)`: a mapping between an index `i` and an
-    instance of `I`
+    instance of `I`. A fallback implementation exists that returns the `i`th value
+    of the `SectorValues` iterator.
 *   `findindex(::SectorValues{I}, c::I)`: reverse mapping between a value `c::I` and an
-    index `i::Integer ∈ 1:length(values(I))`
+    index `i::Integer ∈ 1:length(values(I))`. A fallback implementation exists that
+    linearly searches through the `SectorValues` iterator.
 """
 struct SectorValues{I<:Sector} end
 Base.IteratorEltype(::Type{<:SectorValues}) = HasEltype()
 Base.eltype(::Type{SectorValues{I}}) where {I<:Sector} = I
 Base.values(::Type{I}) where {I<:Sector} = SectorValues{I}()
+
+Base.@propagate_inbounds function Base.getindex(v::SectorValues{I},
+                                                i::Int) where {I<:Sector}
+    @boundscheck begin
+        if Base.IteratorSize(v) === HasLength()
+            1 ≤ i ≤ length(v) || throw(BoundsError(v, i))
+        else
+            1 ≤ i || throw(BoundsError(v, i))
+        end
+    end
+    for (j, c) in enumerate(v)
+        j == i && return c
+    end
+    throw(BoundsError(v, i))
+end
+
+"""
+    findindex(v::SectorValues{I}, c::I)
+
+Reverse mapping between a value `c::I` and an index `i::Integer ∈ 1:length(values(I))`.
+"""
+function findindex(v::SectorValues{I}, c::I) where {I<:Sector}
+    for (i, cc) in enumerate(v)
+        cc == c && return i
+    end
+    throw(ArgumentError(lazy"Cannot locate sector $c"))
+end
 
 """
     one(::Sector) -> Sector
