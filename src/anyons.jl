@@ -56,7 +56,7 @@ Base.length(::SectorValues{FibonacciAnyon}) = 2
 function Base.iterate(::SectorValues{FibonacciAnyon}, i=0)
     return i == 0 ? (FibonacciAnyon(:I), 1) : (i == 1 ? (FibonacciAnyon(:τ), 2) : nothing)
 end
-function Base.getindex(S::SectorValues{FibonacciAnyon}, i)
+function Base.getindex(S::SectorValues{FibonacciAnyon}, i::Int)
     if i == 1
         return FibonacciAnyon(:I)
     elseif i == 2
@@ -177,7 +177,7 @@ const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
 Base.IteratorSize(::Type{SectorValues{IsingAnyon}}) = HasLength()
 Base.length(::SectorValues{IsingAnyon}) = length(all_isinganyons)
 Base.iterate(::SectorValues{IsingAnyon}, i=1) = iterate(all_isinganyons, i)
-Base.getindex(S::SectorValues{IsingAnyon}, i) = getindex(all_isinganyons, i)
+Base.getindex(::SectorValues{IsingAnyon}, i::Int) = getindex(all_isinganyons, i)
 
 function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
     a == all_isinganyons[1] && return 1

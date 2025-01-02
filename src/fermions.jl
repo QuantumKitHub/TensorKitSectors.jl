@@ -23,7 +23,7 @@ Base.length(::SectorValues{FermionParity}) = 2
 function Base.iterate(::SectorValues{FermionParity}, i=0)
     return i == 2 ? nothing : (FermionParity(i), i + 1)
 end
-function Base.getindex(::SectorValues{FermionParity}, i)
+function Base.getindex(::SectorValues{FermionParity}, i::Int)
     return 1 <= i <= 2 ? FermionParity(i - 1) : throw(BoundsError(values(FermionParity), i))
 end
 findindex(::SectorValues{FermionParity}, f::FermionParity) = f.isodd ? 2 : 1
