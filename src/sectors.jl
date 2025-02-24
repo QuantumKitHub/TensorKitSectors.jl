@@ -90,6 +90,8 @@ end
 
 Return the unit element within this type of sector.
 """
+rightone(a::Sector) = one(a)
+leftone(a::Sector) = one(a)
 Base.one(a::Sector) = one(typeof(a))
 
 """
