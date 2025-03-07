@@ -105,13 +105,20 @@ dual(a::Sector) = conj(a)
 Return the scalar type of the topological data (Fsymbol, Rsymbol) of the sector `I`.
 """
 function sectorscalartype(::Type{I}) where {I<:Sector}
-    if BraidingStyle(I) isa NoBraiding
-        return eltype(Core.Compiler.return_type(Fsymbol, NTuple{6,I}))
+    if BraidingStyle(I) === NoBraiding()
+        return _Fscalartype(I)
     else
-        Feltype = eltype(Core.Compiler.return_type(Fsymbol, NTuple{6,I}))
-        Reltype = eltype(Core.Compiler.return_type(Rsymbol, NTuple{3,I}))
-        return Base.promote_op(*, Feltype, Reltype)
+        return Base.promote_op(*, _Fscalartype(I), _Rscalartype(I))
     end
+end
+function _Fscalartype(::Type{I}) where {I<:Sector}
+    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6,I})
+    return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
+end
+function _Rscalartype(::Type{I}) where {I<:Sector}
+    BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
+    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3,I})
+    return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
 end
 
 """
