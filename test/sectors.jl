@@ -10,9 +10,14 @@ Istr = TKS.type_repr(I)
     @constinferred dim(s[1])
     @constinferred frobeniusschur(s[1])
     @constinferred Nsymbol(s...)
-    @constinferred Rsymbol(s...)
-    @constinferred Bsymbol(s...)
-    @constinferred Fsymbol(s..., s...)
+    R = @constinferred Rsymbol(s...)
+    B = @constinferred Bsymbol(s...)
+    F = @constinferred Fsymbol(s..., s...)
+    if FusionStyle(I) === SimpleFusion()
+        @test typeof(R * F) <: @constinferred sectorscalartype(I)
+    else
+        @test Base.promote_op(*, eltype(R), eltype(F)) <: @constinferred sectorscalartype(I)
+    end
     it = @constinferred s[1] ⊗ s[2]
     @constinferred ⊗(s..., s...)
 end
