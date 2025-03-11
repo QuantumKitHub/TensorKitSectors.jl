@@ -17,6 +17,7 @@ export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
        MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
+export rightone, leftone
 
 export pentagon_equation, hexagon_equation
 
