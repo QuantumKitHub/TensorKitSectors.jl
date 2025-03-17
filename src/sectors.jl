@@ -279,10 +279,10 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Bsymbol(a::I, b::I, c::I) where {I<:Sector}
     if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
-        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, one(a))
+        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a))
     else
         reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                Fsymbol(a, b, dual(b), a, c, one(a)),
+                Fsymbol(a, b, dual(b), a, c, rightone(a)),
                 (Nsymbol(a, b, c), Nsymbol(c, dual(b), a)))
     end
 end
