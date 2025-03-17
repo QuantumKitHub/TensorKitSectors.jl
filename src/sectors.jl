@@ -279,7 +279,8 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Bsymbol(a::I, b::I, c::I) where {I<:Sector}
     if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
-        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a))
+        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
+        Fsymbol(a, b, dual(b), a, c, rightone(a))
     else
         reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
                 Fsymbol(a, b, dual(b), a, c, rightone(a)),
