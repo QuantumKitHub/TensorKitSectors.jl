@@ -230,9 +230,9 @@ function dim(a::Sector)
     if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
-        abs(1 / Fsymbol(a, conj(a), a, a, one(a), one(a)))
+        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
     else
-        abs(1 / Fsymbol(a, conj(a), a, a, one(a), one(a))[1])
+        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
     end
 end
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
