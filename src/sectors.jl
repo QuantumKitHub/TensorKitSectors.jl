@@ -245,9 +245,9 @@ Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
     if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
-        sign(Fsymbol(a, conj(a), a, a, one(a), one(a)))
+        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
     else
-        sign(Fsymbol(a, conj(a), a, a, one(a), one(a))[1])
+        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
     end
 end
 
