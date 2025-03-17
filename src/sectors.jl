@@ -39,10 +39,10 @@ abstract type Sector end
 Singleton type to represent an iterator over the possible values of type `I`, whose
 instance is obtained as `values(I)`. For a new `I::Sector`, the following should be defined
 *   `Base.iterate(::SectorValues{I}[, state])`: iterate over the values
-*   `Base.IteratorSize(::Type{SectorValues{I}})`: `HasLenght()`, `SizeUnkown()`
+*   `Base.IteratorSize(::Type{SectorValues{I}})`: `HasLength()`, `SizeUnknown()`
     or `IsInfinite()` depending on whether the number of values of type `I` is finite
     (and sufficiently small) or infinite; for a large number of values, `SizeUnknown()` is
-    recommend because this will trigger the use of `GenericGradedSpace`.
+    recommended because this will trigger the use of `GenericGradedSpace`.
 If `IteratorSize(I) == HasLength()`, also the following must be implemented:
 *   `Base.length(::SectorValues{I})`: the number of different values
 *   `Base.getindex(::SectorValues{I}, i::Int)`: a mapping between an index `i` and an
@@ -107,13 +107,20 @@ dual(a::Sector) = conj(a)
 Return the scalar type of the topological data (Fsymbol, Rsymbol) of the sector `I`.
 """
 function sectorscalartype(::Type{I}) where {I<:Sector}
-    if BraidingStyle(I) isa NoBraiding
-        return eltype(Core.Compiler.return_type(Fsymbol, NTuple{6,I}))
+    if BraidingStyle(I) === NoBraiding()
+        return _Fscalartype(I)
     else
-        Feltype = eltype(Core.Compiler.return_type(Fsymbol, NTuple{6,I}))
-        Reltype = eltype(Core.Compiler.return_type(Rsymbol, NTuple{3,I}))
-        return Base.promote_op(*, Feltype, Reltype)
+        return Base.promote_op(*, _Fscalartype(I), _Rscalartype(I))
     end
+end
+function _Fscalartype(::Type{I}) where {I<:Sector}
+    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6,I})
+    return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
+end
+function _Rscalartype(::Type{I}) where {I<:Sector}
+    BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
+    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3,I})
+    return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
 end
 
 """
@@ -416,7 +423,7 @@ end
 
 # SectorSet:
 #-------------------------------------------------------------------------------
-# Custum generator to represent sets of sectors with type inference
+# Custom generator to represent sets of sectors with type inference
 struct SectorSet{I<:Sector,F,S}
     f::F
     set::S
