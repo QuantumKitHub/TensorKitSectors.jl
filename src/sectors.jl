@@ -90,9 +90,16 @@ end
 
 Return the unit element within this type of sector.
 """
-rightone(a::Sector) = one(a)
-leftone(a::Sector) = one(a)
 Base.one(a::Sector) = one(typeof(a))
+
+"""
+    leftone(a::Sector) -> Sector
+    rightone(a::Sector) -> Sector
+
+Return the left or right unit element within this type of sector. 
+"""
+leftone(a::Sector) = one(a)
+rightone(a::Sector) = one(a)
 
 """
     dual(a::Sector) -> Sector
