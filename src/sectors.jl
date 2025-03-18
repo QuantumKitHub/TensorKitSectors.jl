@@ -94,11 +94,18 @@ Base.one(a::Sector) = one(typeof(a))
 
 """
     leftone(a::Sector) -> Sector
-    rightone(a::Sector) -> Sector
 
-Return the left or right unit element within this type of sector. 
+Return the left unit element within this type of sector.
+See also [`rightone`](@ref) and [`Base.one`](@ref).
 """
 leftone(a::Sector) = one(a)
+
+"""
+    rightone(a::Sector) -> Sector
+
+Return the right unit element within this type of sector.
+See also [`leftone`](@ref) and [`Base.one`](@ref).
+"""
 rightone(a::Sector) = one(a)
 
 """
