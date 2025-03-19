@@ -93,6 +93,22 @@ Return the unit element within this type of sector.
 Base.one(a::Sector) = one(typeof(a))
 
 """
+    leftone(a::Sector) -> Sector
+
+Return the left unit element within this type of sector.
+See also [`rightone`](@ref) and [`Base.one`](@ref).
+"""
+leftone(a::Sector) = one(a)
+
+"""
+    rightone(a::Sector) -> Sector
+
+Return the right unit element within this type of sector.
+See also [`leftone`](@ref) and [`Base.one`](@ref).
+"""
+rightone(a::Sector) = one(a)
+
+"""
     dual(a::Sector) -> Sector
 
 Return the conjugate label `conj(a)`.
@@ -235,9 +251,9 @@ function dim(a::Sector)
     if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
-        abs(1 / Fsymbol(a, conj(a), a, a, one(a), one(a)))
+        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
     else
-        abs(1 / Fsymbol(a, conj(a), a, a, one(a), one(a))[1])
+        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
     end
 end
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
@@ -250,9 +266,9 @@ Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
     if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
-        sign(Fsymbol(a, conj(a), a, a, one(a), one(a)))
+        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
     else
-        sign(Fsymbol(a, conj(a), a, a, one(a), one(a))[1])
+        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
     end
 end
 
@@ -260,10 +276,10 @@ end
 function Asymbol(a::I, b::I, c::I) where {I<:Sector}
     if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-        conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, one(a), c))
+        conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c))
     else
         reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, one(a), c)),
+                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c)),
                 (Nsymbol(a, b, c), Nsymbol(dual(a), c, b)))
     end
 end
@@ -284,10 +300,11 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Bsymbol(a::I, b::I, c::I) where {I<:Sector}
     if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
-        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, one(a))
+        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
+        Fsymbol(a, b, dual(b), a, c, rightone(a))
     else
         reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                Fsymbol(a, b, dual(b), a, c, one(a)),
+                Fsymbol(a, b, dual(b), a, c, rightone(a)),
                 (Nsymbol(a, b, c), Nsymbol(c, dual(b), a)))
     end
 end
