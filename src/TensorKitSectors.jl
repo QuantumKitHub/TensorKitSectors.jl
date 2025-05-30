@@ -1,12 +1,11 @@
 # Superselection sectors (quantum numbers):
-#==========================================================================================## for defining graded vector spaces and invariant subspaces of tensor products
-
+# for defining graded vector spaces and invariant subspaces of tensor products
+#==========================================================================================#
 module TensorKitSectors
 
 # exports
 # -------
-export Sector, Group,
-       AbstractIrrep
+export Sector, Group, AbstractIrrep
 export Irrep
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol

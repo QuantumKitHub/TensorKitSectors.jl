@@ -1,6 +1,5 @@
 # Deligne tensor product of different sectors: ⊠
 #==============================================================================#
-
 const SectorTuple = Tuple{Vararg{Sector}}
 
 """
