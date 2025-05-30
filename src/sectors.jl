@@ -31,6 +31,11 @@ Furthermore, `iterate` and `Base.IteratorSize` should be made to work for the si
 """
 abstract type Sector end
 
+abstract type FusionSector <: Sector end
+abstract type BraidedSector <: FusionSector end
+abstract type SymmetricSector <: BraidedSector end
+abstract type ModularSector <: BraidedSector end
+
 # iterator over the values (i.e., elements of representative set of simple objects)
 # in the sector
 """
@@ -458,4 +463,80 @@ function Base.iterate(s::SectorSet{I}, args...) where {I<:Sector}
     next === nothing && return nothing
     val, state = next
     return convert(I, s.f(val)), state
+end
+
+# Time reversed sector
+struct TimeReversed{I<:BraidedSector} <: BraidedSector
+    a::I
+end
+
+sector_rank(::Type{TimeReversed{I}}) where {I<:BraidedSector} = sector_rank(I)
+
+FusionStyle(::Type{TimeReversed{I}}) where {I<:BraidedSector} = FusionStyle(I)
+BraidingStyle(::Type{TimeReversed{I}}) where {I<:BraidedSector} = BraidingStyle(I)
+is_modular(::Type{TimeReversed{I}}) where {I<:BraidedSector} = is_modular(I)
+function Nsymbol(a::TimeReversed{I}, b::TimeReversed{I},
+                 c::TimeReversed{I}) where {I<:BraidedSector}
+    return Nsymbol(a.a, b.a, c.a)
+end
+function Fsymbol(a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
+                 d::TimeReversed{I}, e::TimeReversed{I},
+                 f::TimeReversed{I}) where {I<:BraidedSector}
+    return Fsymbol(a.a, b.a, c.a, d.a, e.a, f.a)
+end
+function Rsymbol(a::TimeReversed{I}, b::TimeReversed{I},
+                 c::TimeReversed{I}) where {I<:BraidedSector}
+    return Nsymbol(a.a, b.a, c.a) * inv(Rsymbol(a.a, b.a, c.a))
+end
+
+Base.one(::Type{TimeReversed{I}}) where {I<:BraidedSector} = TimeReversed{I}(one(I))
+Base.conj(c::TimeReversed{I}) where {I<:BraidedSector} = TimeReversed{I}(conj(c.a))
+function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:BraidedSector}
+    return map(TimeReversed{I}, c1.a ⊗ c2.a)
+end
+function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I<:BraidedSector}
+    return Base.IteratorSize(SectorValues{I}())
+end
+function Base.length(::SectorValues{TimeReversed{I}}) where {I<:BraidedSector}
+    return Base.length(SectorValues{I}())
+end
+function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I<:BraidedSector}
+    return TimeReversed{I}(SectorValues{I}()[i])
+end
+function Base.iterate(::SectorValues{TimeReversed{I}}, i::Int=0) where {I<:BraidedSector}
+    obj, next = iterate(SectorValues{I}(), i)
+    return TimeReversed{I}(obj), next
+end
+function findindex(::SectorValues{TimeReversed{I}},
+                   a::TimeReversed{I}) where {I<:BraidedSector}
+    return findindex(SectorValues{I}(), a.a)
+end
+
+function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:BraidedSector}
+    return isless(c1.a, c2.a)
+end
+
+function S_matrix(::Type{𝒞}) where {𝒞<:BraidedSector}
+    N = length(SectorValues{𝒞}())
+    S = zeros(ComplexF64, N, N)
+
+    for i in 1:N, j in 1:N
+        a = SectorValues{𝒞}()[i]
+        b = SectorValues{𝒞}()[j]
+        S[i, j] = sum(tr(Rsymbol(b, a, c) * Rsymbol(a, b, c)) * dim(c) for c in a ⊗ b)
+    end
+
+    return S
+end
+
+function T_vector(::Type{𝒞}) where {𝒞<:BraidedSector}
+    N = length(SectorValues{𝒞}())
+    T = zeros(ComplexF64, N)
+
+    for i in 1:N
+        a = SectorValues{𝒞}()[i]
+        T[i] = twist(a)
+    end
+
+    return T
 end

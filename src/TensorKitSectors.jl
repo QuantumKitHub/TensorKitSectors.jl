@@ -1,12 +1,12 @@
 # Superselection sectors (quantum numbers):
-# for defining graded vector spaces and invariant subspaces of tensor products
-#==========================================================================================#
+#==========================================================================================## for defining graded vector spaces and invariant subspaces of tensor products
 
 module TensorKitSectors
 
 # exports
 # -------
-export Sector, Group, AbstractIrrep
+export Sector, FusionSector, BraidedSector, ModularSector, SymmetricSector, Group,
+       AbstractIrrep
 export Irrep
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
@@ -18,13 +18,14 @@ export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
 export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
 export rightone, leftone
+export S_matrix, T_vector
 
 export pentagon_equation, hexagon_equation
 
 export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
-export ProductSector
+export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
-export PlanarTrivial, FibonacciAnyon, IsingAnyon
+export PlanarTrivial, FibonacciAnyon, IsingAnyon, Semion
 
 # unicode exports
 # ---------------
