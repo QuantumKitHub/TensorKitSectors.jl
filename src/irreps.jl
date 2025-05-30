@@ -15,7 +15,7 @@ the group name followed by `Irrep`.
 
 All irreps have [`BraidingStyle`](@ref) equal to `Bosonic()` and thus trivial twists.
 """
-abstract type AbstractIrrep{G<:Group} <: SymmetricSector end # irreps have integer quantum dimensions
+abstract type AbstractIrrep{G<:Group} <: Sector end # irreps have integer quantum dimensions
 BraidingStyle(::Type{<:AbstractIrrep}) = Bosonic()
 
 struct IrrepTable end

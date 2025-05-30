@@ -5,7 +5,7 @@ module TensorKitSectors
 
 # exports
 # -------
-export Sector, FusionSector, BraidedSector, ModularSector, SymmetricSector, Group,
+export Sector, Group,
        AbstractIrrep
 export Irrep
 
