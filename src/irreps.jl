@@ -1,5 +1,5 @@
-#==============================================================================## Sectors corresponding to irreducible representations of compact groups
-
+# Sectors corresponding to irreducible representations of compact groups
+#==============================================================================#
 # Irreps of groups
 #------------------------------------------------------------------------------#
 """
