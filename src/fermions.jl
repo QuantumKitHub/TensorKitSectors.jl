@@ -20,6 +20,7 @@ Base.convert(::Type{FermionParity}, a) = FermionParity(a)
 
 Base.IteratorSize(::Type{SectorValues{FermionParity}}) = HasLength()
 Base.length(::SectorValues{FermionParity}) = 2
+_init_iterating_index(::SectorValues{FermionParity}) = 0
 function Base.iterate(::SectorValues{FermionParity}, i=0)
     return i == 2 ? nothing : (FermionParity(i), i + 1)
 end

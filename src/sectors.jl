@@ -487,6 +487,9 @@ function Fsymbol(a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
 end
 function Rsymbol(a::TimeReversed{I}, b::TimeReversed{I},
                  c::TimeReversed{I}) where {I<:Sector}
+    # if det(Rsymbol(a.a, b.a, c.a)) ≈ 0.0
+    #     throw(ArgumentError("R-symbol is not invertible for sectors $a, $b, $c"))
+    # end 
     return Nsymbol(a.a, b.a, c.a) * inv(Rsymbol(a.a, b.a, c.a))
 end
 
@@ -499,14 +502,20 @@ function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I<:Sect
     return Base.IteratorSize(SectorValues{I}())
 end
 function Base.length(::SectorValues{TimeReversed{I}}) where {I<:Sector}
-    return Base.length(SectorValues{I}())
+    return length(SectorValues{I}())
 end
 function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I<:Sector}
     return TimeReversed{I}(SectorValues{I}()[i])
 end
-function Base.iterate(::SectorValues{TimeReversed{I}}, i::Int=0) where {I<:Sector}
-    obj, next = iterate(SectorValues{I}(), i)
-    return TimeReversed{I}(obj), next
+function Base.iterate(::SectorValues{TimeReversed{I}},
+                      i=_init_iterating_index(SectorValues{I}())) where {I<:Sector}
+    next = iterate(SectorValues{I}(), i)
+    if next === nothing
+        return nothing
+    else
+        obj, next = next
+        return TimeReversed{I}(obj), next
+    end
 end
 function findindex(::SectorValues{TimeReversed{I}},
                    a::TimeReversed{I}) where {I<:Sector}
@@ -520,6 +529,9 @@ end
 function S_matrix(::Type{I}) where {I<:Sector}
     if BraidingStyle(I) isa NoBraiding
         throw(ArgumentError("S-matrix is not defined for sectors $I with no braiding"))
+    end
+    if Base.IteratorSize(SectorValues{I}) isa IsInfinite
+        throw(ArgumentError("S-matrix is not defined for infinite sectors $I"))
     end
     N = length(SectorValues{I}())
     S = zeros(ComplexF64, N, N)
@@ -536,6 +548,9 @@ end
 function T_vector(::Type{I}) where {I<:Sector}
     if BraidingStyle(I) isa NoBraiding
         throw(ArgumentError("T-vector is not defined for sectors $I with no braiding"))
+    end
+    if Base.IteratorSize(SectorValues{I}) isa IsInfinite
+        throw(ArgumentError("T-vector is not defined for infinite sectors $I"))
     end
     N = length(SectorValues{I}())
     T = zeros(ComplexF64, N)

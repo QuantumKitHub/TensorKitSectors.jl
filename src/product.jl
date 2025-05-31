@@ -44,7 +44,7 @@ function findindex(P::SectorValues{ProductSector{T}},
                    c::ProductSector{T}) where {T<:SectorTuple}
     return to_manhattan_index(findindex.(values.(_sectors(T)), c.sectors), _size(P))
 end
-
+_init_iterating_index(::SectorValues{ProductSector{T}}) where {T<:SectorTuple} = 1
 function Base.iterate(P::SectorValues{ProductSector{T}}, i=1) where {T<:SectorTuple}
     Base.IteratorSize(P) != Base.IsInfinite() && i > length(P) && return nothing
     return getindex(P, i), i + 1

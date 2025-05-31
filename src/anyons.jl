@@ -10,6 +10,7 @@ struct PlanarTrivial <: Sector end
 
 Base.IteratorSize(::Type{SectorValues{PlanarTrivial}}) = HasLength()
 Base.length(::SectorValues{PlanarTrivial}) = 1
+_init_iterating_index(::SectorValues{PlanarTrivial}) = 0
 Base.iterate(::SectorValues{PlanarTrivial}, i=0) = i == 0 ? (PlanarTrivial(), 1) : nothing
 function Base.getindex(::SectorValues{PlanarTrivial}, i::Int)
     return i == 1 ? PlanarTrivial() :
@@ -53,6 +54,7 @@ end
 
 Base.IteratorSize(::Type{SectorValues{FibonacciAnyon}}) = HasLength()
 Base.length(::SectorValues{FibonacciAnyon}) = 2
+_init_iterating_index(::SectorValues{FibonacciAnyon}) = 0
 function Base.iterate(::SectorValues{FibonacciAnyon}, i=0)
     return i == 0 ? (FibonacciAnyon(:I), 1) : (i == 1 ? (FibonacciAnyon(:τ), 2) : nothing)
 end
@@ -176,6 +178,7 @@ const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
 
 Base.IteratorSize(::Type{SectorValues{IsingAnyon}}) = HasLength()
 Base.length(::SectorValues{IsingAnyon}) = length(all_isinganyons)
+_init_iterating_index(::SectorValues{IsingAnyon}) = 1
 Base.iterate(::SectorValues{IsingAnyon}, i=1) = iterate(all_isinganyons, i)
 Base.getindex(::SectorValues{IsingAnyon}, i::Int) = getindex(all_isinganyons, i)
 
