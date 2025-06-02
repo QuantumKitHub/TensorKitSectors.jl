@@ -14,15 +14,14 @@ using .TestSetup
 include("newsectors.jl")
 using .NewSectors
 
-const sectorlist = (
-    Z2Irrep, Z3Irrep, Z4Irrep, U1Irrep, CU1Irrep, SU2Irrep, NewSU2Irrep,
+const sectorlist = (Z2Irrep, Z3Irrep, Z4Irrep, U1Irrep, CU1Irrep, SU2Irrep, NewSU2Irrep,
                     FibonacciAnyon, IsingAnyon, FermionParity,
                     FermionParity ⊠ FermionParity,
                     Z3Irrep ⊠ Z4Irrep, FermionParity ⊠ U1Irrep ⊠ SU2Irrep,
                     FermionParity ⊠ SU2Irrep ⊠ SU2Irrep, NewSU2Irrep ⊠ NewSU2Irrep,
                     NewSU2Irrep ⊠ SU2Irrep, FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep,
                     Z2Irrep ⊠ FibonacciAnyon ⊠ FibonacciAnyon,
-                    TimeReversed{Z2Irrep}, 
+                    TimeReversed{Z2Irrep},
                     TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep},
                     TimeReversed{U1Irrep}, TimeReversed{CU1Irrep}, TimeReversed{SU2Irrep},
                     TimeReversed{FibonacciAnyon}, TimeReversed{IsingAnyon},
@@ -35,8 +34,7 @@ const sectorlist = (
                     TimeReversed{NewSU2Irrep ⊠ SU2Irrep},
                     TimeReversed{FermionParity ⊠ U1Irrep ⊠ SU2Irrep},
                     TimeReversed{FermionParity ⊠ SU2Irrep ⊠ SU2Irrep},
-                    TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep},
-                    )
+                    TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep})
 
 @testset "$(TensorKitSectors.type_repr(I))" for I in sectorlist
     @include("sectors.jl")
