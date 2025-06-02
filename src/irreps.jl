@@ -98,7 +98,6 @@ Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
 
 Base.IteratorSize(::Type{SectorValues{ZNIrrep{N}}}) where {N} = HasLength()
 Base.length(::SectorValues{ZNIrrep{N}}) where {N} = N
-_init_iterating_index(::SectorValues{ZNIrrep{N}}) where {N} = 0
 function Base.iterate(::SectorValues{ZNIrrep{N}}, i=0) where {N}
     return i == N ? nothing : (ZNIrrep{N}(i), i + 1)
 end
@@ -136,7 +135,6 @@ Base.conj(c::U1Irrep) = U1Irrep(-c.charge)
 ⊗(c1::U1Irrep, c2::U1Irrep) = (U1Irrep(c1.charge + c2.charge),)
 
 Base.IteratorSize(::Type{SectorValues{U1Irrep}}) = IsInfinite()
-_init_iterating_index(::SectorValues{U1Irrep}) = 0
 function Base.iterate(::SectorValues{U1Irrep}, i::Int=0)
     return i <= 0 ? (U1Irrep(half(i)), (-i + 1)) : (U1Irrep(half(i)), -i)
 end
@@ -190,7 +188,6 @@ Base.conj(s::SU2Irrep) = s
 ⊗(s1::SU2Irrep, s2::SU2Irrep) = SectorSet{SU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))
 
 Base.IteratorSize(::Type{SectorValues{SU2Irrep}}) = IsInfinite()
-_init_iterating_index(::SectorValues{SU2Irrep}) = 0
 Base.iterate(::SectorValues{SU2Irrep}, i::Int=0) = (SU2Irrep(half(i)), i + 1)
 function Base.getindex(::SectorValues{SU2Irrep}, i::Int)
     return 1 <= i ? SU2Irrep(half(i - 1)) : throw(BoundsError(values(SU2Irrep), i))
@@ -272,7 +269,6 @@ Base.getindex(::IrrepTable, ::Type{CU₁}) = CU1Irrep
 Base.convert(::Type{CU1Irrep}, (j, s)::Tuple{Real,Integer}) = CU1Irrep(j, s)
 
 Base.IteratorSize(::Type{SectorValues{CU1Irrep}}) = IsInfinite()
-_init_iterating_index(::SectorValues{CU1Irrep}) = (0, 0)
 function Base.iterate(::SectorValues{CU1Irrep}, state::Tuple{Int,Int}=(0, 0))
     j, s = state
     if iszero(j) && s == 0
