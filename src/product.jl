@@ -79,12 +79,24 @@ _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P<:ProductSector}
     heads = map(_firstsector, (a, b, c, d, e, f))
     tails = map(_tailsector, (a, b, c, d, e, f))
-    f₁ = Fsymbol(heads...)
-    f₂ = Fsymbol(tails...)
-    if f₁ isa Number || f₂ isa Number
-        f₁ * f₂
+    F₁ = Fsymbol(heads...)
+    F₂ = Fsymbol(tails...)
+    if F₁ isa Number && F₂ isa Number
+        return F₁ * F₂
+    elseif F₁ isa Number
+        a₁, b₁, c₁, d₁, e₁, f₁ = heads
+        sz₁ = (Nsymbol(a₁, b₁, e₁), Nsymbol(e₁, c₁, d₁), Nsymbol(b₁, c₁, f₁),
+               Nsymbol(a₁, f₁, d₁))
+        F₁′ = fill(F₁, sz₁)
+        return _kron(F₁′, F₂)
+    elseif F₂ isa Number
+        a₂, b₂, c₂, d₂, e₂, f₂ = tails
+        sz₂ = (Nsymbol(a₂, b₂, e₂), Nsymbol(e₂, c₂, d₂), Nsymbol(b₂, c₂, f₂),
+               Nsymbol(a₂, f₂, d₂))
+        F₂′ = fill(F₂, sz₂)
+        return _kron(F₁, F₂′)
     else
-        _kron(f₁, f₂)
+        return _kron(F₁, F₂)
     end
 end
 function Fsymbol(a::P, b::P, c::P, d::P, e::P,
@@ -95,12 +107,22 @@ end
 function Rsymbol(a::P, b::P, c::P) where {P<:ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
-    r1 = Rsymbol(heads...)
-    r2 = Rsymbol(tails...)
-    if r1 isa Number || r2 isa Number
-        r1 * r2
+    R₁ = Rsymbol(heads...)
+    R₂ = Rsymbol(tails...)
+    if R₁ isa Number && R₂ isa Number
+        R₁ * R₂
+    elseif R₁ isa Number
+        a₁, b₁, c₁ = heads
+        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(b₁, a₁, c₁)) # 0 x 0 or 1 x 1
+        R₁′ = fill(R₁, sz₁)
+        return _kron(R₁′, R₂)
+    elseif R₂ isa Number
+        a₂, b₂, c₂ = tails
+        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(b₂, a₂, c₂)) # 0 x 0 or 1 x 1
+        R₂′ = fill(R₂, sz₂)
+        return _kron(R₁, R₂′)
     else
-        _kron(r1, r2)
+        return _kron(R₁, R₂)
     end
 end
 function Rsymbol(a::P, b::P, c::P) where {P<:ProductSector{<:Tuple{Sector}}}
@@ -110,12 +132,22 @@ end
 function Bsymbol(a::P, b::P, c::P) where {P<:ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
-    b1 = Bsymbol(heads...)
-    b2 = Bsymbol(tails...)
-    if b1 isa Number || b2 isa Number
-        b1 * b2
+    B₁ = Bsymbol(heads...)
+    B₂ = Bsymbol(tails...)
+    if B₁ isa Number && B₂ isa Number
+        B₁ * B₂
+    elseif B₁ isa Number
+        a₁, b₁, c₁ = heads
+        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(c₁, dual(b₁), a₁)) # 0 x 0 or 1 x 1
+        B₁′ = fill(B₁, sz₁)
+        return _kron(B₁′, B₂)
+    elseif B₂ isa Number
+        a₂, b₂, c₂ = tails
+        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(c₂, dual(b₂), a₂)) # 0 x 0 or 1 x 1
+        B₂′ = fill(B₂, sz₂)
+        return _kron(B₁, B₂′)
     else
-        _kron(b1, b2)
+        return _kron(B₁, B₂)
     end
 end
 function Bsymbol(a::P, b::P, c::P) where {P<:ProductSector{<:Tuple{Sector}}}
@@ -125,12 +157,22 @@ end
 function Asymbol(a::P, b::P, c::P) where {P<:ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
-    a1 = Asymbol(heads...)
-    a2 = Asymbol(tails...)
-    if a1 isa Number || a2 isa Number
-        a1 * a2
+    A₁ = Asymbol(heads...)
+    A₂ = Asymbol(tails...)
+    if A₁ isa Number && A₂ isa Number
+        A₁ * A₂
+    elseif A₁ isa Number
+        a₁, b₁, c₁ = heads
+        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(dual(a₁), c₁, b₁)) # 0 x 0 or 1 x 1
+        A₁′ = fill(A₁, sz₁)
+        return _kron(A₁′, A₂)
+    elseif A₂ isa Number
+        a₂, b₂, c₂ = tails
+        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(dual(a₂), c₂, b₂)) # 0 x 0 or 1 x 1
+        A₂′ = fill(A₂, sz₂)
+        return _kron(A₁, A₂′)
     else
-        _kron(a1, a2)
+        return _kron(A₁, A₂)
     end
 end
 function Asymbol(a::P, b::P, c::P) where {P<:ProductSector{<:Tuple{Sector}}}
