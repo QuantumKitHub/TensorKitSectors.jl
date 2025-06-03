@@ -496,13 +496,13 @@ function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:Sector}
     return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
 end
 function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I<:Sector}
-    return Base.IteratorSize(SectorValues{I}())
+    return Base.IteratorSize(values(I))
 end
 function Base.length(::SectorValues{TimeReversed{I}}) where {I<:Sector}
-    return length(SectorValues{I}())
+    return length(values(I))
 end
 function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I<:Sector}
-    return TimeReversed{I}(SectorValues{I}()[i])
+    return TimeReversed{I}(getindex(values(I), i))
 end
 function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I<:Sector}
     next = iterate(values(I), state...)
@@ -515,7 +515,7 @@ function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I<:Secto
 end
 function findindex(::SectorValues{TimeReversed{I}},
                    a::TimeReversed{I}) where {I<:Sector}
-    return findindex(SectorValues{I}(), a.a)
+    return findindex(values(I), a.a)
 end
 
 function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:Sector}
