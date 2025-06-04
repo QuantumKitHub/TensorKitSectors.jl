@@ -1,3 +1,6 @@
+# Sectors corresponding to simplest fusion categories that are not group representations.
+#---------------------------------------------------------------------------------------#
+
 # PlanarTrivial
 """
     struct PlanarTrivial <: Sector

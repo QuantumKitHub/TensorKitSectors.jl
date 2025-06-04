@@ -1,6 +1,4 @@
 # Sectors corresponding to irreducible representations of compact groups
-#==============================================================================#
-# Irreps of groups
 #------------------------------------------------------------------------------#
 """
     abstract type AbstractIrrep{G<:Group} <: Sector end
@@ -143,7 +141,7 @@ function Base.getindex(::SectorValues{U1Irrep}, i::Int)
     return U1Irrep(iseven(i) ? half(i >> 1) : -half(i >> 1))
 end
 function findindex(::SectorValues{U1Irrep}, c::U1Irrep)
-    return (n = twice(c.charge); 2 * abs(n) + (n <= 0))
+    return (n=twice(c.charge); 2 * abs(n) + (n <= 0))
 end
 
 Base.hash(c::U1Irrep, h::UInt) = hash(c.charge, h)
