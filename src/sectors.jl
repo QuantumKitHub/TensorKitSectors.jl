@@ -470,9 +470,6 @@ struct TimeReversed{I<:Sector} <: Sector
         return new{I}(a)
     end
 end
-
-sector_rank(::Type{TimeReversed{I}}) where {I<:Sector} = sector_rank(I)
-
 FusionStyle(::Type{TimeReversed{I}}) where {I<:Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I<:Sector} = BraidingStyle(I)
 function Nsymbol(a::TimeReversed{I}, b::TimeReversed{I},
