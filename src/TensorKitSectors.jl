@@ -1,7 +1,3 @@
-# Superselection sectors (quantum numbers):
-# for defining graded vector spaces and invariant subspaces of tensor products
-#==========================================================================================#
-
 module TensorKitSectors
 
 # exports

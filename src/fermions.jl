@@ -97,8 +97,7 @@ See also: [`SU2Irrep`](@ref), [`FermionParity`](@ref)
 """
 const FermionSpin = SU2Irrep ⊠ FermionParity
 const fSU₂ = FermionSpin
-FermionSpin(j::Real) = (s = SU2Irrep(j);
-                        s ⊠ FermionParity(isodd(twice(s.j))))
+FermionSpin(j::Real) = (s=SU2Irrep(j); s ⊠ FermionParity(isodd(twice(s.j))))
 type_repr(::Type{FermionSpin}) = "FermionSpin"
 
 # convenience default converter -> allows Vect[FermionSpin](1 => 1)
