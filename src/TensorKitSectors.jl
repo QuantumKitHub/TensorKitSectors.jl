@@ -18,7 +18,7 @@ export rightone, leftone
 export pentagon_equation, hexagon_equation
 
 export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
-export ProductSector
+export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
 
@@ -58,7 +58,7 @@ include("precompile.jl")
 function __precompile__()
     for I in (Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep,
               FermionParity, FermionNumber, FermionSpin, PlanarTrivial, FibonacciAnyon,
-              IsingAnyon)
+              IsingAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon})
         precompile_sector(I)
     end
 end
