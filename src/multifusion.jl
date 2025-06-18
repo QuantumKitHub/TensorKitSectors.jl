@@ -11,6 +11,10 @@
 # """
 @enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
 
+function Base.getindex(a::CatType, label::Int)
+    return IsingBimod(a, label)
+end
+
 struct IsingBimod <: Sector
     type::CatType
     label::Int
