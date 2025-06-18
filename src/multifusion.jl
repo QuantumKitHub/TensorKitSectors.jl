@@ -2,16 +2,16 @@
 # 𝒞 = 𝒟 = RepZ2 ≅ {1, ψ}, while ℳ = Vec ≅ {σ}
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
 
-abstract type Bimodule <: Sector end
-"""
-    CatType
-    
-𝒞   ℳ
-ℳᵒᵖ 𝒟
-"""
+# abstract type Bimodule <: Sector end
+# """
+#     CatType
+
+# 𝒞   ℳ
+# ℳᵒᵖ 𝒟
+# """
 @enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
 
-struct IsingBimod <: Bimodule
+struct IsingBimod <: Sector
     type::CatType
     label::Int
     function IsingBimod(type::CatType, label::Int)
@@ -191,8 +191,5 @@ end
 function Base.hash(a::IsingBimod, h::UInt)
     return hash(a.label, hash(a.type, h))
 end
-
-vertex_labeltype(::Type{IsingBimod}) = Nothing
-VectorInterface.scalartype(::Type{IsingBimod}) = ComplexF64
 
 dim(a::IsingBimod) = dim(convert(IsingAnyon, a))
