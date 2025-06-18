@@ -41,6 +41,13 @@ function isModule(a::IsingBimod)
     return a.type in (ℳ, ℳᵒᵖ)
 end
 
+const all_isingbimod_objects = (IsingBimod(𝒞, 0), IsingBimod(𝒞, 1), IsingBimod(ℳᵒᵖ, 0),
+                                IsingBimod(ℳ, 0), IsingBimod(𝒟, 0), IsingBimod(𝒟, 1))
+
+Base.IteratorSize(::Type{<:SectorValues{IsingBimod}}) = Base.SizeUnknown()
+Base.iterate(::SectorValues{IsingBimod}, i=1) = iterate(all_isingbimod_objects, i)
+Base.length(::SectorValues{IsingBimod}) = length(all_isingbimod_objects)
+
 ⊗(a::IsingBimod, b::IsingBimod) = IsingBimodIterator(a, b)
 
 struct IsingBimodIterator
