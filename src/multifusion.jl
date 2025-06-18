@@ -2,7 +2,7 @@
 # 𝒞 = 𝒟 = RepZ2 ≅ {1, ψ}, while ℳ = Vec ≅ {σ}
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
 
-abstract type Bimodule <: Sector end # read as BimoduleSector
+abstract type Bimodule <: Sector end
 """
     CatType
     
@@ -12,19 +12,19 @@ abstract type Bimodule <: Sector end # read as BimoduleSector
 @enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
 
 struct IsingBimod <: Bimodule
-    type::CatType # which category
-    label::Int # which object in type
+    type::CatType
+    label::Int
     function IsingBimod(type::CatType, label::Int)
-        if type == 𝒞 # Rep Z2
+        if type == 𝒞
             0 ≤ label ≤ 1 ||
                 throw(ArgumentError("Invalid 𝒞 label for Ising bimodule: $(label)"))
-        elseif type == ℳ # Vec ~ σ
+        elseif type == ℳ
             label == 0 ||
                 throw(ArgumentError("Invalid ℳ label for Ising bimodule: $(label)"))
         elseif type == ℳᵒᵖ
             label == 0 ||
                 throw(ArgumentError("Invalid ℳᵒᵖ label for Ising bimodule: $(label)"))
-        elseif type == 𝒟 # Rep Z2
+        elseif type == 𝒟
             0 ≤ label ≤ 1 ||
                 throw(ArgumentError("Invalid 𝒟 label for Ising bimodule: $(label)"))
         end
@@ -37,14 +37,11 @@ isM(x::IsingBimod) = x.type == ℳ
 isMop(x::IsingBimod) = x.type == ℳᵒᵖ
 isD(x::IsingBimod) = x.type == 𝒟
 
-const FusionCat(::Type{<:Bimodule}) = (𝒞, 𝒟)
-const ModuleCat(::Type{<:Bimodule}) = (ℳ, ℳᵒᵖ)
-
 function isModule(a::IsingBimod)
-    return a.type in ModuleCat(IsingBimod)
+    return a.type in (ℳ, ℳᵒᵖ)
 end
 
-TensorKit.:⊗(a::IsingBimod, b::IsingBimod) = IsingBimodIterator(a, b)
+⊗(a::IsingBimod, b::IsingBimod) = IsingBimodIterator(a, b)
 
 struct IsingBimodIterator
     a::IsingBimod
@@ -69,45 +66,37 @@ function Base.length(iter::IsingBimodIterator)
 end
 
 function Base.iterate(iter::IsingBimodIterator, state=0)
-    # 𝒞 × 𝒞 -> 𝒞:
-    if isC(iter.a) && isC(iter.b)
+    if isC(iter.a) && isC(iter.b) # 𝒞 × 𝒞 -> 𝒞
         return state == 0 ? (IsingBimod(𝒞, mod(iter.a.label + iter.b.label, 2)), 1) :
                nothing
     end
 
-    # 𝒟 × 𝒟 -> 𝒟:
-    if isD(iter.a) && isD(iter.b)
+    if isD(iter.a) && isD(iter.b) # 𝒟 × 𝒟 -> 𝒟
         return state == 0 ? (IsingBimod(𝒟, mod(iter.a.label + iter.b.label, 2)), 1) :
                nothing
     end
 
-    # ℳ × ℳop -> 𝒞:
-    if isM(iter.a) && isMop(iter.b)
+    if isM(iter.a) && isMop(iter.b) # ℳ × ℳop -> 𝒞
         return state < 2 ? (IsingBimod(𝒞, state), state + 1) : nothing
     end
 
-    # ℳop × ℳ -> 𝒟:
-    if isMop(iter.a) && isM(iter.b)
+    if isMop(iter.a) && isM(iter.b) # ℳop × ℳ -> 𝒟
         return state < 2 ? (IsingBimod(𝒟, state), state + 1) : nothing
     end
 
-    # 𝒞 × ℳ -> ℳ:
-    if isC(iter.a) && isM(iter.b)
+    if isC(iter.a) && isM(iter.b) # 𝒞 × ℳ -> ℳ
         return state == 0 ? (iter.b, 1) : nothing
     end
 
-    # ℳop x 𝒞 -> ℳop
-    if isMop(iter.a) && isC(iter.b)
+    if isMop(iter.a) && isC(iter.b) # ℳop x 𝒞 -> ℳop
         return state == 0 ? (iter.a, 1) : nothing
     end
 
-    # ℳ x 𝒟 -> ℳ:
-    if isM(iter.a) && isD(iter.b)
+    if isM(iter.a) && isD(iter.b) # ℳ x 𝒟 -> ℳ
         return state == 0 ? (iter.a, 1) : nothing
     end
 
-    # 𝒟 x ℳop -> ℳop
-    if isD(iter.a) && isMop(iter.b)
+    if isD(iter.a) && isMop(iter.b) # 𝒟 x ℳop -> ℳop
         return state == 0 ? (iter.b, 1) : nothing
     end
 
@@ -126,25 +115,11 @@ function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimod}
-    MopSet = Set([(𝒞, ℳ, ℳᵒᵖ, 𝒞, ℳ, 𝒞), (𝒟, 𝒟, ℳᵒᵖ, ℳᵒᵖ, 𝒟, ℳᵒᵖ), (𝒟, ℳᵒᵖ, ℳ, 𝒟, ℳᵒᵖ, 𝒟),
-                  (ℳᵒᵖ, ℳ, 𝒟, 𝒟, 𝒟, ℳ), (ℳ, ℳᵒᵖ, ℳ, ℳ, 𝒞, 𝒟), (ℳᵒᵖ, ℳ, ℳᵒᵖ, ℳᵒᵖ, 𝒟, 𝒞),
-                  (ℳᵒᵖ, 𝒞, ℳ, 𝒟, ℳᵒᵖ, ℳ), (ℳ, ℳᵒᵖ, 𝒞, 𝒞, 𝒞, ℳᵒᵖ), (ℳ, 𝒟, ℳᵒᵖ, 𝒞, ℳ, ℳᵒᵖ),
-                  (ℳᵒᵖ, 𝒞, 𝒞, ℳᵒᵖ, ℳᵒᵖ, 𝒞), (𝒟, ℳᵒᵖ, 𝒞, ℳᵒᵖ, ℳᵒᵖ, ℳᵒᵖ)])
-
-    # must use MopSet to check for cases where ℳop is allowed!
-
-    # using ℳᵒᵖ data here
-    if map(i -> i.type, (a, b, c, d, e, f)) in MopSet
-        return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b),
-                       convert(IsingAnyon, c), convert(IsingAnyon, d),
-                       convert(IsingAnyon, e), convert(IsingAnyon, f))
-    end
-
     return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
 end
 
-function Rsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod) # only defined within fusion categories
+function Rsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
     a.type == b.type == c.type ||
         throw(ArgumentError("can't braid between different categories"))
     ℳ ∉ map(i -> i.type, (a, b, c)) && ℳᵒᵖ ∉ map(i -> i.type, (a, b, c)) ||
@@ -153,19 +128,19 @@ function Rsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod) # only defined wit
 end
 
 function Base.conj(a::IsingBimod) # ℳ ↔ ℳop when conjugating elements within these
-    if a.type == 𝒞 || a.type == 𝒟 # self-conjugate within RepZ2
+    if isC(a) || isD(a) # self-conjugate within RepZ2
         return a
-    elseif a.type == ℳ
-        return IsingBimod(ℳᵒᵖ, a.label) # same object but in ℳop
+    elseif isM(a)
+        return IsingBimod(ℳᵒᵖ, a.label)
     else
-        return IsingBimod(ℳ, a.label) # same object but in ℳ
+        return IsingBimod(ℳ, a.label)
     end
 end
 
 function rightone(a::IsingBimod)
-    if a.type == 𝒞 || a.type == 𝒟
+    if isC(a) || isD(a)
         return IsingBimod(a.type, 0)
-    elseif a.type == ℳ # ℳ as right-𝒟 module
+    elseif isM(a) # ℳ as right-𝒟 module category
         return IsingBimod(𝒟, 0)
     else
         return IsingBimod(𝒞, 0)
@@ -173,9 +148,9 @@ function rightone(a::IsingBimod)
 end
 
 function leftone(a::IsingBimod)
-    if a.type == 𝒞 || a.type == 𝒟
+    if isC(a) || isD(a)
         return IsingBimod(a.type, 0)
-    elseif a.type == ℳ # ℳ as left-𝒞 module
+    elseif isM(a) # ℳ as left-𝒞 module category
         return IsingBimod(𝒞, 0)
     else
         return IsingBimod(𝒟, 0)
@@ -183,10 +158,10 @@ function leftone(a::IsingBimod)
 end
 
 function Base.one(a::IsingBimod)
-    if a.type == 𝒞 || a.type == 𝒟
+    if isC(a) || isD(a)
         return IsingBimod(a.type, 0)
     else
-        throw(DomainError("unit of module $(a.type) doesn't exist"))
+        throw(DomainError("unit of module category $(a.type) doesn't exist"))
     end
 end
 
