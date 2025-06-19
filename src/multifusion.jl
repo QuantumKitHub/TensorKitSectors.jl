@@ -120,12 +120,19 @@ function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ Re
 end
 
 function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
-    return c ∈ a ⊗ b ?
-           Nsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c)) :
-           false
+    # if a and b can fuse, then so can dual(a) and c, and c and dual(b)
+    # only needs to be explicitly checked when CatTypes differ or when there's a module category involved
+    if a.type != b.type || a.type != c.type || b.type != c.type ||
+       isModule(a) || isModule(b) || isModule(c)
+        c ∈ a ⊗ b && dual(b) ∈ dual(c) ⊗ a && dual(a) ∈ b ⊗ dual(c) ||
+            throw(ArgumentError("invalid fusion channel"))
+    end
+    return Nsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c))
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimod}
+    Nsymbol(a, b, e) && Nsymbol(e, c, d) &&
+        Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
     return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
 end
