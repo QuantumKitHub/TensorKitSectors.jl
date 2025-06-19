@@ -107,7 +107,7 @@ function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
     # if a and b can fuse, then so can dual(a) and c, and c and dual(b)
     # only needs to be explicitly checked when CatTypes differ or when there's a module category involved
     if a.type != b.type || a.type != c.type || b.type != c.type ||
-       isModule(a) || isModule(b) || isModule(c)
+       any(ismodulecategory, (a, b, c))
         c ∈ a ⊗ b && dual(b) ∈ dual(c) ⊗ a && dual(a) ∈ b ⊗ dual(c) ||
             throw(ArgumentError("invalid fusion channel"))
     end
