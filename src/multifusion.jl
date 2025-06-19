@@ -35,7 +35,7 @@ isM(x::IsingBimod) = x.type == ℳ
 isMop(x::IsingBimod) = x.type == ℳᵒᵖ
 isD(x::IsingBimod) = x.type == 𝒟
 
-function isModule(a::IsingBimod)
+function ismodulecategory(a::IsingBimod)
     return a.type in (ℳ, ℳᵒᵖ)
 end
 
@@ -109,7 +109,7 @@ function Base.iterate(iter::IsingBimodIterator, state=0)
 end
 
 function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ RepZ2 ≅ Ising
-    isModule(a) && return IsingAnyon(:σ)
+    ismodulecategory(a) && return IsingAnyon(:σ)
     return IsingAnyon(a.label == 0 ? :I : :ψ)
 end
 
