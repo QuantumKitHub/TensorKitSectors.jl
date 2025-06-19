@@ -21,6 +21,7 @@ export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
 export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
+export IsingBimod, CatType, 𝒞, 𝒟, ℳ, ℳᵒᵖ
 
 # unicode exports
 # ---------------
@@ -50,6 +51,7 @@ include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
+include("multifusion.jl") # multifusion examples, e.g. IsingBimod
 
 # precompile
 # ----------
