@@ -1,13 +1,8 @@
 # Rep Z2 ⊕ Rep Z2 ≅ Ising is worked out here
 # 𝒞 = 𝒟 = RepZ2 ≅ {1, ψ}, while ℳ = Vec ≅ {σ}
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
+#------------------------------------------------------------------------------#
 
-# """
-#     CatType
-
-# 𝒞   ℳ
-# ℳᵒᵖ 𝒟
-# """
 @enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
 # possible TODO: get rid of CatType and use Int instead -> prevents the need to export 𝒞 etc
 function Base.getindex(a::CatType, label::Int)
