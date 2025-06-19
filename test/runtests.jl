@@ -91,6 +91,7 @@ end
     D1 = IsingBimod(CatType(4), 1)
     C = rand([C0, C1])
     D = rand([D0, D1])
+    s = rand((M, Mop, C, D))
 
     @testset "Basic properties" begin
         @test @constinferred(one(C1)) == @constinferred(leftone(C1)) ==
@@ -99,7 +100,6 @@ end
         @test one(C1) == leftone(M) == rightone(Mop)
         @test one(D1) == rightone(M) == leftone(Mop)
 
-        s = rand((M, Mop, C, D))
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
         @constinferred dual(s)
@@ -131,10 +131,11 @@ end
     end
 
     @testset "Fusion rules and F-symbols" begin
+        argerr = ArgumentError("invalid fusion channel")
         # forbidden fusions
         for obs in [(C, D), (D, C), (M, M), (Mop, Mop), (D, M), (M, C), (Mop, D), (C, Mop)]
             @test isempty(⊗(obs...))
-            @test_throws ArgumentError("invalid fusion channel") Nsymbol(obs..., s)
+            @test_throws argerr Nsymbol(obs..., s)
         end
 
         # allowed fusions
@@ -144,10 +145,10 @@ end
 
         @test Nsymbol(C, C, one(C)) == Nsymbol(D, D, one(D)) == 1
         @test Nsymbol(C, M, M) == Nsymbol(Mop, C, Mop) == 1
-        @test Nsymbol(M, D, M) == Nsymbol(Mop, D, Mop) == 1
+        @test Nsymbol(M, D, M) == Nsymbol(D, Mop, Mop) == 1
 
-        @test_throws ArgumentError("invalid fusion channel") Nsymbol(M, Mop, D)
-        @test_throws ArgumentError("invalid fusion channel") Nsymbol(Mop, M, C)
+        @test_throws argerr Nsymbol(M, Mop, D)
+        @test_throws argerr Nsymbol(Mop, M, C)
         @test Nsymbol(M, Mop, C) == Nsymbol(Mop, M, D) == 1
 
         # non-trivial F-symbol checks
@@ -157,15 +158,15 @@ end
         @test Fsymbol(M, Mop, C1, C0, C1, Mop) == 1
 
         @test Fsymbol(C, M, D, M, M, M) == 1 # 𝒞 x ℳ x 𝒟 → ℳ allowed
-        @test Fsymbol(M, Mop, M, Mop, C, D) == 0 # IsingAnyon conversion would give non-zero
-        @test Fsymbol(Mop, M, Mop, M, D, C) == 0
+        @test_throws argerr Fsymbol(M, Mop, M, Mop, C, D) == 0 # IsingAnyon conversion would give non-zero
+        @test_throws argerr Fsymbol(Mop, M, Mop, M, D, C) == 0
 
         @test Fsymbol(M, Mop, M, M, C, D) ==
               (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳ x ℳᵒᵖ x ℳ → ℳ allowed
         @test Fsymbol(Mop, M, Mop, Mop, D, C) ==
               (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳᵒᵖ x ℳ x ℳᵒᵖ → ℳᵒᵖ allowed
 
-        @test_throws ArgumentError("invalid fusion channel") Fsymbol(M, Mop, M, Mop, C, D)
+        @test_throws argerr Fsymbol(M, Mop, M, Mop, C, D)
     end
 end
 
