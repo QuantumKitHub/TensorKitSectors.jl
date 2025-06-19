@@ -100,6 +100,9 @@ function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ Re
     return IsingAnyon(a.label == 0 ? :I : :ψ)
 end
 
+FusionStyle(::Type{IsingBimod}) = SimpleFusion() # no multiplicities
+BraidingStyle(::Type{IsingBimod}) = NoBraiding() # because of module categories
+
 function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
     # if a and b can fuse, then so can dual(a) and c, and c and dual(b)
     # only needs to be explicitly checked when CatTypes differ or when there's a module category involved
@@ -116,14 +119,6 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimod}
         Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
     return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
-end
-
-function Rsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
-    a.type == b.type == c.type ||
-        throw(ArgumentError("can't braid between different categories"))
-    ℳ ∉ map(i -> i.type, (a, b, c)) && ℳᵒᵖ ∉ map(i -> i.type, (a, b, c)) ||
-        throw(ArgumentError("can't braid with module category"))
-    return Rsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c))
 end
 
 function Base.conj(a::IsingBimod) # ℳ ↔ ℳop when conjugating elements within these
@@ -165,9 +160,6 @@ function Base.one(a::IsingBimod)
 end
 
 Base.one(::Type{IsingBimod}) = throw(ArgumentError("one of Type IsingBimod doesn't exist"))
-
-FusionStyle(::Type{IsingBimod}) = SimpleFusion() # no multiplicities
-BraidingStyle(::Type{IsingBimod}) = Anyonic() # see R symbols
 
 Base.isreal(::Type{IsingBimod}) = false
 
