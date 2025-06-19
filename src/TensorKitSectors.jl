@@ -51,7 +51,7 @@ include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
-include("multifusion.jl") # multifusion examples, e.g. IsingBimod
+include("multifusion.jl") # multifusion example, namely Rep Z2 ⊕ Rep Z2 ≅ Ising
 
 # precompile
 # ----------
