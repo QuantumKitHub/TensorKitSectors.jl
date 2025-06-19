@@ -157,7 +157,7 @@ end
         @test Fsymbol(M, Mop, C1, C0, C0, Mop) == 0
         @test Fsymbol(M, Mop, C1, C0, C1, Mop) == 1
 
-        @test Fsymbol(C, M, D, M, M, M) == 1 # 𝒞 x ℳ x 𝒟 → ℳ allowed
+        @test Fsymbol(C, M, D, M, M, M) == (C.label * D.label == 0 ? 1 : -1) # 𝒞 x ℳ x 𝒟 → ℳ allowed
         @test_throws argerr Fsymbol(M, Mop, M, Mop, C, D) == 0 # IsingAnyon conversion would give non-zero
         @test_throws argerr Fsymbol(Mop, M, Mop, M, D, C) == 0
 
