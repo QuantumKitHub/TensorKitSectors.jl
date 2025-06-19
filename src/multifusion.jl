@@ -53,22 +53,9 @@ struct IsingBimodIterator
     b::IsingBimod
 end
 
-Base.IteratorSize(::Type{IsingBimodIterator}) = Base.HasLength()
+Base.IteratorSize(::Type{IsingBimodIterator}) = Base.SizeUnknown()
 Base.IteratorEltype(::Type{IsingBimodIterator}) = Base.HasEltype()
 Base.eltype(::Type{IsingBimodIterator}) = IsingBimod
-
-function Base.length(iter::IsingBimodIterator)
-    if (isC(iter.a) && isC(iter.b)) || (isD(iter.a) && isD(iter.b))
-        return 1
-    elseif (isM(iter.a) && isMop(iter.b)) || (isMop(iter.a) && isM(iter.b)) # σ x σ = 1 + ψ
-        return 2
-    elseif (isM(iter.a) && isD(iter.b)) || (isC(iter.a) && isM(iter.b)) ||
-           (isD(iter.a) && isMop(iter.b)) || (isMop(iter.a) && isC(iter.b))
-        return 1
-    else
-        return 0 # some a⊗b can't exist, e.g. 𝒞 ⊗ 𝒟
-    end
-end
 
 function Base.iterate(iter::IsingBimodIterator, state=0)
     if isC(iter.a) && isC(iter.b) # 𝒞 × 𝒞 -> 𝒞
