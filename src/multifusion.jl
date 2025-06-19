@@ -10,7 +10,7 @@
 # ℳᵒᵖ 𝒟
 # """
 @enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
-
+# possible TODO: get rid of CatType and use Int instead -> prevents the need to export 𝒞 etc
 function Base.getindex(a::CatType, label::Int)
     return IsingBimod(a, label)
 end
