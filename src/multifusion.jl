@@ -170,5 +170,3 @@ end
 function Base.hash(a::IsingBimod, h::UInt)
     return hash(a.label, hash(a.type, h))
 end
-
-dim(a::IsingBimod) = dim(convert(IsingAnyon, a))
