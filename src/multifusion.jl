@@ -13,18 +13,8 @@ struct IsingBimod <: Sector
     type::CatType
     label::Int
     function IsingBimod(type::CatType, label::Int)
-        if type == 𝒞
-            0 ≤ label ≤ 1 ||
-                throw(ArgumentError("Invalid 𝒞 label for Ising bimodule: $(label)"))
-        elseif type == ℳ
-            label == 0 ||
-                throw(ArgumentError("Invalid ℳ label for Ising bimodule: $(label)"))
-        elseif type == ℳᵒᵖ
-            label == 0 ||
-                throw(ArgumentError("Invalid ℳᵒᵖ label for Ising bimodule: $(label)"))
-        elseif type == 𝒟
-            0 ≤ label ≤ 1 ||
-                throw(ArgumentError("Invalid 𝒟 label for Ising bimodule: $(label)"))
+        if label < 0 || label > 1 || (label == 1 && (type == ℳ || type == ℳᵒᵖ))
+            throw(ArgumentError(lazy"Invalid $type label for Ising bimodule: $(label)"))
         end
         return new(type, label)
     end
@@ -161,9 +151,7 @@ end
 
 Base.one(::Type{IsingBimod}) = throw(ArgumentError("one of Type IsingBimod doesn't exist"))
 
-Base.isreal(::Type{IsingBimod}) = false
-
-function Base.show(io::IO, a::IsingBimod)
+function Base.show(io::IO, ::MIME"text/plain", a::IsingBimod)
     if isC(a)
         print(io, "𝒞[$(a.label)]")
     elseif isM(a)
