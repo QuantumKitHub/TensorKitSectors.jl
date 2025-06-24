@@ -6,12 +6,12 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
     end
 
-    M = IsingBimod(CatType(3), 0)
-    Mop = IsingBimod(CatType(2), 0)
-    C0 = IsingBimod(CatType(1), 0)
-    C1 = IsingBimod(CatType(1), 1)
-    D0 = IsingBimod(CatType(4), 0)
-    D1 = IsingBimod(CatType(4), 1)
+    M = IsingBimod(1, 2, 0)
+    Mop = IsingBimod(2, 1, 0)
+    C0 = IsingBimod(1, 1, 0)
+    C1 = IsingBimod(1, 1, 1)
+    D0 = IsingBimod(2, 2, 0)
+    D1 = IsingBimod(2, 2, 1)
     C = rand([C0, C1])
     D = rand([D0, D1])
     s = rand((M, Mop, C, D))
@@ -48,7 +48,7 @@ Istr = TensorKitSectors.type_repr(I)
         end
         @test C0 == first(values(I))
         @test (@constinferred findindex(values(I), C0)) == 1
-        for s in smallset(I)
+        for s in collect(values(I))
             @test (@constinferred values(I)[findindex(values(I), s)]) == s
         end
     end
@@ -93,7 +93,8 @@ Istr = TensorKitSectors.type_repr(I)
     end
 
     @testset "$Istr: Unitarity of F-move" begin
-        for a in smallset(I), b in smallset(I), c in smallset(I)
+        objects = collect(values(I))
+        for a in objects, b in objects, c in objects
             for d in ⊗(a, b, c)
                 es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
                 fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))

@@ -3,34 +3,34 @@
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
 #------------------------------------------------------------------------------#
 
-@enum CatType 𝒞 = 1 ℳ = 3 ℳᵒᵖ = 2 𝒟 = 4
-# possible TODO: get rid of CatType and use Int instead -> prevents the need to export 𝒞 etc
-function Base.getindex(a::CatType, label::Int)
-    return IsingBimod(a, label)
-end
-
+# 𝒞   ℳ 
+# ℳᵒᵖ 𝒟
 struct IsingBimod <: Sector
-    type::CatType
+    row::Int
+    col::Int
     label::Int
-    function IsingBimod(type::CatType, label::Int)
-        if label < 0 || label > 1 || (label == 1 && (type == ℳ || type == ℳᵒᵖ))
-            throw(ArgumentError(lazy"Invalid $type label for Ising bimodule: $(label)"))
+    function IsingBimod(row::Int, col::Int, label::Int)
+        row <= 2 && col <= 2 || throw(DomainError(lazy"Invalid subcategory ($row, $col)"))
+        if label < 0 || label > 1 || (label == 1 && (row != col))
+            throw(ArgumentError(lazy"Invalid label $label for IsingBimod subcategory ($row, $col)"))
         end
-        return new(type, label)
+        return new(row, col, label)
     end
 end
 
-isC(x::IsingBimod) = x.type == 𝒞
-isM(x::IsingBimod) = x.type == ℳ
-isMop(x::IsingBimod) = x.type == ℳᵒᵖ
-isD(x::IsingBimod) = x.type == 𝒟
+isC(x::IsingBimod) = (x.row == x.col == 1)
+isM(x::IsingBimod) = (x.row == 1 && x.col == 2)
+isMop(x::IsingBimod) = (x.row == 2 && x.col == 1)
+isD(x::IsingBimod) = (x.row == 2 && x.col == 2)
 
 function ismodulecategory(a::IsingBimod)
-    return a.type in (ℳ, ℳᵒᵖ)
+    return (isM(a) || isMop(a))
 end
 
-const all_isingbimod_objects = (IsingBimod(𝒞, 0), IsingBimod(𝒞, 1), IsingBimod(ℳᵒᵖ, 0),
-                                IsingBimod(ℳ, 0), IsingBimod(𝒟, 0), IsingBimod(𝒟, 1))
+const all_isingbimod_objects = (IsingBimod(1, 1, 0), IsingBimod(1, 1, 1),
+                                IsingBimod(2, 1, 0),
+                                IsingBimod(1, 2, 0), IsingBimod(2, 2, 0),
+                                IsingBimod(2, 2, 1))
 
 Base.IteratorSize(::Type{<:SectorValues{IsingBimod}}) = Base.SizeUnknown()
 Base.iterate(::SectorValues{IsingBimod}, i=1) = iterate(all_isingbimod_objects, i)
@@ -49,21 +49,21 @@ Base.eltype(::Type{IsingBimodIterator}) = IsingBimod
 
 function Base.iterate(iter::IsingBimodIterator, state=0)
     if isC(iter.a) && isC(iter.b) # 𝒞 × 𝒞 -> 𝒞
-        return state == 0 ? (IsingBimod(𝒞, mod(iter.a.label + iter.b.label, 2)), 1) :
+        return state == 0 ? (IsingBimod(1, 1, mod(iter.a.label + iter.b.label, 2)), 1) :
                nothing
     end
 
     if isD(iter.a) && isD(iter.b) # 𝒟 × 𝒟 -> 𝒟
-        return state == 0 ? (IsingBimod(𝒟, mod(iter.a.label + iter.b.label, 2)), 1) :
+        return state == 0 ? (IsingBimod(2, 2, mod(iter.a.label + iter.b.label, 2)), 1) :
                nothing
     end
 
     if isM(iter.a) && isMop(iter.b) # ℳ × ℳop -> 𝒞
-        return state < 2 ? (IsingBimod(𝒞, state), state + 1) : nothing
+        return state < 2 ? (IsingBimod(1, 1, state), state + 1) : nothing
     end
 
     if isMop(iter.a) && isM(iter.b) # ℳop × ℳ -> 𝒟
-        return state < 2 ? (IsingBimod(𝒟, state), state + 1) : nothing
+        return state < 2 ? (IsingBimod(2, 2, state), state + 1) : nothing
     end
 
     if isC(iter.a) && isM(iter.b) # 𝒞 × ℳ -> ℳ
@@ -96,7 +96,8 @@ BraidingStyle(::Type{IsingBimod}) = NoBraiding() # because of module categories
 function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
     # if a and b can fuse, then so can dual(a) and c, and c and dual(b)
     # only needs to be explicitly checked when CatTypes differ or when there's a module category involved
-    if a.type != b.type || a.type != c.type || b.type != c.type ||
+    if (a.row, a.col) != (b.row, b.col) || (a.row, a.col) != (c.row, c.col) ||
+       (b.row, b.col) != (c.row, c.col) ||
        any(ismodulecategory, (a, b, c))
         c ∈ a ⊗ b && dual(b) ∈ dual(c) ⊗ a && dual(a) ∈ b ⊗ dual(c) ||
             throw(ArgumentError("invalid fusion channel"))
@@ -115,37 +116,37 @@ function Base.conj(a::IsingBimod) # ℳ ↔ ℳop when conjugating elements with
     if isC(a) || isD(a) # self-conjugate within RepZ2
         return a
     elseif isM(a)
-        return IsingBimod(ℳᵒᵖ, a.label)
+        return IsingBimod(2, 1, a.label)
     else
-        return IsingBimod(ℳ, a.label)
+        return IsingBimod(1, 2, a.label)
     end
 end
 
 function rightone(a::IsingBimod)
     if isC(a) || isD(a)
-        return IsingBimod(a.type, 0)
+        return IsingBimod(a.row, a.col, 0)
     elseif isM(a) # ℳ as right-𝒟 module category
-        return IsingBimod(𝒟, 0)
+        return IsingBimod(2, 2, 0)
     else
-        return IsingBimod(𝒞, 0)
+        return IsingBimod(1, 1, 0)
     end
 end
 
 function leftone(a::IsingBimod)
     if isC(a) || isD(a)
-        return IsingBimod(a.type, 0)
+        return IsingBimod(a.row, a.col, 0)
     elseif isM(a) # ℳ as left-𝒞 module category
-        return IsingBimod(𝒞, 0)
+        return IsingBimod(1, 1, 0)
     else
-        return IsingBimod(𝒟, 0)
+        return IsingBimod(2, 2, 0)
     end
 end
 
 function Base.one(a::IsingBimod)
     if isC(a) || isD(a)
-        return IsingBimod(a.type, 0)
+        return IsingBimod(a.row, a.col, 0)
     else
-        throw(DomainError("unit of module category $(a.type) doesn't exist"))
+        throw(DomainError("unit of module category ($(a.row), $(a.col)) doesn't exist"))
     end
 end
 
@@ -164,9 +165,10 @@ function Base.show(io::IO, ::MIME"text/plain", a::IsingBimod)
 end
 
 function Base.isless(a::IsingBimod, b::IsingBimod)
-    return isless((a.type, a.label), (b.type, b.label)) # order 𝒞 < ℳᵒᵖ < ℳ < 𝒟, and then within each cat according to label
+    vals = SectorValues{IsingBimod}()
+    return isless(findindex(vals, a), findindex(vals, b)) # order 𝒞 < ℳᵒᵖ < ℳ < 𝒟, and then within each cat according to label
 end
 
 function Base.hash(a::IsingBimod, h::UInt)
-    return hash(a.label, hash(a.type, h))
+    return hash(a.label, hash(a.row, hash(a.col, h)))
 end

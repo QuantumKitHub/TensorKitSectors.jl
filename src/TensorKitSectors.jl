@@ -21,7 +21,7 @@ export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
 export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
-export IsingBimod, CatType, 𝒞, 𝒟, ℳ, ℳᵒᵖ
+export IsingBimod
 
 # unicode exports
 # ---------------
