@@ -96,8 +96,7 @@ function Base.show(io::IO, ::MIME"text/plain", a::IsingBimod)
 end
 
 function Base.isless(a::IsingBimod, b::IsingBimod)
-    vals = SectorValues{IsingBimod}()
-    return isless(findindex(vals, a), findindex(vals, b)) # order 𝒞 < ℳᵒᵖ < ℳ < 𝒟, and then within each cat according to label
+    return isless((a.col, a.row, a.label), (b.col, b.row, b.label))
 end
 
 function Base.hash(a::IsingBimod, h::UInt)
