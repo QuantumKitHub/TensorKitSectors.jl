@@ -69,24 +69,16 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimod}
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
 end
 
-function Base.conj(a::IsingBimod) # ℳ ↔ ℳop when conjugating elements within these
-    return IsingBimod(a.col, a.row, a.label)
-end
+# ℳ ↔ ℳop when conjugating elements within these
+Base.conj(a::IsingBimod) = IsingBimod(a.col, a.row, a.label)
 
-function rightone(a::IsingBimod)
-    return IsingBimod(a.col, a.col, 0)
-end
-
-function leftone(a::IsingBimod)
-    return IsingBimod(a.row, a.row, 0)
-end
+rightone(a::IsingBimod) = IsingBimod(a.col, a.col, 0)
+leftone(a::IsingBimod) = IsingBimod(a.row, a.row, 0)
 
 function Base.one(a::IsingBimod)
-    if a.row == a.col
-        return IsingBimod(a.row, a.col, 0)
-    else
+    a.row == a.col ||
         throw(DomainError("unit of module category ($(a.row), $(a.col)) doesn't exist"))
-    end
+    return IsingBimod(a.row, a.col, 0)
 end
 
 Base.one(::Type{IsingBimod}) = throw(ArgumentError("one of Type IsingBimod doesn't exist"))
