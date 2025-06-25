@@ -104,18 +104,12 @@ Istr = TensorKitSectors.type_repr(I)
             end
         end
     end
+
     @testset "$Istr: Pentagon equation" begin
         objects = collect(values(I))
-        len(x) = length(collect(values(x))) # not predicting length of IsingBimodIterator
-        for a in objects, b in objects
-            len(a ⊗ b) > 0 || continue # skip if not compatible
-            for c in objects
-                len(b ⊗ c) > 0 || continue # skip if not compatible
-                for d in objects
-                    len(⊗(a, b, c)) > 0 || continue # skip if not compatible
-                    @test pentagon_equation(a, b, c, d; atol=1e-12, rtol=1e-12)
-                end
-            end
+        for a in objects, b in objects, c in objects, d in objects
+            # compatibility checks built in Fsymbol
+            @test pentagon_equation(a, b, c, d; atol=1e-12, rtol=1e-12)
         end
     end
 end
