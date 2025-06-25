@@ -10,7 +10,8 @@ struct IsingBimod <: Sector
     col::Int
     label::Int
     function IsingBimod(row::Int, col::Int, label::Int)
-        row <= 2 && col <= 2 || throw(DomainError(lazy"Invalid subcategory ($row, $col)"))
+        1 <= row <= 2 && 1 <= col <= 2 ||
+            throw(DomainError(lazy"Invalid subcategory ($row, $col)"))
         if label < 0 || label > 1 || (label == 1 && (row != col))
             throw(ArgumentError(lazy"Invalid label $label for IsingBimod subcategory ($row, $col)"))
         end
