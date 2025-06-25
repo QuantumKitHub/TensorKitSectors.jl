@@ -53,6 +53,15 @@ Istr = TensorKitSectors.type_repr(I)
         end
     end
 
+    @testset "$Istr: Printing and errors" begin
+        @test eval(Meta.parse(sprint(show, C0))) == one(C)
+        @test eval(Meta.parse(sprint(show, M))) == IsingBimod(1, 2, 0)
+        @test eval(Meta.parse(sprint(show, Mop))) == IsingBimod(2, 1, 0)
+        @test eval(Meta.parse(sprint(show, D0))) == one(D)
+        @test_throws DomainError one(M)
+        @test_throws DomainError one(Mop)
+    end
+
     @testset "$Istr Fusion rules and F-symbols" begin
         argerr = ArgumentError("invalid fusion channel")
         # forbidden fusions
