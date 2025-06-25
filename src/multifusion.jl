@@ -48,41 +48,12 @@ Base.IteratorEltype(::Type{IsingBimodIterator}) = Base.HasEltype()
 Base.eltype(::Type{IsingBimodIterator}) = IsingBimod
 
 function Base.iterate(iter::IsingBimodIterator, state=0)
-    if isC(iter.a) && isC(iter.b) # 𝒞 × 𝒞 -> 𝒞
-        return state == 0 ? (IsingBimod(1, 1, mod(iter.a.label + iter.b.label, 2)), 1) :
-               nothing
-    end
+    a, b = iter.a, iter.b
+    a.col == b.row || return nothing
 
-    if isD(iter.a) && isD(iter.b) # 𝒟 × 𝒟 -> 𝒟
-        return state == 0 ? (IsingBimod(2, 2, mod(iter.a.label + iter.b.label, 2)), 1) :
-               nothing
-    end
-
-    if isM(iter.a) && isMop(iter.b) # ℳ × ℳop -> 𝒞
-        return state < 2 ? (IsingBimod(1, 1, state), state + 1) : nothing
-    end
-
-    if isMop(iter.a) && isM(iter.b) # ℳop × ℳ -> 𝒟
-        return state < 2 ? (IsingBimod(2, 2, state), state + 1) : nothing
-    end
-
-    if isC(iter.a) && isM(iter.b) # 𝒞 × ℳ -> ℳ
-        return state == 0 ? (iter.b, 1) : nothing
-    end
-
-    if isMop(iter.a) && isC(iter.b) # ℳop x 𝒞 -> ℳop
-        return state == 0 ? (iter.a, 1) : nothing
-    end
-
-    if isM(iter.a) && isD(iter.b) # ℳ x 𝒟 -> ℳ
-        return state == 0 ? (iter.a, 1) : nothing
-    end
-
-    if isD(iter.a) && isMop(iter.b) # 𝒟 x ℳop -> ℳop
-        return state == 0 ? (iter.b, 1) : nothing
-    end
-
-    return nothing
+    _state = (a.row == b.col == a.col) ? mod(a.label + b.label, 2) : state
+    return state < (1 + (a.row == b.col && a.row != a.col)) ?
+           (IsingBimod(a.row, b.col, _state), state + 1) : nothing
 end
 
 function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ RepZ2 ≅ Ising
@@ -94,13 +65,8 @@ FusionStyle(::Type{IsingBimod}) = SimpleFusion() # no multiplicities
 BraidingStyle(::Type{IsingBimod}) = NoBraiding() # because of module categories
 
 function Nsymbol(a::IsingBimod, b::IsingBimod, c::IsingBimod)
-    # if a and b can fuse, then so can dual(a) and c, and c and dual(b)
-    # only needs to be explicitly checked when CatTypes differ or when there's a module category involved
-    if (a.row, a.col) != (b.row, b.col) || (a.row, a.col) != (c.row, c.col) ||
-       (b.row, b.col) != (c.row, c.col) ||
-       any(ismodulecategory, (a, b, c))
-        c ∈ a ⊗ b && dual(b) ∈ dual(c) ⊗ a && dual(a) ∈ b ⊗ dual(c) ||
-            throw(ArgumentError("invalid fusion channel"))
+    if (a.row != c.row) || (a.col != b.row) || (b.col != c.col)
+        throw(ArgumentError("invalid fusion channel"))
     end
     return Nsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c))
 end
