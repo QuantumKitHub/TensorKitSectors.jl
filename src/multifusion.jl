@@ -18,15 +18,6 @@ struct IsingBimod <: Sector
     end
 end
 
-isC(x::IsingBimod) = (x.row == x.col == 1)
-isM(x::IsingBimod) = (x.row == 1 && x.col == 2)
-isMop(x::IsingBimod) = (x.row == 2 && x.col == 1)
-isD(x::IsingBimod) = (x.row == 2 && x.col == 2)
-
-function ismodulecategory(a::IsingBimod)
-    return (isM(a) || isMop(a))
-end
-
 const all_isingbimod_objects = (IsingBimod(1, 1, 0), IsingBimod(1, 1, 1),
                                 IsingBimod(2, 1, 0),
                                 IsingBimod(1, 2, 0), IsingBimod(2, 2, 0),
@@ -57,7 +48,7 @@ function Base.iterate(iter::IsingBimodIterator, state=0)
 end
 
 function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ RepZ2 ≅ Ising
-    ismodulecategory(a) && return IsingAnyon(:σ)
+    (a.row != a.col) && return IsingAnyon(:σ)
     return IsingAnyon(a.label == 0 ? :I : :ψ)
 end
 
@@ -79,37 +70,19 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimod}
 end
 
 function Base.conj(a::IsingBimod) # ℳ ↔ ℳop when conjugating elements within these
-    if isC(a) || isD(a) # self-conjugate within RepZ2
-        return a
-    elseif isM(a)
-        return IsingBimod(2, 1, a.label)
-    else
-        return IsingBimod(1, 2, a.label)
-    end
+    return IsingBimod(a.col, a.row, a.label)
 end
 
 function rightone(a::IsingBimod)
-    if isC(a) || isD(a)
-        return IsingBimod(a.row, a.col, 0)
-    elseif isM(a) # ℳ as right-𝒟 module category
-        return IsingBimod(2, 2, 0)
-    else
-        return IsingBimod(1, 1, 0)
-    end
+    return IsingBimod(a.col, a.col, 0)
 end
 
 function leftone(a::IsingBimod)
-    if isC(a) || isD(a)
-        return IsingBimod(a.row, a.col, 0)
-    elseif isM(a) # ℳ as left-𝒞 module category
-        return IsingBimod(1, 1, 0)
-    else
-        return IsingBimod(2, 2, 0)
-    end
+    return IsingBimod(a.row, a.row, 0)
 end
 
 function Base.one(a::IsingBimod)
-    if isC(a) || isD(a)
+    if a.row == a.col
         return IsingBimod(a.row, a.col, 0)
     else
         throw(DomainError("unit of module category ($(a.row), $(a.col)) doesn't exist"))
@@ -119,13 +92,13 @@ end
 Base.one(::Type{IsingBimod}) = throw(ArgumentError("one of Type IsingBimod doesn't exist"))
 
 function Base.show(io::IO, ::MIME"text/plain", a::IsingBimod)
-    if isC(a)
+    if (a.row == a.col == 1)
         print(io, "𝒞[$(a.label)]")
-    elseif isM(a)
+    elseif (a.row == 1 && a.col == 2)
         print(io, "ℳ[$(a.label)]")
-    elseif isMop(a)
+    elseif (a.row == 2 && a.col == 1)
         print(io, "ℳᵒᵖ[$(a.label)]")
-    elseif isD(a)
+    elseif (a.row == a.col == 2)
         print(io, "𝒟[$(a.label)]")
     end
 end
