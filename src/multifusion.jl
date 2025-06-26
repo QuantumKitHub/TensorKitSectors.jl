@@ -83,18 +83,6 @@ end
 
 Base.one(::Type{IsingBimod}) = throw(ArgumentError("one of Type IsingBimod doesn't exist"))
 
-function Base.show(io::IO, ::MIME"text/plain", a::IsingBimod)
-    if (a.row == a.col == 1)
-        print(io, "𝒞[$(a.label)]")
-    elseif (a.row == 1 && a.col == 2)
-        print(io, "ℳ[$(a.label)]")
-    elseif (a.row == 2 && a.col == 1)
-        print(io, "ℳᵒᵖ[$(a.label)]")
-    elseif (a.row == a.col == 2)
-        print(io, "𝒟[$(a.label)]")
-    end
-end
-
 function Base.isless(a::IsingBimod, b::IsingBimod)
     return isless((a.col, a.row, a.label), (b.col, b.row, b.label))
 end
