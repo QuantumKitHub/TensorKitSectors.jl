@@ -54,10 +54,10 @@ Istr = TensorKitSectors.type_repr(I)
     end
 
     @testset "$Istr: Printing and errors" begin
-        @test eval(Meta.parse(sprint(show, C))) == IsingBimod(1, 1, C.label)
-        @test eval(Meta.parse(sprint(show, M))) == IsingBimod(1, 2, 0)
-        @test eval(Meta.parse(sprint(show, Mop))) == IsingBimod(2, 1, 0)
-        @test eval(Meta.parse(sprint(show, D))) == IsingBimod(2, 2, D.label)
+        @test eval(Meta.parse(sprint(show, C))) == C
+        @test eval(Meta.parse(sprint(show, M))) == M
+        @test eval(Meta.parse(sprint(show, Mop))) == Mop
+        @test eval(Meta.parse(sprint(show, D))) == D
         @test_throws DomainError one(M)
         @test_throws DomainError one(Mop)
     end
