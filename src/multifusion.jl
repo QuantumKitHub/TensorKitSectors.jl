@@ -12,7 +12,7 @@ struct IsingBimod <: Sector
     function IsingBimod(row::Int, col::Int, label::Int)
         1 <= row <= 2 && 1 <= col <= 2 ||
             throw(DomainError(lazy"Invalid subcategory ($row, $col)"))
-        if label < 0 || label > (row == col)
+        0 <= label <= (row == col)
             throw(ArgumentError(lazy"Invalid label $label for IsingBimod subcategory ($row, $col)"))
         end
         return new(row, col, label)
@@ -23,7 +23,7 @@ const all_isingbimod_objects = (IsingBimod(1, 1, 0), IsingBimod(1, 1, 1),
                                 IsingBimod(2, 1, 0), IsingBimod(1, 2, 0),
                                 IsingBimod(2, 2, 0), IsingBimod(2, 2, 1))
 
-Base.IteratorSize(::Type{<:SectorValues{IsingBimod}}) = Base.SizeUnknown()
+Base.IteratorSize(::Type{SectorValues{IsingBimod}}) = Base.SizeUnknown()
 Base.iterate(::SectorValues{IsingBimod}, i=1) = iterate(all_isingbimod_objects, i)
 Base.length(::SectorValues{IsingBimod}) = length(all_isingbimod_objects)
 
