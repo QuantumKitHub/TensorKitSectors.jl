@@ -75,6 +75,8 @@ end
     @test size(Rsymbol(a, b, c)) == (0, 0)
 end
 
+include("multifusion.jl")
+
 @testset "Aqua" begin
     using Aqua: Aqua
     Aqua.test_all(TensorKitSectors)
