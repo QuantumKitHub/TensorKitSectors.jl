@@ -105,3 +105,8 @@ end
         @test hexagon_equation(a, b, c; atol=1e-12, rtol=1e-12)
     end
 end
+@testset "Sector $Istr: Triangle equation" begin
+    for a in smallset(I), b in smallset(I)
+        @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
+    end
+end
