@@ -435,6 +435,28 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I<:Sector}
     return true
 end
 
+# Triangle equation
+#-------------------------------------------------------------------------------
+# requirement that certain F-moves involving unit objects are trivial
+function triangle_equation(a::I, b::I; kwargs...) where {I<:Sector}
+    for c in ⊗(a, b)
+        F1 = Fsymbol(leftone(a), a, b, c, a, c)
+        F2 = Fsymbol(a, rightone(a), b, c, a, b)
+        F3 = Fsymbol(a, b, rightone(b), c, c, b)
+
+        if FusionStyle(I) isa MultiplicityFreeFusion
+            all(isapprox(F, one(sectorscalartype(I)); kwargs...) for F in (F1, F2, F3)) ||
+                return false
+        else
+            N = Nsymbol(a, b, c)
+            diag = diagm(ones(sectorscalartype(I), N))
+            all(isapprox(reshape(F, N, N), diag; kwargs...) for F in (F1, F2, F3)) ||
+                return false
+        end
+    end
+    return true
+end
+
 # SectorSet:
 #-------------------------------------------------------------------------------
 # Custom generator to represent sets of sectors with type inference
