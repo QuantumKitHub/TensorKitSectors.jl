@@ -15,7 +15,7 @@ export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
 export rightone, leftone
 
-export pentagon_equation, hexagon_equation
+export pentagon_equation, hexagon_equation, triangle_equation
 
 export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
 export ProductSector, TimeReversed
@@ -36,7 +36,7 @@ using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
 using Base: tuple_type_head, tuple_type_tail
 
-using LinearAlgebra: tr
+using LinearAlgebra: tr, diagm
 using TensorOperations
 using HalfIntegers
 using WignerSymbols
