@@ -95,6 +95,11 @@ end
         end
     end
 end
+@testset "Sector $Istr: Triangle equation" begin
+    for a in smallset(I), b in smallset(I)
+        @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
+    end
+end
 @testset "Sector $Istr: Pentagon equation" begin
     for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
         @test pentagon_equation(a, b, c, d; atol=1e-12, rtol=1e-12)
@@ -103,10 +108,5 @@ end
 @testset "Sector $Istr: Hexagon equation" begin
     for a in smallset(I), b in smallset(I), c in smallset(I)
         @test hexagon_equation(a, b, c; atol=1e-12, rtol=1e-12)
-    end
-end
-@testset "Sector $Istr: Triangle equation" begin
-    for a in smallset(I), b in smallset(I)
-        @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
     end
 end
