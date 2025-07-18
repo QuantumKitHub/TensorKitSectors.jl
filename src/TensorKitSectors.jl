@@ -36,7 +36,7 @@ using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
 using Base: tuple_type_head, tuple_type_tail
 
-using LinearAlgebra: tr, diagm
+using LinearAlgebra: tr
 using TensorOperations
 using HalfIntegers
 using WignerSymbols

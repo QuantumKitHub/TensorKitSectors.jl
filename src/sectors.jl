@@ -444,15 +444,14 @@ function triangle_equation(a::I, b::I; kwargs...) where {I<:Sector}
         F2 = Fsymbol(a, rightone(a), b, c, a, b)
         F3 = Fsymbol(a, b, rightone(b), c, c, b)
 
+        isapproxone(F) = isapprox(F, one(F); kwargs...)
         if FusionStyle(I) isa MultiplicityFreeFusion
-            all(isapprox(F, one(sectorscalartype(I)); kwargs...) for F in (F1, F2, F3)) ||
-                return false
+            all(isapproxone, (F1, F2, F3)) || return false
         else
             N = Nsymbol(a, b, c)
-            diag = diagm(ones(sectorscalartype(I), N))
-            all(isapprox(reshape(F, N, N), diag; kwargs...) for F in (F1, F2, F3)) ||
-                return false
-        end
+            tomatrix = Base.Fix2(reshape, (N, N))
+            all(isapproxone ∘ tomatrix, (F1, F2, F3)) || return false
+        end 
     end
     return true
 end
