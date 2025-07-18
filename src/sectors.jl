@@ -451,7 +451,7 @@ function triangle_equation(a::I, b::I; kwargs...) where {I<:Sector}
             N = Nsymbol(a, b, c)
             tomatrix = Base.Fix2(reshape, (N, N))
             all(isapproxone ∘ tomatrix, (F1, F2, F3)) || return false
-        end 
+        end
     end
     return true
 end
