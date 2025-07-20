@@ -114,6 +114,12 @@ Istr = TensorKitSectors.type_repr(I)
         end
     end
 
+    @testset "$Istr: Triangle equation" begin
+        for a in smallset(I), b in smallset(I)
+            @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
+        end
+    end
+
     @testset "$Istr: Pentagon equation" begin
         objects = collect(values(I))
         for a in objects, b in objects, c in objects, d in objects

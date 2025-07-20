@@ -370,6 +370,27 @@ Return the twist of a sector `a`
 """
 twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
+# Triangle equation
+#-------------------------------------------------------------------------------
+# requirement that certain F-moves involving unit objects are trivial
+function triangle_equation(a::I, b::I; kwargs...) where {I<:Sector}
+    for c in ⊗(a, b)
+        F1 = Fsymbol(leftone(a), a, b, c, a, c)
+        F2 = Fsymbol(a, rightone(a), b, c, a, b)
+        F3 = Fsymbol(a, b, rightone(b), c, c, b)
+
+        isapproxone(F) = isapprox(F, one(F); kwargs...)
+        if FusionStyle(I) isa MultiplicityFreeFusion
+            all(isapproxone, (F1, F2, F3)) || return false
+        else
+            N = Nsymbol(a, b, c)
+            tomatrix = Base.Fix2(reshape, (N, N))
+            all(isapproxone ∘ tomatrix, (F1, F2, F3)) || return false
+        end
+    end
+    return true
+end
+
 # Pentagon and Hexagon equations
 #-------------------------------------------------------------------------------
 # Consistency equations for F- and R-symbols
