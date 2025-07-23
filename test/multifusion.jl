@@ -1,4 +1,4 @@
-I = IsingBimod
+I = IsingBimodule
 Istr = TensorKitSectors.type_repr(I)
 @testset "$Istr sector" begin
     @testset "Basic type properties" begin
@@ -6,12 +6,12 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
     end
 
-    M = IsingBimod(1, 2, 0)
-    Mop = IsingBimod(2, 1, 0)
-    C0 = IsingBimod(1, 1, 0)
-    C1 = IsingBimod(1, 1, 1)
-    D0 = IsingBimod(2, 2, 0)
-    D1 = IsingBimod(2, 2, 1)
+    M = IsingBimodule(1, 2, 0)
+    Mop = IsingBimodule(2, 1, 0)
+    C0 = IsingBimodule(1, 1, 0)
+    C1 = IsingBimodule(1, 1, 1)
+    D0 = IsingBimodule(2, 2, 0)
+    D1 = IsingBimodule(2, 2, 1)
     C = rand([C0, C1])
     D = rand([D0, D1])
     s = rand((M, Mop, C, D))
