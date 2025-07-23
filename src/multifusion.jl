@@ -3,7 +3,7 @@
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
 #------------------------------------------------------------------------------#
 
-# 𝒞   ℳ 
+# 𝒞   ℳ
 # ℳᵒᵖ 𝒟
 struct IsingBimodule <: Sector
     row::Int
@@ -18,8 +18,9 @@ struct IsingBimodule <: Sector
     end
 end
 
-const all_isingbimod_objects = IsingBimodule.((1, 1, 0), (1, 1, 1), (2, 1, 0), (1, 2, 0),
-                                (2, 2, 0), (2, 2, 1))
+const all_isingbimod_objects = (IsingBimodule(1, 1, 0), IsingBimodule(1, 1, 1),
+                                IsingBimodule(2, 1, 0), IsingBimodule(1, 2, 0),
+                                IsingBimodule(2, 2, 0), IsingBimodule(2, 2, 1))
 
 Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.SizeUnknown()
 Base.iterate(::SectorValues{IsingBimodule}, i=1) = iterate(all_isingbimod_objects, i)
@@ -64,7 +65,7 @@ end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimodule}
     Nsymbol(a, b, e) && Nsymbol(e, c, d) &&
-    Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
+        Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
     return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
 end
@@ -81,7 +82,9 @@ function Base.one(a::IsingBimodule)
     return IsingBimodule(a.row, a.col, 0)
 end
 
-Base.one(::Type{IsingBimodule}) = throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
+function Base.one(::Type{IsingBimodule})
+    throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
+end
 
 function Base.isless(a::IsingBimodule, b::IsingBimodule)
     return isless((a.col, a.row, a.label), (b.col, b.row, b.label))
