@@ -46,6 +46,8 @@ function Base.iterate(iter::IsingBimodIterator, state=0)
            (IsingBimod(a.row, b.col, _state), state + 1) : nothing
 end
 
+Base.convert(::Type{IsingBimod}, labels::NTuple{3,Int}) = IsingBimod(labels...)
+
 function Base.convert(::Type{IsingAnyon}, a::IsingBimod) # identify RepZ2 ⊕ RepZ2 ≅ Ising
     (a.row != a.col) && return IsingAnyon(:σ)
     return IsingAnyon(a.label == 0 ? :I : :ψ)
@@ -88,4 +90,13 @@ end
 
 function Base.hash(a::IsingBimod, h::UInt)
     return hash(a.label, hash(a.row, hash(a.col, h)))
+end
+
+function Base.show(io::IO, a::IsingBimod)
+    if get(io, :typeinfo, nothing) === IsingBimod
+        print(io, (a.row, a.col, a.label))
+    else
+        print(io, "IsingBimod", (a.row, a.col, a.label))
+    end
+    return nothing
 end
