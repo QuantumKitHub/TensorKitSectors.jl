@@ -18,7 +18,7 @@ struct IsingBimodule <: Sector
     end
 end
 
-const all_isingbimod_objects = IsingBimodue.((1, 1, 0), (1, 1, 1), (2, 1, 0), (1, 2, 0),
+const all_isingbimod_objects = IsingBimodule.((1, 1, 0), (1, 1, 1), (2, 1, 0), (1, 2, 0),
                                 (2, 2, 0), (2, 2, 1))
 
 Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.SizeUnknown()
