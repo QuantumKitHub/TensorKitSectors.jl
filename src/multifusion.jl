@@ -65,7 +65,7 @@ end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimodule}
     Nsymbol(a, b, e) && Nsymbol(e, c, d) &&
-        Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
+    Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
     return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
                    convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
 end
