@@ -24,9 +24,7 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(dual, (I,))
     precompile(twist, (I,))
     precompile(frobeniusschur, (I,))
+    precompile(fusiontensor, (I, I, I))
 
-    return try
-        precompile(fusiontensor, (I, I, I))
-    catch
-    end
+    return nothing
 end
