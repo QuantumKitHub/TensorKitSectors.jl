@@ -18,7 +18,7 @@ Istr = TensorKitSectors.type_repr(I)
 
     @testset "Basic properties" begin
         @test @constinferred(one(C1)) == @constinferred(leftone(C1)) ==
-              @constinferred(rightone(C1))
+            @constinferred(rightone(C1))
         @test one(D1) == leftone(D1) == rightone(D1)
         @test one(C1) == leftone(M) == rightone(Mop)
         @test one(D1) == rightone(M) == leftone(Mop)
@@ -94,9 +94,9 @@ Istr = TensorKitSectors.type_repr(I)
         @test_throws argerr Fsymbol(Mop, M, Mop, M, D, C) == 0
 
         @test Fsymbol(M, Mop, M, M, C, D) ==
-              (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳ x ℳᵒᵖ x ℳ → ℳ allowed
+            (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳ x ℳᵒᵖ x ℳ → ℳ allowed
         @test Fsymbol(Mop, M, Mop, Mop, D, C) ==
-              (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳᵒᵖ x ℳ x ℳᵒᵖ → ℳᵒᵖ allowed
+            (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳᵒᵖ x ℳ x ℳᵒᵖ → ℳᵒᵖ allowed
 
         @test_throws argerr Fsymbol(M, Mop, M, Mop, C, D)
     end
@@ -109,14 +109,14 @@ Istr = TensorKitSectors.type_repr(I)
                 fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
                 @test length(es) == length(fs)
                 F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
-                @test isapprox(F' * F, one(F); atol=1e-12, rtol=1e-12)
+                @test isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12)
             end
         end
     end
 
     @testset "$Istr: Triangle equation" begin
         for a in smallset(I), b in smallset(I)
-            @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
+            @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
 
@@ -124,7 +124,7 @@ Istr = TensorKitSectors.type_repr(I)
         objects = collect(values(I))
         for a in objects, b in objects, c in objects, d in objects
             # compatibility checks built in Fsymbol
-            @test pentagon_equation(a, b, c, d; atol=1e-12, rtol=1e-12)
+            @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
 end

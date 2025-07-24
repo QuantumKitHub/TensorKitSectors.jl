@@ -3,7 +3,7 @@
 
 Precompile common methods for the given sector type.
 """
-function precompile_sector(::Type{I}) where {I<:Sector}
+function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(Nsymbol, (I, I, I))
     precompile(Fsymbol, (I, I, I, I, I, I))
     precompile(Rsymbol, (I, I, I))
@@ -25,7 +25,7 @@ function precompile_sector(::Type{I}) where {I<:Sector}
     precompile(twist, (I,))
     precompile(frobeniusschur, (I,))
 
-    try
+    return try
         precompile(fusiontensor, (I, I, I))
     catch
     end

@@ -21,7 +21,7 @@ type_repr(T::Type) = repr(T)
 
 const GroupTuple = Tuple{Vararg{Group}}
 
-abstract type ProductGroup{T<:GroupTuple} <: Group end
+abstract type ProductGroup{T <: GroupTuple} <: Group end
 
 """
     ×(G::Vararg{Type{<:Group}}) -> ProductGroup{Tuple{G...}}
@@ -34,20 +34,20 @@ const times = ×
 
 ×(a::Type{<:Group}, b::Type{<:Group}, c::Type{<:Group}...) = ×(×(a, b), c...)
 ×(G::Type{<:Group}) = ProductGroup{Tuple{G}}
-×(G1::Type{ProductGroup{Tuple{}}},
-G2::Type{ProductGroup{T}}) where {T<:GroupTuple} = G2
-function ×(G1::Type{ProductGroup{T1}},
-           G2::Type{ProductGroup{T2}}) where {T1<:GroupTuple,T2<:GroupTuple}
+×(G1::Type{ProductGroup{Tuple{}}}, G2::Type{ProductGroup{T}}) where {T <: GroupTuple} = G2
+function ×(
+        G1::Type{ProductGroup{T1}}, G2::Type{ProductGroup{T2}}
+    ) where {T1 <: GroupTuple, T2 <: GroupTuple}
     return tuple_type_head(T1) × (ProductGroup{tuple_type_tail(T1)} × G2)
 end
 ×(G1::Type{ProductGroup{Tuple{}}}, G2::Type{<:Group}) = ProductGroup{Tuple{G2}}
-function ×(G1::Type{ProductGroup{T}}, G2::Type{<:Group}) where {T<:GroupTuple}
+function ×(G1::Type{ProductGroup{T}}, G2::Type{<:Group}) where {T <: GroupTuple}
     return Base.tuple_type_head(T) × (ProductGroup{Base.tuple_type_tail(T)} × G2)
 end
-function ×(G1::Type{<:Group}, G2::Type{ProductGroup{T}}) where {T<:GroupTuple}
+function ×(G1::Type{<:Group}, G2::Type{ProductGroup{T}}) where {T <: GroupTuple}
     return ProductGroup{Base.tuple_type_cons(G1, T)}
 end
-×(G1::Type{<:Group}, G2::Type{<:Group}) = ProductGroup{Tuple{G1,G2}}
+×(G1::Type{<:Group}, G2::Type{<:Group}) = ProductGroup{Tuple{G1, G2}}
 
 function type_repr(G::Type{<:ProductGroup})
     T = G.parameters[1]

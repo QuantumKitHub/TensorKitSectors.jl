@@ -57,14 +57,13 @@ if BraidingStyle(I) isa Bosonic && hasfusiontensor(I)
                     Y1 = fusiontensor(b, c, f)
                     Y2 = fusiontensor(a, f, d)
                     @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
-                                                  conj(Y1[b, c, f, -3]) *
-                                                  X1[a, b, e, -1] * X2[e, c, d, -2]
+                        conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
                     if FusionStyle(I) isa MultiplicityFreeFusion
                         f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
                     else
                         f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
                     end
-                    @test isapprox(f1, f2; atol=1e-12, rtol=1e-12)
+                    @test isapprox(f1, f2; atol = 1.0e-12, rtol = 1.0e-12)
                 end
             end
         end
@@ -80,33 +79,31 @@ end
                 F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
             else
                 Fblocks = Vector{Any}()
-                for e in es
-                    for f in fs
-                        Fs = Fsymbol(a, b, c, d, e, f)
-                        push!(Fblocks,
-                              reshape(Fs,
-                                      (size(Fs, 1) * size(Fs, 2),
-                                       size(Fs, 3) * size(Fs, 4))))
-                    end
+                for e in es, f in fs
+                    Fs = Fsymbol(a, b, c, d, e, f)
+                    push!(
+                        Fblocks,
+                        reshape(Fs, (size(Fs, 1) * size(Fs, 2), size(Fs, 3) * size(Fs, 4)))
+                    )
                 end
                 F = hvcat(length(fs), Fblocks...)
             end
-            @test isapprox(F' * F, one(F); atol=1e-12, rtol=1e-12)
+            @test isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
 end
 @testset "Sector $Istr: Triangle equation" begin
     for a in smallset(I), b in smallset(I)
-        @test triangle_equation(a, b; atol=1e-12, rtol=1e-12)
+        @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 @testset "Sector $Istr: Pentagon equation" begin
     for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
-        @test pentagon_equation(a, b, c, d; atol=1e-12, rtol=1e-12)
+        @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 @testset "Sector $Istr: Hexagon equation" begin
     for a in smallset(I), b in smallset(I), c in smallset(I)
-        @test hexagon_equation(a, b, c; atol=1e-12, rtol=1e-12)
+        @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end

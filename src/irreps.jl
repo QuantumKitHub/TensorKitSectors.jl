@@ -13,7 +13,7 @@ the group name followed by `Irrep`.
 
 All irreps have [`BraidingStyle`](@ref) equal to `Bosonic()` and thus trivial twists.
 """
-abstract type AbstractIrrep{G<:Group} <: Sector end # irreps have integer quantum dimensions
+abstract type AbstractIrrep{G <: Group} <: Sector end # irreps have integer quantum dimensions
 BraidingStyle(::Type{<:AbstractIrrep}) = Bosonic()
 
 struct IrrepTable end
@@ -26,10 +26,10 @@ structure used to represent irreducible representations of the group `G`.
 """
 const Irrep = IrrepTable()
 
-type_repr(::Type{<:AbstractIrrep{G}}) where {G<:Group} = "Irrep[" * type_repr(G) * "]"
+type_repr(::Type{<:AbstractIrrep{G}}) where {G <: Group} = "Irrep[" * type_repr(G) * "]"
 function Base.show(io::IO, c::AbstractIrrep)
     I = typeof(c)
-    if get(io, :typeinfo, nothing) !== I
+    return if get(io, :typeinfo, nothing) !== I
         print(io, type_repr(I), "(")
         for k in 1:fieldcount(I)
             k > 1 && print(io, ", ")
@@ -46,20 +46,20 @@ function Base.show(io::IO, c::AbstractIrrep)
     end
 end
 
-const AbelianIrrep{G} = AbstractIrrep{G} where {G<:AbelianGroup}
+const AbelianIrrep{G} = AbstractIrrep{G} where {G <: AbelianGroup}
 FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
 Base.isreal(::Type{<:AbelianIrrep}) = true
 
-Nsymbol(a::I, b::I, c::I) where {I<:AbelianIrrep} = c == first(a ⊗ b)
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:AbelianIrrep}
+Nsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = c == first(a ⊗ b)
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbelianIrrep}
     return Int(Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
 end
 frobeniusschur(a::AbelianIrrep) = 1
-Asymbol(a::I, b::I, c::I) where {I<:AbelianIrrep} = Int(Nsymbol(a, b, c))
-Bsymbol(a::I, b::I, c::I) where {I<:AbelianIrrep} = Int(Nsymbol(a, b, c))
-Rsymbol(a::I, b::I, c::I) where {I<:AbelianIrrep} = Int(Nsymbol(a, b, c))
+Asymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
+Bsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
+Rsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
 
-function fusiontensor(a::I, b::I, c::I) where {I<:AbelianIrrep}
+function fusiontensor(a::I, b::I, c::I) where {I <: AbelianIrrep}
     return fill(Int(Nsymbol(a, b, c)), (1, 1, 1, 1))
 end
 
@@ -96,7 +96,7 @@ Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
 
 Base.IteratorSize(::Type{SectorValues{ZNIrrep{N}}}) where {N} = HasLength()
 Base.length(::SectorValues{ZNIrrep{N}}) where {N} = N
-function Base.iterate(::SectorValues{ZNIrrep{N}}, i=0) where {N}
+function Base.iterate(::SectorValues{ZNIrrep{N}}, i = 0) where {N}
     return i == N ? nothing : (ZNIrrep{N}(i), i + 1)
 end
 function Base.getindex(::SectorValues{ZNIrrep{N}}, i::Int) where {N}
@@ -133,7 +133,7 @@ Base.conj(c::U1Irrep) = U1Irrep(-c.charge)
 ⊗(c1::U1Irrep, c2::U1Irrep) = (U1Irrep(c1.charge + c2.charge),)
 
 Base.IteratorSize(::Type{SectorValues{U1Irrep}}) = IsInfinite()
-function Base.iterate(::SectorValues{U1Irrep}, i::Int=0)
+function Base.iterate(::SectorValues{U1Irrep}, i::Int = 0)
     return i <= 0 ? (U1Irrep(half(i)), (-i + 1)) : (U1Irrep(half(i)), -i)
 end
 function Base.getindex(::SectorValues{U1Irrep}, i::Int)
@@ -141,7 +141,7 @@ function Base.getindex(::SectorValues{U1Irrep}, i::Int)
     return U1Irrep(iseven(i) ? half(i >> 1) : -half(i >> 1))
 end
 function findindex(::SectorValues{U1Irrep}, c::U1Irrep)
-    return (n=twice(c.charge); 2 * abs(n) + (n <= 0))
+    return (n = twice(c.charge); 2 * abs(n) + (n <= 0))
 end
 
 Base.hash(c::U1Irrep, h::UInt) = hash(c.charge, h)
@@ -154,8 +154,10 @@ end
 # SU2Irrep: irreps of SU2 are labelled by half integers j
 struct SU2IrrepException <: Exception end
 function Base.show(io::IO, ::SU2IrrepException)
-    return print(io,
-                 "Irreps of (bosonic or fermionic) `SU₂` should be labelled by non-negative half integers, i.e. elements of `Rational{Int}` with denominator 1 or 2")
+    return print(
+        io,
+        "Irreps of (bosonic or fermionic) `SU₂` should be labelled by non-negative half integers, i.e. elements of `Rational{Int}` with denominator 1 or 2"
+    )
 end
 
 """
@@ -186,7 +188,7 @@ Base.conj(s::SU2Irrep) = s
 ⊗(s1::SU2Irrep, s2::SU2Irrep) = SectorSet{SU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))
 
 Base.IteratorSize(::Type{SectorValues{SU2Irrep}}) = IsInfinite()
-Base.iterate(::SectorValues{SU2Irrep}, i::Int=0) = (SU2Irrep(half(i)), i + 1)
+Base.iterate(::SectorValues{SU2Irrep}, i::Int = 0) = (SU2Irrep(half(i)), i + 1)
 function Base.getindex(::SectorValues{SU2Irrep}, i::Int)
     return 1 <= i ? SU2Irrep(half(i - 1)) : throw(BoundsError(values(SU2Irrep), i))
 end
@@ -200,21 +202,22 @@ Base.isreal(::Type{SU2Irrep}) = true
 
 Nsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep) = WignerSymbols.δ(sa.j, sb.j, sc.j)
 
-function Fsymbol(s1::SU2Irrep, s2::SU2Irrep, s3::SU2Irrep,
-                 s4::SU2Irrep, s5::SU2Irrep, s6::SU2Irrep)
+function Fsymbol(
+        s1::SU2Irrep, s2::SU2Irrep, s3::SU2Irrep,
+        s4::SU2Irrep, s5::SU2Irrep, s6::SU2Irrep
+    )
     if all(==(_su2one), (s1, s2, s3, s4, s5, s6))
         return 1.0
     else
         return sqrtdim(s5) * sqrtdim(s6) *
-               WignerSymbols.racahW(sectorscalartype(SU2Irrep), s1.j, s2.j,
-                                    s4.j, s3.j, s5.j, s6.j)
+            WignerSymbols.racahW(sectorscalartype(SU2Irrep), s1.j, s2.j, s4.j, s3.j, s5.j, s6.j)
     end
 end
 
 function Rsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep)
     Nsymbol(sa, sb, sc) || return zero(sectorscalartype(SU2Irrep))
     return iseven(convert(Int, sa.j + sb.j - sc.j)) ? one(sectorscalartype(SU2Irrep)) :
-           -one(sectorscalartype(SU2Irrep))
+        -one(sectorscalartype(SU2Irrep))
 end
 
 function fusiontensor(a::SU2Irrep, b::SU2Irrep, c::SU2Irrep)
@@ -222,8 +225,9 @@ function fusiontensor(a::SU2Irrep, b::SU2Irrep, c::SU2Irrep)
     ja, jb, jc = a.j, b.j, c.j
 
     for kc in 1:dim(c), kb in 1:dim(b), ka in 1:dim(a)
-        C[ka, kb, kc, 1] = WignerSymbols.clebschgordan(ja, ja + 1 - ka, jb, jb + 1 - kb, jc,
-                                                       jc + 1 - kc)
+        C[ka, kb, kc, 1] = WignerSymbols.clebschgordan(
+            ja, ja + 1 - ka, jb, jb + 1 - kb, jc, jc + 1 - kc
+        )
     end
     return C
 end
@@ -255,8 +259,8 @@ struct CU1Irrep <: AbstractIrrep{CU₁}
     # if j == 0, s = 0 (trivial) or s = 1 (non-trivial),
     # else s = 2 (two-dimensional representation)
     # Let constructor take the actual half integer value j
-    function CU1Irrep(j::Real, s::Integer=ifelse(j > zero(j), 2, 0))
-        if ((j > zero(j) && s == 2) || (j == zero(j) && (s == 0 || s == 1)))
+    function CU1Irrep(j::Real, s::Integer = ifelse(j > zero(j), 2, 0))
+        return if ((j > zero(j) && s == 2) || (j == zero(j) && (s == 0 || s == 1)))
             new(j, s)
         else
             error("Not a valid CU₁ irrep")
@@ -264,10 +268,10 @@ struct CU1Irrep <: AbstractIrrep{CU₁}
     end
 end
 Base.getindex(::IrrepTable, ::Type{CU₁}) = CU1Irrep
-Base.convert(::Type{CU1Irrep}, (j, s)::Tuple{Real,Integer}) = CU1Irrep(j, s)
+Base.convert(::Type{CU1Irrep}, (j, s)::Tuple{Real, Integer}) = CU1Irrep(j, s)
 
 Base.IteratorSize(::Type{SectorValues{CU1Irrep}}) = IsInfinite()
-function Base.iterate(::SectorValues{CU1Irrep}, state::Tuple{Int,Int}=(0, 0))
+function Base.iterate(::SectorValues{CU1Irrep}, state::Tuple{Int, Int} = (0, 0))
     j, s = state
     if iszero(j) && s == 0
         return CU1Irrep(j, s), (j, 1)
@@ -297,7 +301,7 @@ end
 # CU1Irrep(j::Real, s::Int = ifelse(j>0, 2, 0)) = CU1Irrep(convert(HalfInteger, j), s)
 
 Base.convert(::Type{CU1Irrep}, j::Real) = CU1Irrep(j)
-Base.convert(::Type{CU1Irrep}, js::Tuple{Real,Int}) = CU1Irrep(js...)
+Base.convert(::Type{CU1Irrep}, js::Tuple{Real, Int}) = CU1Irrep(js...)
 
 Base.one(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
 Base.conj(c::CU1Irrep) = c
@@ -306,7 +310,7 @@ struct CU1ProdIterator
     a::CU1Irrep
     b::CU1Irrep
 end
-function Base.iterate(p::CU1ProdIterator, s::Int=1)
+function Base.iterate(p::CU1ProdIterator, s::Int = 1)
     if s == 1
         if p.a.j == p.b.j == zero(HalfInt)
             return CU1Irrep(zero(HalfInt), xor(p.a.s, p.b.s)), 4
@@ -347,13 +351,18 @@ sectorscalartype(::Type{CU1Irrep}) = Float64
 Base.isreal(::Type{CU1Irrep}) = true
 
 function Nsymbol(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
-    return ifelse(c.s == 0, (a.j == b.j) & ((a.s == b.s == 2) | (a.s == b.s)),
-                  ifelse(c.s == 1, (a.j == b.j) & ((a.s == b.s == 2) | (a.s != b.s)),
-                         (c.j == a.j + b.j) | (c.j == abs(a.j - b.j))))
+    return ifelse(
+        c.s == 0, (a.j == b.j) & ((a.s == b.s == 2) | (a.s == b.s)),
+        ifelse(
+            c.s == 1, (a.j == b.j) & ((a.s == b.s == 2) | (a.s != b.s)),
+            (c.j == a.j + b.j) | (c.j == abs(a.j - b.j))
+        )
+    )
 end
 
-function Fsymbol(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep,
-                 d::CU1Irrep, e::CU1Irrep, f::CU1Irrep)
+function Fsymbol(
+        a::CU1Irrep, b::CU1Irrep, c::CU1Irrep, d::CU1Irrep, e::CU1Irrep, f::CU1Irrep
+    )
     Nabe = convert(Int, Nsymbol(a, b, e))
     Necd = convert(Int, Nsymbol(e, c, d))
     Nbcf = convert(Int, Nsymbol(b, c, f))

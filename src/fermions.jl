@@ -20,7 +20,7 @@ Base.convert(::Type{FermionParity}, a) = FermionParity(a)
 
 Base.IteratorSize(::Type{SectorValues{FermionParity}}) = HasLength()
 Base.length(::SectorValues{FermionParity}) = 2
-function Base.iterate(::SectorValues{FermionParity}, i=0)
+function Base.iterate(::SectorValues{FermionParity}, i = 0)
     return i == 2 ? nothing : (FermionParity(i), i + 1)
 end
 function Base.getindex(::SectorValues{FermionParity}, i::Int)
@@ -41,21 +41,21 @@ Base.isreal(::Type{FermionParity}) = true
 function Nsymbol(a::FermionParity, b::FermionParity, c::FermionParity)
     return (a.isodd ⊻ b.isodd) == c.isodd
 end
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:FermionParity}
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: FermionParity}
     return Int(Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
 end
-function Rsymbol(a::I, b::I, c::I) where {I<:FermionParity}
+function Rsymbol(a::I, b::I, c::I) where {I <: FermionParity}
     return a.isodd && b.isodd ? -Int(Nsymbol(a, b, c)) : Int(Nsymbol(a, b, c))
 end
 twist(a::FermionParity) = a.isodd ? -1 : +1
 
-function fusiontensor(a::I, b::I, c::I) where {I<:FermionParity}
+function fusiontensor(a::I, b::I, c::I) where {I <: FermionParity}
     @warn "FermionParity Arrays do not preserve categorical properties." maxlog = 1
     return fill(Int(Nsymbol(a, b, c)), (1, 1, 1, 1))
 end
 
 function Base.show(io::IO, a::FermionParity)
-    if get(io, :typeinfo, nothing) === typeof(a)
+    return if get(io, :typeinfo, nothing) === typeof(a)
         print(io, Int(a.isodd))
     else
         print(io, type_repr(typeof(a)), "(", Int(a.isodd), ")")
@@ -97,7 +97,7 @@ See also: [`SU2Irrep`](@ref), [`FermionParity`](@ref)
 """
 const FermionSpin = SU2Irrep ⊠ FermionParity
 const fSU₂ = FermionSpin
-FermionSpin(j::Real) = (s=SU2Irrep(j); s ⊠ FermionParity(isodd(twice(s.j))))
+FermionSpin(j::Real) = (s = SU2Irrep(j); s ⊠ FermionParity(isodd(twice(s.j))))
 type_repr(::Type{FermionSpin}) = "FermionSpin"
 
 # convenience default converter -> allows Vect[FermionSpin](1 => 1)
