@@ -18,12 +18,13 @@ struct IsingBimodule <: Sector
     end
 end
 
-const all_isingbimod_objects = (IsingBimodule(1, 1, 0), IsingBimodule(1, 1, 1),
-                                IsingBimodule(2, 1, 0), IsingBimodule(1, 2, 0),
-                                IsingBimodule(2, 2, 0), IsingBimodule(2, 2, 1))
+const all_isingbimod_objects = (
+    IsingBimodule(1, 1, 0), IsingBimodule(1, 1, 1), IsingBimodule(2, 1, 0),
+    IsingBimodule(1, 2, 0), IsingBimodule(2, 2, 0), IsingBimodule(2, 2, 1),
+)
 
 Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.SizeUnknown()
-Base.iterate(::SectorValues{IsingBimodule}, i=1) = iterate(all_isingbimod_objects, i)
+Base.iterate(::SectorValues{IsingBimodule}, i = 1) = iterate(all_isingbimod_objects, i)
 Base.length(::SectorValues{IsingBimodule}) = length(all_isingbimod_objects)
 
 ⊗(a::IsingBimodule, b::IsingBimodule) = IsingBimoduleIterator(a, b)
@@ -37,16 +38,16 @@ Base.IteratorSize(::Type{IsingBimoduleIterator}) = Base.SizeUnknown()
 Base.IteratorEltype(::Type{IsingBimoduleIterator}) = Base.HasEltype()
 Base.eltype(::Type{IsingBimoduleIterator}) = IsingBimodule
 
-function Base.iterate(iter::IsingBimoduleIterator, state=0)
+function Base.iterate(iter::IsingBimoduleIterator, state = 0)
     a, b = iter.a, iter.b
     a.col == b.row || return nothing
 
     _state = (a.row == b.col == a.col) ? mod(a.label + b.label, 2) : state
     return state < (1 + (a.row == b.col && a.row != a.col)) ?
-           (IsingBimodule(a.row, b.col, _state), state + 1) : nothing
+        (IsingBimodule(a.row, b.col, _state), state + 1) : nothing
 end
 
-Base.convert(::Type{IsingBimodule}, labels::NTuple{3,Int}) = IsingBimodule(labels...)
+Base.convert(::Type{IsingBimodule}, labels::NTuple{3, Int}) = IsingBimodule(labels...)
 
 function Base.convert(::Type{IsingAnyon}, a::IsingBimodule) # identify RepZ2 ⊕ RepZ2 ≅ Ising
     (a.row != a.col) && return IsingAnyon(:σ)
@@ -63,11 +64,13 @@ function Nsymbol(a::IsingBimodule, b::IsingBimodule, c::IsingBimodule)
     return Nsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c))
 end
 
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:IsingBimodule}
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: IsingBimodule}
     Nsymbol(a, b, e) && Nsymbol(e, c, d) &&
-    Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
-    return Fsymbol(convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
-                   convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f))
+        Nsymbol(b, c, f) && Nsymbol(a, f, d) || return 0.0
+    return Fsymbol(
+        convert(IsingAnyon, a), convert(IsingAnyon, b), convert(IsingAnyon, c),
+        convert(IsingAnyon, d), convert(IsingAnyon, e), convert(IsingAnyon, f)
+    )
 end
 
 # ℳ ↔ ℳop when conjugating elements within these

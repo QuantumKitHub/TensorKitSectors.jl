@@ -13,10 +13,10 @@ struct PlanarTrivial <: Sector end
 
 Base.IteratorSize(::Type{SectorValues{PlanarTrivial}}) = HasLength()
 Base.length(::SectorValues{PlanarTrivial}) = 1
-Base.iterate(::SectorValues{PlanarTrivial}, i=0) = i == 0 ? (PlanarTrivial(), 1) : nothing
+Base.iterate(::SectorValues{PlanarTrivial}, i = 0) = i == 0 ? (PlanarTrivial(), 1) : nothing
 function Base.getindex(::SectorValues{PlanarTrivial}, i::Int)
     return i == 1 ? PlanarTrivial() :
-           throw(BoundsError(values(PlanarTrivial), i))
+        throw(BoundsError(values(PlanarTrivial), i))
 end
 findindex(::SectorValues{PlanarTrivial}, c::PlanarTrivial) = 1
 Base.isless(::PlanarTrivial, ::PlanarTrivial) = false
@@ -28,8 +28,8 @@ FusionStyle(::Type{PlanarTrivial}) = UniqueFusion()
 BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
 Base.isreal(::Type{PlanarTrivial}) = true
 
-Nsymbol(::Vararg{PlanarTrivial,3}) = 1
-Fsymbol(::Vararg{PlanarTrivial,6}) = 1
+Nsymbol(::Vararg{PlanarTrivial, 3}) = 1
+Fsymbol(::Vararg{PlanarTrivial, 6}) = 1
 
 ⊗(::PlanarTrivial, ::PlanarTrivial) = (PlanarTrivial(),)
 
@@ -56,7 +56,7 @@ end
 
 Base.IteratorSize(::Type{SectorValues{FibonacciAnyon}}) = HasLength()
 Base.length(::SectorValues{FibonacciAnyon}) = 2
-function Base.iterate(::SectorValues{FibonacciAnyon}, i=0)
+function Base.iterate(::SectorValues{FibonacciAnyon}, i = 0)
     return i == 0 ? (FibonacciAnyon(:I), 1) : (i == 1 ? (FibonacciAnyon(:τ), 2) : nothing)
 end
 function Base.getindex(S::SectorValues{FibonacciAnyon}, i::Int)
@@ -91,7 +91,7 @@ Base.IteratorSize(::Type{FibonacciIterator}) = Base.HasLength()
 Base.IteratorEltype(::Type{FibonacciIterator}) = Base.HasEltype()
 Base.length(iter::FibonacciIterator) = (isone(iter.a) || isone(iter.b)) ? 1 : 2
 Base.eltype(::Type{FibonacciIterator}) = FibonacciAnyon
-function Base.iterate(iter::FibonacciIterator, state=1)
+function Base.iterate(iter::FibonacciIterator, state = 1)
     I = FibonacciAnyon(:I)
     τ = FibonacciAnyon(:τ)
     if state == 1 # first iteration
@@ -110,8 +110,10 @@ function Nsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon)
     return isone(a) + isone(b) + isone(c) != 2
 end # zero if one tau and two ones
 
-function Fsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon,
-                 d::FibonacciAnyon, e::FibonacciAnyon, f::FibonacciAnyon)
+function Fsymbol(
+        a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon,
+        d::FibonacciAnyon, e::FibonacciAnyon, f::FibonacciAnyon
+    )
     Nsymbol(a, b, e) || return zero(_goldenratio)
     Nsymbol(e, c, d) || return zero(_goldenratio)
     Nsymbol(b, c, f) || return zero(_goldenratio)
@@ -144,7 +146,7 @@ end
 function Base.show(io::IO, a::FibonacciAnyon)
     s = isone(a) ? ":I" : ":τ"
     return get(io, :typeinfo, nothing) === FibonacciAnyon ?
-           print(io, s) : print(io, "FibonacciAnyon(", s, ")")
+        print(io, s) : print(io, "FibonacciAnyon(", s, ")")
 end
 
 Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isone, h)
@@ -179,7 +181,7 @@ const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
 
 Base.IteratorSize(::Type{SectorValues{IsingAnyon}}) = HasLength()
 Base.length(::SectorValues{IsingAnyon}) = length(all_isinganyons)
-Base.iterate(::SectorValues{IsingAnyon}, i=1) = iterate(all_isinganyons, i)
+Base.iterate(::SectorValues{IsingAnyon}, i = 1) = iterate(all_isinganyons, i)
 Base.getindex(::SectorValues{IsingAnyon}, i::Int) = getindex(all_isinganyons, i)
 
 function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
@@ -214,7 +216,7 @@ function Base.length(iter::IsingIterator)
     return (iter.a == σ && iter.b == σ) ? 2 : 1
 end
 
-function Base.iterate(iter::IsingIterator, state=1)
+function Base.iterate(iter::IsingIterator, state = 1)
     I, σ, ψ = all_isinganyons
     if state == 1 # first iteration
         iter.a == I && return (iter.b, 2)
@@ -232,16 +234,20 @@ end
 
 function Nsymbol(a::IsingAnyon, b::IsingAnyon, c::IsingAnyon)
     I, σ, ψ = all_isinganyons
-    return ((a == I && b == c)
+    return (
+        (a == I && b == c)
             || (b == I && a == c)
             || (c == I && a == b)
             || (a == σ && b == σ && c == ψ)
             || (a == σ && b == ψ && c == σ)
-            || (a == ψ && b == σ && c == σ))
+            || (a == ψ && b == σ && c == σ)
+    )
 end
 
-function Fsymbol(a::IsingAnyon, b::IsingAnyon, c::IsingAnyon,
-                 d::IsingAnyon, e::IsingAnyon, f::IsingAnyon)
+function Fsymbol(
+        a::IsingAnyon, b::IsingAnyon, c::IsingAnyon,
+        d::IsingAnyon, e::IsingAnyon, f::IsingAnyon
+    )
     Nsymbol(a, b, e) || return 0.0
     Nsymbol(e, c, d) || return 0.0
     Nsymbol(b, c, f) || return 0.0

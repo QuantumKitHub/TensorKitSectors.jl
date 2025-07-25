@@ -52,13 +52,14 @@ If `IteratorSize(I) == HasLength()`, also the following must be implemented:
     index `i::Integer ∈ 1:length(values(I))`. A fallback implementation exists that
     linearly searches through the `SectorValues` iterator.
 """
-struct SectorValues{I<:Sector} end
+struct SectorValues{I <: Sector} end
 Base.IteratorEltype(::Type{<:SectorValues}) = HasEltype()
-Base.eltype(::Type{SectorValues{I}}) where {I<:Sector} = I
-Base.values(::Type{I}) where {I<:Sector} = SectorValues{I}()
+Base.eltype(::Type{SectorValues{I}}) where {I <: Sector} = I
+Base.values(::Type{I}) where {I <: Sector} = SectorValues{I}()
 
-Base.@propagate_inbounds function Base.getindex(v::SectorValues{I},
-                                                i::Int) where {I<:Sector}
+Base.@propagate_inbounds function Base.getindex(
+        v::SectorValues{I}, i::Int
+    ) where {I <: Sector}
     @boundscheck begin
         if Base.IteratorSize(v) === HasLength()
             1 ≤ i ≤ length(v) || throw(BoundsError(v, i))
@@ -77,7 +78,7 @@ end
 
 Reverse mapping between a value `c::I` and an index `i::Integer ∈ 1:length(values(I))`.
 """
-function findindex(v::SectorValues{I}, c::I) where {I<:Sector}
+function findindex(v::SectorValues{I}, c::I) where {I <: Sector}
     for (i, cc) in enumerate(v)
         cc == c && return i
     end
@@ -120,20 +121,20 @@ dual(a::Sector) = conj(a)
 
 Return the scalar type of the topological data (Fsymbol, Rsymbol) of the sector `I`.
 """
-function sectorscalartype(::Type{I}) where {I<:Sector}
+function sectorscalartype(::Type{I}) where {I <: Sector}
     if BraidingStyle(I) === NoBraiding()
         return _Fscalartype(I)
     else
         return Base.promote_op(*, _Fscalartype(I), _Rscalartype(I))
     end
 end
-function _Fscalartype(::Type{I}) where {I<:Sector}
-    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6,I})
+function _Fscalartype(::Type{I}) where {I <: Sector}
+    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
     return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
 end
-function _Rscalartype(::Type{I}) where {I<:Sector}
+function _Rscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
-    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3,I})
+    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
     return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
 end
 
@@ -163,7 +164,7 @@ const otimes = ⊗
 
 # NOTE: the following inline is extremely important for performance, especially
 # in the case of UniqueFusion, because ⊗(...) is computed very often
-@inline function ⊗(a::I, b::I, c::I, rest::Vararg{I}) where {I<:Sector}
+@inline function ⊗(a::I, b::I, c::I, rest::Vararg{I}) where {I <: Sector}
     if FusionStyle(I) isa UniqueFusion
         return a ⊗ first(⊗(b, c, rest...))
     else
@@ -209,10 +210,10 @@ struct UniqueFusion <: FusionStyle end # unique fusion output when fusing two se
 abstract type MultipleFusion <: FusionStyle end
 struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity free
 struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
-const MultiplicityFreeFusion = Union{UniqueFusion,SimpleFusion}
+const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
 
 # combine fusion properties of tensor products of sectors
-Base.:&(f::F, ::F) where {F<:FusionStyle} = f
+Base.:&(f::F, ::F) where {F <: FusionStyle} = f
 Base.:&(f₁::FusionStyle, f₂::FusionStyle) = f₂ & f₁
 
 Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
@@ -248,7 +249,7 @@ function Fsymbol end
 Return the (quantum) dimension of the sector `a`.
 """
 function dim(a::Sector)
-    if FusionStyle(a) isa UniqueFusion
+    return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
         abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
@@ -265,7 +266,7 @@ invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a))
 Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
-    if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
+    return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
     else
         sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
@@ -273,14 +274,16 @@ function frobeniusschur(a::Sector)
 end
 
 # Not necessary
-function Asymbol(a::I, b::I, c::I) where {I<:Sector}
-    if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+function Asymbol(a::I, b::I, c::I) where {I <: Sector}
+    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-        conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c))
+            conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c))
     else
-        reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
+        reshape(
+            (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
                 conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c)),
-                (Nsymbol(a, b, c), Nsymbol(dual(a), c, b)))
+            (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
+        )
     end
 end
 
@@ -298,14 +301,14 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the B-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
-function Bsymbol(a::I, b::I, c::I) where {I<:Sector}
-    if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
-        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-        Fsymbol(a, b, dual(b), a, c, rightone(a))
+function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
+    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a))
     else
-        reshape((sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                Fsymbol(a, b, dual(b), a, c, rightone(a)),
-                (Nsymbol(a, b, c), Nsymbol(c, dual(b), a)))
+        reshape(
+            (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a)),
+            (Nsymbol(a, b, c), Nsymbol(c, dual(b), a))
+        )
     end
 end
 
@@ -337,7 +340,7 @@ struct Bosonic <: SymmetricBraiding end # all twists are one
 struct Fermionic <: SymmetricBraiding end # twists one and minus one
 struct Anyonic <: HasBraiding end
 
-Base.:&(b::B, ::B) where {B<:BraidingStyle} = b
+Base.:&(b::B, ::B) where {B <: BraidingStyle} = b
 Base.:&(B1::BraidingStyle, B2::BraidingStyle) = B2 & B1
 Base.:&(::Bosonic, ::Fermionic) = Fermionic()
 Base.:&(::Bosonic, ::Anyonic) = Anyonic()
@@ -373,7 +376,7 @@ twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 # Triangle equation
 #-------------------------------------------------------------------------------
 # requirement that certain F-moves involving unit objects are trivial
-function triangle_equation(a::I, b::I; kwargs...) where {I<:Sector}
+function triangle_equation(a::I, b::I; kwargs...) where {I <: Sector}
     for c in ⊗(a, b)
         F1 = Fsymbol(leftone(a), a, b, c, a, c)
         F2 = Fsymbol(a, rightone(a), b, c, a, b)
@@ -394,7 +397,7 @@ end
 # Pentagon and Hexagon equations
 #-------------------------------------------------------------------------------
 # Consistency equations for F- and R-symbols
-function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I<:Sector}
+function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I <: Sector}
     for f in ⊗(a, b), h in ⊗(c, d)
         for g in ⊗(f, c), i in ⊗(b, h)
             for e in intersect(⊗(g, d), ⊗(a, i))
@@ -403,20 +406,26 @@ function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I<:Sector}
                     p2 = zero(p1)
                     for j in ⊗(b, c)
                         p2 += Fsymbol(a, b, c, g, f, j) *
-                              Fsymbol(a, j, d, e, g, i) *
-                              Fsymbol(b, c, d, i, j, h)
+                            Fsymbol(a, j, d, e, g, i) *
+                            Fsymbol(b, c, d, i, j, h)
                     end
                 else
                     @tensor p1[λ, μ, ν, κ, ρ, σ] := Fsymbol(f, c, d, e, g, h)[λ, μ, ν, τ] *
-                                                    Fsymbol(a, b, h, e, f, i)[κ, τ, ρ, σ]
+                        Fsymbol(a, b, h, e, f, i)[κ, τ, ρ, σ]
                     p2 = zero(p1)
                     for j in ⊗(b, c)
-                        @tensor p2[λ, μ, ν, κ, ρ, σ] += Fsymbol(a, b, c, g, f, j)[κ, λ, α,
-                                                                                  β] *
-                                                        Fsymbol(a, j, d, e, g, i)[β, μ, τ,
-                                                                                  σ] *
-                                                        Fsymbol(b, c, d, i, j, h)[α, τ, ν,
-                                                                                  ρ]
+                        @tensor p2[λ, μ, ν, κ, ρ, σ] += Fsymbol(a, b, c, g, f, j)[
+                            κ, λ, α,
+                            β,
+                        ] *
+                            Fsymbol(a, j, d, e, g, i)[
+                            β, μ, τ,
+                            σ,
+                        ] *
+                            Fsymbol(b, c, d, i, j, h)[
+                            α, τ, ν,
+                            ρ,
+                        ]
                     end
                 end
                 isapprox(p1, p2; kwargs...) || return false
@@ -426,7 +435,7 @@ function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I<:Sector}
     return true
 end
 
-function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I<:Sector}
+function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
     for e in ⊗(c, a), f in ⊗(c, b)
@@ -436,18 +445,15 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I<:Sector}
                 p2 = zero(p1)
                 for g in ⊗(a, b)
                     p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(g, c, d) *
-                          Fsymbol(a, b, c, d, g, f)
+                        Fsymbol(a, b, c, d, g, f)
                 end
             else
                 @tensor p1[α, β, μ, ν] := Rsymbol(a, c, e)[α, λ] *
-                                          Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] *
-                                          Rsymbol(b, c, f)[γ, μ]
+                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(b, c, f)[γ, μ]
                 p2 = zero(p1)
                 for g in ⊗(a, b)
-                    @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ,
-                                                                        σ] *
-                                              Rsymbol(g, c, d)[σ, ψ] *
-                                              Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
+                    @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
+                        Rsymbol(g, c, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
                 end
             end
             isapprox(p1, p2; kwargs...) || return false
@@ -459,22 +465,22 @@ end
 # SectorSet:
 #-------------------------------------------------------------------------------
 # Custom generator to represent sets of sectors with type inference
-struct SectorSet{I<:Sector,F,S}
+struct SectorSet{I <: Sector, F, S}
     f::F
     set::S
 end
-SectorSet{I}(::Type{F}, set::S) where {I<:Sector,F,S} = SectorSet{I,Type{F},S}(F, set)
-SectorSet{I}(f::F, set::S) where {I<:Sector,F,S} = SectorSet{I,F,S}(f, set)
-SectorSet{I}(set) where {I<:Sector} = SectorSet{I}(identity, set)
+SectorSet{I}(::Type{F}, set::S) where {I <: Sector, F, S} = SectorSet{I, Type{F}, S}(F, set)
+SectorSet{I}(f::F, set::S) where {I <: Sector, F, S} = SectorSet{I, F, S}(f, set)
+SectorSet{I}(set) where {I <: Sector} = SectorSet{I}(identity, set)
 
 Base.IteratorEltype(::Type{<:SectorSet}) = HasEltype()
-Base.IteratorSize(::Type{SectorSet{I,F,S}}) where {I<:Sector,F,S} = Base.IteratorSize(S)
+Base.IteratorSize(::Type{SectorSet{I, F, S}}) where {I <: Sector, F, S} = Base.IteratorSize(S)
 
-Base.eltype(::SectorSet{I}) where {I<:Sector} = I
+Base.eltype(::SectorSet{I}) where {I <: Sector} = I
 Base.length(s::SectorSet) = length(s.set)
 Base.size(s::SectorSet) = size(s.set)
 
-function Base.iterate(s::SectorSet{I}, args...) where {I<:Sector}
+function Base.iterate(s::SectorSet{I}, args...) where {I <: Sector}
     next = iterate(s.set, args...)
     next === nothing && return nothing
     val, state = next
@@ -482,47 +488,50 @@ function Base.iterate(s::SectorSet{I}, args...) where {I<:Sector}
 end
 
 # Time reversed sector
-struct TimeReversed{I<:Sector} <: Sector
+struct TimeReversed{I <: Sector} <: Sector
     a::I
-    function TimeReversed{I}(a::I) where {I<:Sector}
+    function TimeReversed{I}(a::I) where {I <: Sector}
         if BraidingStyle(I) isa NoBraiding
             throw(ArgumentError("TimeReversed is not defined for sectors $I with no braiding"))
         end
         return new{I}(a)
     end
 end
-FusionStyle(::Type{TimeReversed{I}}) where {I<:Sector} = FusionStyle(I)
-BraidingStyle(::Type{TimeReversed{I}}) where {I<:Sector} = BraidingStyle(I)
-function Nsymbol(a::TimeReversed{I}, b::TimeReversed{I},
-                 c::TimeReversed{I}) where {I<:Sector}
+FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
+BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
+function Nsymbol(
+        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
+    ) where {I <: Sector}
     return Nsymbol(a.a, b.a, c.a)
 end
 
-function Fsymbol(a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
-                 d::TimeReversed{I}, e::TimeReversed{I},
-                 f::TimeReversed{I}) where {I<:Sector}
+function Fsymbol(
+        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
+        d::TimeReversed{I}, e::TimeReversed{I}, f::TimeReversed{I}
+    ) where {I <: Sector}
     return Fsymbol(a.a, b.a, c.a, d.a, e.a, f.a)
 end
-function Rsymbol(a::TimeReversed{I}, b::TimeReversed{I},
-                 c::TimeReversed{I}) where {I<:Sector}
+function Rsymbol(
+        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
+    ) where {I <: Sector}
     return adjoint(Rsymbol(a.a, b.a, c.a))
 end
 
-Base.one(::Type{TimeReversed{I}}) where {I<:Sector} = TimeReversed{I}(one(I))
-Base.conj(c::TimeReversed{I}) where {I<:Sector} = TimeReversed{I}(conj(c.a))
-function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:Sector}
+Base.one(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(one(I))
+Base.conj(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(conj(c.a))
+function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
 end
-function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I<:Sector}
+function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I <: Sector}
     return Base.IteratorSize(values(I))
 end
-function Base.length(::SectorValues{TimeReversed{I}}) where {I<:Sector}
+function Base.length(::SectorValues{TimeReversed{I}}) where {I <: Sector}
     return length(values(I))
 end
-function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I<:Sector}
+function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I <: Sector}
     return TimeReversed{I}(getindex(values(I), i))
 end
-function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I<:Sector}
+function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I <: Sector}
     next = iterate(values(I), state...)
     if isnothing(next)
         return nothing
@@ -531,11 +540,12 @@ function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I<:Secto
         return TimeReversed{I}(obj), nextstate
     end
 end
-function findindex(::SectorValues{TimeReversed{I}},
-                   a::TimeReversed{I}) where {I<:Sector}
+function findindex(
+        ::SectorValues{TimeReversed{I}}, a::TimeReversed{I}
+    ) where {I <: Sector}
     return findindex(values(I), a.a)
 end
 
-function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I<:Sector}
+function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return isless(c1.a, c2.a)
 end

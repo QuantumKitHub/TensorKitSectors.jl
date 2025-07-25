@@ -10,7 +10,7 @@ export sectorscalartype
 export dim, sqrtdim, invsqrtdim, frobeniusschur, twist, fusiontensor, dual
 export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
-       MultiplicityFreeFusion
+    MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
 export rightone, leftone
@@ -58,11 +58,14 @@ include("multifusion.jl") # multifusion example, namely Rep Z2 ⊕ Rep Z2 ≅ Is
 include("precompile.jl")
 
 function __precompile__()
-    for I in (Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep,
-              FermionParity, FermionNumber, FermionSpin, PlanarTrivial, FibonacciAnyon,
-              IsingAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon})
+    for I in (
+            Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep,
+            FermionParity, FermionNumber, FermionSpin, PlanarTrivial, FibonacciAnyon,
+            IsingAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
+        )
         precompile_sector(I)
     end
+    return
 end
 
 end # module TensorKitSectors
