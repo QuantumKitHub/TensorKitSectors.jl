@@ -10,13 +10,17 @@ Istr = TKS.type_repr(I)
     @constinferred dim(s[1])
     @constinferred frobeniusschur(s[1])
     @constinferred Nsymbol(s...)
-    R = @constinferred Rsymbol(s...)
     B = @constinferred Bsymbol(s...)
     F = @constinferred Fsymbol(s..., s...)
-    if FusionStyle(I) === SimpleFusion()
-        @test typeof(R * F) <: @constinferred sectorscalartype(I)
+    if BraidingStyle(I) isa HasBraiding
+        R = @constinferred Rsymbol(s...)
+        if FusionStyle(I) === SimpleFusion()
+            @test typeof(R * F) <: @constinferred sectorscalartype(I)
+        else
+            @test Base.promote_op(*, eltype(R), eltype(F)) <: @constinferred sectorscalartype(I)
+        end
     else
-        @test Base.promote_op(*, eltype(R), eltype(F)) <: @constinferred sectorscalartype(I)
+        @test typeof(F) <: @constinferred sectorscalartype(I)
     end
     it = @constinferred s[1] ⊗ s[2]
     @constinferred ⊗(s..., s...)
@@ -102,8 +106,10 @@ end
         @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
-@testset "Sector $Istr: Hexagon equation" begin
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+if BraidingStyle(I) isa HasBraiding
+    @testset "Sector $Istr: Hexagon equation" begin
+        for a in smallset(I), b in smallset(I), c in smallset(I)
+            @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+        end
     end
 end

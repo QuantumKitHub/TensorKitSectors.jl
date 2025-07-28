@@ -2,8 +2,8 @@ module TensorKitSectors
 
 # exports
 # -------
-export Sector, Group, AbstractIrrep
-export Irrep
+export Sector, Group, AbstractIrrep, AbstractGroupElement
+export Irrep, Element
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype
@@ -11,13 +11,14 @@ export dim, sqrtdim, invsqrtdim, frobeniusschur, twist, fusiontensor, dual
 export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
     MultiplicityFreeFusion
-export BraidingStyle, NoBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
+export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
 export rightone, leftone
 
 export triangle_equation, pentagon_equation, hexagon_equation
 
 export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
+export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
@@ -48,6 +49,7 @@ include("sectors.jl")
 include("trivial.jl")
 include("groups.jl")
 include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
+include("groupelements.jl") # group elements with cocycles, no braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
