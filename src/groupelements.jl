@@ -137,7 +137,7 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # TODO: is this true?
-# const AbelianGroupElement{G, ω} = AbelianGroupElement{G, ω} where {G <: AbelianGroup}
+# const AbelianGroupElement{G, ω} = AbstractGroupElement{G, ω} where {G <: AbelianGroup}
 # BraidingStyle(::Type{<:AbelianGroupElement}) = HasBraiding()
 
 BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
