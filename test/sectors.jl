@@ -20,7 +20,11 @@ Istr = TKS.type_repr(I)
             @test Base.promote_op(*, eltype(R), eltype(F)) <: @constinferred sectorscalartype(I)
         end
     else
-        @test typeof(F) <: @constinferred sectorscalartype(I)
+        if FusionStyle(I) === SimpleFusion()
+            @test typeof(F) <: @constinferred sectorscalartype(I)
+        else
+            @test eltype(F) <: @constinferred sectorscalartype(I)
+        end
     end
     it = @constinferred s[1] ⊗ s[2]
     @constinferred ⊗(s..., s...)
