@@ -3,7 +3,7 @@ module TensorKitSectors
 # exports
 # -------
 export Sector, Group, AbstractIrrep, AbstractGroupElement
-export Irrep, Element
+export Irrep, GroupElement
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype
