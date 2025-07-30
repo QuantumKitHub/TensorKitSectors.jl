@@ -130,9 +130,7 @@ Base.inv(c::ZNElement) = typeof(c)(-c.n)
 Base.:*(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} =
     ZNElement{N, p}(mod(c1.n + c2.n, N))
 
-# cocycle(a::ZNElement{2, 0}, b::ZNElement{2, 0}, c::ZNElement{2, 0}) = 1
-# cocycle(a::ZNElement{2, 1}, b::ZNElement{2, 1}, c::ZNElement{2, 1}) = ifelse(a.n == b.n == c.n == 1, -1, 1)
-# cocycle(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = 1
+cocycle(a::ZNElement{2, 0}, b::ZNElement{2, 0}, c::ZNElement{2, 0}) = 1
 function cocycle(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
     return cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2)
 end
