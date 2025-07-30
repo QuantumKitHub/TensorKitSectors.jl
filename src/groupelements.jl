@@ -146,3 +146,19 @@ findindex(::SectorValues{ZNElement{N, p}}, c::ZNElement{N, p}) where {N, p} = c.
 
 Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
+
+# Experimental
+BraidingStyle(::Type{ZNElement{2, 0}}) = Bosonic()
+BraidingStyle(::Type{ZNElement{2, 1}}) = Fermionic()
+BraidingStyle(::Type{ZNElement{N, 0}}) where {N} = Bosonic()
+BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = Anyonic()
+function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
+    if p == 0
+        R = 1
+    elseif N == 2 && p == 1
+        R = ifelse(a.n == b.n == 1, -1.0, 1.0)
+    else
+        R = cispi(2 * p * a.n * b.n / N)
+    end
+    return ifelse(c == a * b, R, zero(R))
+end
