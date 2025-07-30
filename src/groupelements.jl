@@ -130,8 +130,11 @@ Base.inv(c::ZNElement) = typeof(c)(-c.n)
 Base.:*(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} =
     ZNElement{N, p}(mod(c1.n + c2.n, N))
 
+# cocycle(a::ZNElement{2, 0}, b::ZNElement{2, 0}, c::ZNElement{2, 0}) = 1
+# cocycle(a::ZNElement{2, 1}, b::ZNElement{2, 1}, c::ZNElement{2, 1}) = ifelse(a.n == b.n == c.n == 1, -1, 1)
+# cocycle(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = 1
 function cocycle(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
-    return cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N)
+    return cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2)
 end
 
 Base.IteratorSize(::Type{SectorValues{<:ZNElement}}) = HasLength()
@@ -148,17 +151,11 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # Experimental
-BraidingStyle(::Type{ZNElement{2, 0}}) = Bosonic()
-BraidingStyle(::Type{ZNElement{2, 1}}) = Fermionic()
 BraidingStyle(::Type{ZNElement{N, 0}}) where {N} = Bosonic()
+Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
+
 BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = Anyonic()
 function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
-    if p == 0
-        R = 1
-    elseif N == 2 && p == 1
-        R = ifelse(a.n == b.n == 1, -1.0, 1.0)
-    else
-        R = cispi(2 * p * a.n * b.n / N)
-    end
+    R = cispi(2 * p * a.n * b.n / N^2)
     return ifelse(c == a * b, R, zero(R))
 end
