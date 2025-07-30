@@ -60,7 +60,7 @@ struct ElementTable end
 """
     const GroupElement
 
-A constant of a singleton type used as `Element[G]` or `Element[G,ω]` with `G<:Group`
+A constant of a singleton type used as `GroupElement[G]` or `GroupElement[G,ω]` with `G<:Group`
 a type of group, to construct or obtain a concrete subtype of `AbstractElement{G}`
 that implements the data structure used to represent elements of the group `G`, possibly
 with a second argument `ω` that specifies the associated 3-cocycle.
