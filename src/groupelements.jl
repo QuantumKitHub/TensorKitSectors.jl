@@ -67,7 +67,7 @@ with a second argument `ω` that specifies the associated 3-cocycle.
 """
 const GroupElement = ElementTable()
 
-function Base.show(io::IO, c::AbstractGroupElement)
+function Base.show(io::IO, c::AbstractGroupElement{G}) where {G}
     I = typeof(c)
     return if get(io, :typeinfo, nothing) !== I
         print(io, type_repr(I), "(")
