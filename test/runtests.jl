@@ -54,6 +54,7 @@ end
         @constinferred I1 ⊠ I2
         @test typeof(a ⊠ b) == I1 ⊠ I2
     end
+    @test @constinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
 end
 
 @testset "Issue that came up in #11" begin
