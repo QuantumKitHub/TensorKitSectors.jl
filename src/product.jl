@@ -13,6 +13,8 @@ struct ProductSector{T <: SectorTuple} <: Sector
     sectors::T
 end
 
+Base.Tuple(a::ProductSector) = a.sectors
+
 Base.getindex(s::ProductSector, i::Int) = getindex(s.sectors, i)
 Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
