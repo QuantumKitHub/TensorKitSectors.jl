@@ -23,6 +23,11 @@ Istr = TensorKitSectors.type_repr(I)
         @test one(C1) == leftone(M) == rightone(Mop)
         @test one(D1) == rightone(M) == leftone(Mop)
 
+        @test @constinferred(isone(C0))
+        @test isone(D0)
+        @test isone(C1) == isone(D1) == false
+        @test isone(M) == isone(Mop) == false
+
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
         @constinferred dual(s)
