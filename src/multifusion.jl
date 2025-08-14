@@ -82,7 +82,7 @@ function Base.one(a::IsingBimodule)
     return IsingBimodule(a.row, a.col, 0)
 end
 
-# Base.isone(a::IsingBimodule) = leftone(a) == a == rightone(a)
+Base.isone(a::IsingBimodule) = leftone(a) == a == rightone(a)
 
 function Base.one(::Type{IsingBimodule})
     throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
