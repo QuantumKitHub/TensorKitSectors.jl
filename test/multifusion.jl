@@ -25,8 +25,7 @@ Istr = TensorKitSectors.type_repr(I)
 
         @test @constinferred(isone(C0))
         @test isone(D0)
-        @test isone(C1) == isone(D1) == false
-        @test isone(M) == isone(Mop) == false
+        @test !isone(C1) && !isone(D1) && !isone(M) && !isone(Mop)
 
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
