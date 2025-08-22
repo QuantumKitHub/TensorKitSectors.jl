@@ -441,19 +441,19 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
             if FusionStyle(I) isa MultiplicityFreeFusion
-                p1 = Rsymbol(a, c, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(b, c, f)
+                p1 = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
                 p2 = zero(p1)
                 for g in ⊗(a, b)
-                    p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(g, c, d) *
+                    p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(c, g, d) *
                         Fsymbol(a, b, c, d, g, f)
                 end
             else
-                @tensor p1[α, β, μ, ν] := Rsymbol(a, c, e)[α, λ] *
-                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(b, c, f)[γ, μ]
+                @tensor p1[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
+                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(c, b, f)[γ, μ]
                 p2 = zero(p1)
                 for g in ⊗(a, b)
                     @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
-                        Rsymbol(g, c, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
+                        Rsymbol(c, g, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
                 end
             end
             isapprox(p1, p2; kwargs...) || return false
