@@ -26,7 +26,7 @@ structure used to represent irreducible representations of the group `G`.
 """
 const Irrep = IrrepTable()
 
-type_repr(::Type{IR}) where {G<:Group, IR<:AbstractIrrep{G}} = "Irrep[" * type_repr(G) * "]"
+type_repr(::Type{IR}) where {G <: Group, IR <: AbstractIrrep{G}} = "Irrep[" * type_repr(G) * "]"
 function Base.show(io::IO, c::AbstractIrrep)
     I = typeof(c)
     return if get(io, :typeinfo, nothing) !== I
