@@ -60,6 +60,7 @@ end
         @test typeof(a ⊠ b) == I1 ⊠ I2
     end
     @test @constinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
+    @test @constinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3
 end
 
 @testset "Issue that came up in #11" begin
