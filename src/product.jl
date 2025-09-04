@@ -16,6 +16,7 @@ end
 Base.Tuple(a::ProductSector) = a.sectors
 
 Base.getindex(s::ProductSector, i::Int) = getindex(s.sectors, i)
+Base.length(s::ProductSector) = length(s.sectors)
 Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
