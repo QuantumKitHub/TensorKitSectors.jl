@@ -7,15 +7,20 @@ abstract type ℤ{N} <: AbelianGroup end
 abstract type U₁ <: AbelianGroup end
 abstract type SU{N} <: Group end
 abstract type CU₁ <: Group end
+abstract type D{N} <: Group end
 
 const ℤ₂ = ℤ{2}
 const ℤ₃ = ℤ{3}
 const ℤ₄ = ℤ{4}
+const D₃ = D{3}
+const D₄ = D{4}
 const SU₂ = SU{2}
 
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
 type_repr(::Type{ℤ₄}) = "ℤ₄"
+type_repr(::Type{D₃}) = "D₃"
+type_repr(::Type{D₄}) = "D₄"
 type_repr(::Type{SU₂}) = "SU₂"
 type_repr(T::Type) = repr(T)
 

@@ -27,7 +27,7 @@ export IsingBimodule
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
-export ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, CU₁
+export ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, D, D₃, D₄, CU₁
 export fℤ₂, fU₁, fSU₂
 
 # imports
