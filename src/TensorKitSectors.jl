@@ -17,7 +17,10 @@ export rightone, leftone
 
 export triangle_equation, pentagon_equation, hexagon_equation
 
-export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
+export Trivial
+export Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep
+export D3Irrep, D4Irrep, DNIrrep, CU1Irrep
+export SU2Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
