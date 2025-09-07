@@ -28,3 +28,41 @@ function DNIrrep{N}(j::Integer, isodd::Bool = false) where {N}
         throw(DomainError(j, "DNIrrep only has odd irreps when `j == 0` or `iseven(N) && j == N / 2`"))
     return DNIrrep{N}((j % UInt8) << 1 | isodd)
 end
+
+function Base.getproperty(a::DNIrrep{N}, sym::Symbol) where {N}
+    if sym === :j
+        return getfield(a, :data) >> 1
+    elseif sym === :isodd
+        return Bool(getfield(a, :data) & true)
+    elseif sym === :data
+        return getfield(a, :data)
+    else
+        error("Unknown property $sym")
+    end
+end
+
+Base.propertynames(x::DNIrrep) = (:j, :isodd, :data)
+
+Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
+
+function Base.show(io::IO, a::DNIrrep)
+    if get(io, :typeinfo, nothing) !== typeof(a)
+        print(io, type_repr(typeof(a)))
+    end
+    print(io, "(", a.j, ", ", a.isodd, ")")
+    return nothing
+end
+function Base.show(io::IO, ::MIME"text/plain", a::DNIrrep{N}) where {N}
+    print_type = get(io, :typeinfo, nothing) !== typeof(a)
+    print_type && print(io, type_repr(typeof(a)), "(")
+    print(io, '"')
+    if a.isodd
+        print(io, '-')
+    elseif a.j == 0 || (iseven(N) && a.j == N >> 1)
+        print(io, '+')
+    end
+    print(io, a.j, '"')
+    print_type && print(io, ")")
+    return nothing
+end
+
