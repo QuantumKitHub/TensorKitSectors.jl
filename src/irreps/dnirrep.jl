@@ -66,3 +66,36 @@ function Base.show(io::IO, ::MIME"text/plain", a::DNIrrep{N}) where {N}
     return nothing
 end
 
+# Sector iterator
+# ---------------
+Base.isless(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = isless(a.data, b.data)
+Base.IteratorSize(::Type{SectorValues{DNIrrep{N}}}) where {N} = Base.HasLength()
+Base.length(::SectorValues{DNIrrep{N}}) where {N} = (N >> 1) + (isodd(N) ? 2 : 3)
+
+function Base.iterate(v::SectorValues{DNIrrep{N}}, i = 1) where {N}
+    return i > length(v) ? nothing : (v[i], i + 1)
+end
+
+@inline function Base.getindex(v::SectorValues{DNIrrep{N}}, i::Int) where {N}
+    L = length(v)
+    @boundscheck 1 <= i <= L || throw(BoundsError(v, i))
+    if i == 1
+        return DNIrrep{N}(0x00)
+    elseif i == 2
+        return DNIrrep{N}(0x01)
+    elseif iseven(N) && i == L
+        return DNIrrep{N}((UInt8(N >> 1) << 1) | true)
+    else
+        return DNIrrep{N}(UInt8(i - 2) << 1)
+    end
+end
+
+function findindex(::SectorValues{DNIrrep{N}}, a::DNIrrep{N}) where {N}
+    if a.isodd && a.j > 0
+        return Int(a.j) + 3
+    elseif a.data < 2
+        return Int(a.data) + 1
+    else
+        return Int(a.j) + 2
+    end
+end
