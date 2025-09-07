@@ -99,3 +99,84 @@ function findindex(::SectorValues{DNIrrep{N}}, a::DNIrrep{N}) where {N}
         return Int(a.j) + 2
     end
 end
+
+# Product iterator
+# ----------------
+struct DNIrrepProdIterator{N}
+    a::DNIrrep{N}
+    b::DNIrrep{N}
+end
+
+⊗(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = a <= b ? DNIrrepProdIterator(a, b) : DNIrrepProdIterator(b, a)
+
+function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
+    a, b = p.a, p.b
+    if state == 1
+        # A_i x A_j = A_{xor(i,j)}
+        if iszero(b.j) # then also iszero(a.j)
+            cj = 0
+            cisodd = xor(a.isodd, b.isodd)
+            return DNIrrep{N}(cj, cisodd), 5
+        end
+
+        if iszero(a.j)
+            cj = b.j
+
+            # A_i x B_j = B_{xor(i,j)}
+            if iseven(N) && (cj == N >> 1)
+                cisodd = xor(a.isodd, b.isodd)
+                return DNIrrep{N}(cj, cisodd), 5
+            end
+
+            # A_i x rho_j = rho_j
+            return b, 5
+        end
+
+        if a.j == b.j # != 0
+            # B_i x B_j = A_{xor(i,j)}
+            if iseven(N) && b.j == N >> 1
+                return DNIrrep{N}(0, xor(a.isodd, b.isodd)), 5
+            end
+
+            # rho_i x rho_i = A_1 + A_2 + rho_2i
+            return DNIrrep{N}(0, false), 2
+        end
+
+        # rho_i x B_j = rho_{j-i}
+        if iseven(N) && b.j == (N >> 1)
+            return DNIrrep{N}(b.j - a.j, false), 5
+        end
+
+        # rho_i x rho_j = rho_{i-j} + rho_{i+j}
+        return DNIrrep{N}(b.j - a.j, false), 3
+
+    elseif state == 2
+        return DNIrrep{N}(0, true), 3
+    elseif state == 3
+        cj = a.j + b.j
+        if iseven(N) && cj == (N >> 1)
+            return DNIrrep{N}(cj, false), 4
+        end
+        if cj > (N >> 1)
+            cj = N - cj
+        end
+        return DNIrrep{N}(cj, false), 5
+    elseif state == 4
+        return DNIrrep{N}(N >> 1, true), 5
+    else
+        return nothing
+    end
+end
+
+Base.IteratorSize(x::DNIrrepProdIterator) = Base.HasLength()
+
+function Base.length(x::DNIrrepProdIterator{N}) where {N}
+    a, b = x.a, x.b
+    if a.j == 0 || b.j == 0 || (iseven(N) && (a.j == N >> 1 || b.j == N >> 1))
+        return 1
+    end
+
+    Asplits = iszero(b.j - a.j)
+    Bsplits = iseven(N) & (a.j + b.j == N >> 1)
+    return 2 + Asplits + Bsplits
+end
