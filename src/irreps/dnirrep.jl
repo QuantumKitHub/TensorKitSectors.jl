@@ -201,13 +201,77 @@ function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
+    T = sectorscalartype(I)
+    (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
 
+    # tensoring with units gives 1
+    (isone(a) || isone(b) || isone(c)) && return one(T)
+
+    # fallback through fusiontensor
+    A = fusiontensor(a, b, e)
+    A = reshape(A, size(A, 1), size(A, 2), size(A, 3))
+    B = fusiontensor(e, c, d)
+    B1 = reshape(view(B, :, :, 1), size(B, 1), size(B, 2))
+    C = fusiontensor(b, c, f)
+    C = reshape(C, size(C, 1), size(C, 2), size(C, 3))
+    D = fusiontensor(a, f, d)
+    D1 = reshape(view(D, :, :, 1), size(D, 1), size(D, 2))
+
+    return @tensor conj(D1[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B1[3 4]
 end
 
 function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
-
+    R = convert(sectorscalartype(I), Nsymbol(a, b, c))
+    return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !(iseven(N) && (a.j == b.j == (N >> 1))), -R, R)
 end
 
-function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
+const _invsqrt2 = 1 / sqrt(2)
 
+function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
+    C = fill(zero(sectorscalartype(I)), dim(a), dim(b), dim(c), 1)
+    Nsymbol(a, b, c) || return C
+
+    if c.j == 0
+        if a.j == b.j == 0 || (iseven(N) && (a.j == b.j == (N >> 1)))
+            C[1] = 1
+        else # a.j == b.j
+            # 0\pm = 1/sqrt(2) (v_i^+ \otimes w_j^- \pm v_i^- \otimes w_j^+)
+            C[1, 2] = _invsqrt2
+            C[2, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
+        end
+    elseif iseven(N) && c.j == (N >> 1)
+        if (a.j == (N >> 1)) | (b.j == (N >> 1))
+            C[1] = 1
+        else
+            C[1, 1] = _invsqrt2
+            C[2, 2] = c.isodd ? -_invsqrt2 : _invsqrt2
+        end
+    elseif a.j == 0
+        C[1, 1, 1] = 1
+        C[1, 2, 2] = a.isodd ? -1 : 1
+    elseif b.j == 0
+        C[1, 1, 1] = 1
+        C[2, 1, 2] = b.isodd ? -1 : 1
+    elseif iseven(N) && (a.j == (N >> 1))
+        C[1, 1, 2] = 1
+        C[1, 2, 1] = a.isodd ? -1 : 1
+    elseif iseven(N) && (b.j == (N >> 1))
+        C[1, 1, 2] = 1
+        C[2, 1, 1] = b.isodd ? -1 : 1
+        # from here on everything is 2D --------------------
+    elseif c.j == a.j + b.j
+        C[1, 1, 1] = 1
+        C[2, 2, 2] = 1
+    elseif c.j == N - (a.j + b.j)
+        C[1, 1, 2] = 1
+        C[2, 2, 1] = 1
+    elseif c.j == a.j - b.j
+        C[1, 2, 1] = 1
+        C[2, 1, 2] = 1
+    elseif c.j == b.j - a.j
+        C[1, 2, 2] = 1
+        C[2, 1, 1] = 1
+    end
+
+    return C
 end
