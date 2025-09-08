@@ -1,7 +1,7 @@
 """
-    struct DNIrrep{N} <: AbstractIrrep{D{N}}
+    struct DNIrrep{N} <: AbstractIrrep{Dihedral{N}}
     DNIrrep{N}(n::Integer, isodd::Bool=false)
-    Irrep[D{N}](n::Integer, isodd::Bool=false)
+    Irrep[Dihedral{N}](n::Integer, isodd::Bool=false)
 
 Represents irreps of the dihedral group ``D_N = Z_N ⋊ C`` (``Z_N`` and charge conjugation or reflection).
 
@@ -14,7 +14,7 @@ Combined these take the values ``+0, -0, 1, ..., (N - 1) / 2`` for odd ``N``, an
 ``+0, -0, 1, ..., N / 2 - 1, +(N/2), -(N/2)`` for even ``N``, where the ``+`` (``-``)
 refer to the even (odd) one-dimensional irreps, while the others are two-dimensional.
 """
-struct DNIrrep{N} <: AbstractIrrep{D{N}}
+struct DNIrrep{N} <: AbstractIrrep{Dihedral{N}}
     # store isodd in right bit, use rest for storing the angle
     data::UInt8
     DNIrrep{N}(data::UInt8) where {N} = new{N}(data)
@@ -53,7 +53,7 @@ Base.conj(a::DNIrrep) = a
 Base.hash(a::DNIrrep, h::UInt) = hash(a.data, h)
 Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
 
-Base.getindex(::IrrepTable, ::Type{D{N}}) where {N} = DNIrrep{N}
+Base.getindex(::IrrepTable, ::Type{Dihedral{N}}) where {N} = DNIrrep{N}
 
 const D3Irrep = DNIrrep{3}
 const D4Irrep = DNIrrep{4}

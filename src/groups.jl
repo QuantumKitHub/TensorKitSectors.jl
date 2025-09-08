@@ -3,17 +3,18 @@
 abstract type Group end
 abstract type AbelianGroup <: Group end
 
-abstract type ℤ{N} <: AbelianGroup end
+abstract type Cyclic{N} <: AbelianGroup end
 abstract type U₁ <: AbelianGroup end
 abstract type SU{N} <: Group end
 abstract type CU₁ <: Group end
-abstract type D{N} <: Group end
+abstract type Dihedral{N} <: Group end
 
+const ℤ{N} = Cyclic{N}
 const ℤ₂ = ℤ{2}
 const ℤ₃ = ℤ{3}
 const ℤ₄ = ℤ{4}
-const D₃ = D{3}
-const D₄ = D{4}
+const D₃ = Dihedral{3}
+const D₄ = Dihedral{4}
 const SU₂ = SU{2}
 
 type_repr(::Type{ℤ₂}) = "ℤ₂"
