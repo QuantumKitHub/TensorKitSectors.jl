@@ -55,6 +55,9 @@ Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrr
 
 Base.getindex(::IrrepTable, ::Type{D{N}}) where {N} = DNIrrep{N}
 
+const D3Irrep = DNIrrep{3}
+const D4Irrep = DNIrrep{4}
+
 function Base.show(io::IO, a::DNIrrep)
     if get(io, :typeinfo, nothing) !== typeof(a)
         print(io, type_repr(typeof(a)))
