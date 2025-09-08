@@ -45,6 +45,8 @@ Base.propertynames(x::DNIrrep) = (:j, :isodd, :data)
 
 Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
 
+Base.one(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
+
 function Base.show(io::IO, a::DNIrrep)
     if get(io, :typeinfo, nothing) !== typeof(a)
         print(io, type_repr(typeof(a)))
