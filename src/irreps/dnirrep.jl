@@ -195,7 +195,7 @@ end
 
 # Topological data
 # ----------------
-dim(a::DNIrrep{N}) where {N} = ifelse(a.j == 0 | (iseven(N) & a.j == (N >> 1)), 1, 2)
+dim(a::DNIrrep{N}) where {N} = ifelse((a.j == 0) | (iseven(N) & (a.j == (N >> 1))), 1, 2)
 
 function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
     j_satisfied = (c.j == min(a.j + b.j, N - (a.j + b.j))) | (c.j == max(a.j, b.j) - min(a.j, b.j))
@@ -242,7 +242,7 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
             C[1, 2] = _invsqrt2
             C[2, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
         end
-    elseif iseven(N) && c.j == (N >> 1)
+    elseif iseven(N) && (c.j == (N >> 1))
         if (a.j == (N >> 1)) | (b.j == (N >> 1))
             C[1] = 1
         else
