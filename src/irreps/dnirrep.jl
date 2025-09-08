@@ -23,7 +23,7 @@ end
 function DNIrrep{N}(j::Integer, isodd::Bool = false) where {N}
     @assert 0 < N < 32 "DNIrrep requires 0 < N < 32 to function properly"
     0 <= j <= (N >> 1) ||
-        throw(DomainError(j, "DNIrrep only has irreps 0 <= j <= (N >> 1)"))
+        throw(DomainError(j, "DNIrrep only has irreps 0 <= j <= (N ÷ 2)"))
     !isodd || j == 0 || (iseven(N) && (j == (N >> 1))) ||
         throw(DomainError(j, "DNIrrep only has odd irreps when `j == 0` or `iseven(N) && j == N / 2`"))
     return DNIrrep{N}((j % UInt8) << 1 | isodd)
