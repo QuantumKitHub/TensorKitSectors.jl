@@ -29,6 +29,8 @@ function DNIrrep{N}(j::Integer, isodd::Bool = false) where {N}
     return DNIrrep{N}((j % UInt8) << 1 | isodd)
 end
 
+Base.propertynames(x::DNIrrep) = (:j, :isodd, :data)
+
 function Base.getproperty(a::DNIrrep{N}, sym::Symbol) where {N}
     if sym === :j
         return getfield(a, :data) >> 1
@@ -41,11 +43,17 @@ function Base.getproperty(a::DNIrrep{N}, sym::Symbol) where {N}
     end
 end
 
-Base.propertynames(x::DNIrrep) = (:j, :isodd, :data)
-
-Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
+FusionStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? UniqueFusion() : SimpleFusion()
+sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
+Base.isreal(::Type{DNIrrep{N}}) where {N} = true
 
 Base.one(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
+Base.conj(a::DNIrrep) = a
+
+Base.hash(a::DNIrrep, h::UInt) = hash(a.data, h)
+Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
+
+Base.getindex(::IrrepTable, ::Type{D{N}}) where {N} = DNIrrep{N}
 
 function Base.show(io::IO, a::DNIrrep)
     if get(io, :typeinfo, nothing) !== typeof(a)
@@ -111,6 +119,19 @@ end
 
 ⊗(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = a <= b ? DNIrrepProdIterator(a, b) : DNIrrepProdIterator(b, a)
 
+Base.eltype(::Type{DNIrrepProdIterator{N}}) where {N} = DNIrrep{N}
+Base.IteratorSize(x::DNIrrepProdIterator) = Base.HasLength()
+function Base.length(x::DNIrrepProdIterator{N}) where {N}
+    a, b = x.a, x.b
+    if a.j == 0 || b.j == 0 || (iseven(N) && (a.j == N >> 1 || b.j == N >> 1))
+        return 1
+    end
+
+    Asplits = iszero(b.j - a.j)
+    Bsplits = iseven(N) & (a.j + b.j == N >> 1)
+    return 2 + Asplits + Bsplits
+end
+
 function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if state == 1
@@ -151,7 +172,6 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
 
         # rho_i x rho_j = rho_{i-j} + rho_{i+j}
         return DNIrrep{N}(b.j - a.j, false), 3
-
     elseif state == 2
         return DNIrrep{N}(0, true), 3
     elseif state == 3
@@ -170,23 +190,24 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
     end
 end
 
-Base.IteratorSize(x::DNIrrepProdIterator) = Base.HasLength()
-
-function Base.length(x::DNIrrepProdIterator{N}) where {N}
-    a, b = x.a, x.b
-    if a.j == 0 || b.j == 0 || (iseven(N) && (a.j == N >> 1 || b.j == N >> 1))
-        return 1
-    end
-
-    Asplits = iszero(b.j - a.j)
-    Bsplits = iseven(N) & (a.j + b.j == N >> 1)
-    return 2 + Asplits + Bsplits
-end
-
+# Topological data
+# ----------------
 dim(a::DNIrrep{N}) where {N} = ifelse(a.j == 0 | (iseven(N) & a.j == (N >> 1)), 1, 2)
 
 function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
     j_satisfied = (c.j == min(a.j + b.j, N - (a.j + b.j))) | (c.j == max(a.j, b.j) - min(a.j, b.j))
     s_satisfied = (dim(c) != 1) | (dim(a) != 1) | (xor(a.isodd, b.isodd) == c.isodd)
     return j_satisfied & s_satisfied
+end
+
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
+
+end
+
+function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
+
+end
+
+function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
+
 end
