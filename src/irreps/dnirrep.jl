@@ -180,3 +180,11 @@ function Base.length(x::DNIrrepProdIterator{N}) where {N}
     Bsplits = iseven(N) & (a.j + b.j == N >> 1)
     return 2 + Asplits + Bsplits
 end
+
+dim(a::DNIrrep{N}) where {N} = ifelse(a.j == 0 | (iseven(N) & a.j == (N >> 1)), 1, 2)
+
+function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
+    j_satisfied = (c.j == min(a.j + b.j, N - (a.j + b.j))) | (c.j == max(a.j, b.j) - min(a.j, b.j))
+    s_satisfied = (dim(c) != 1) | (dim(a) != 1) | (xor(a.isodd, b.isodd) == c.isodd)
+    return j_satisfied & s_satisfied
+end
