@@ -77,6 +77,19 @@ if BraidingStyle(I) isa Bosonic && hasfusiontensor(I)
         end
     end
 end
+if hasfusiontensor(I)
+    @testset "Orthogonality of fusiontensors" begin
+        for a in smallset(I), b in smallset(I)
+            cs = vec(collect(a ⊗ b))
+            CGCs = map(c -> reshape(fusiontensor(a, b, c), :, dim(c)), cs)
+            M = map(Iterators.product(CGCs, CGCs)) do (cgc1, cgc2)
+                return LinearAlgebra.norm(cgc1' * cgc2)
+            end
+            @test isapprox(M' * M, LinearAlgebra.Diagonal(dim.(cs)); atol = 1.0e-12)
+        end
+    end
+end
+
 @testset "Sector $Istr: Unitarity of F-move" begin
     for a in smallset(I), b in smallset(I), c in smallset(I)
         for d in ⊗(a, b, c)

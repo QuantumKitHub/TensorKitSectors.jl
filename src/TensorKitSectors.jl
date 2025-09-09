@@ -17,7 +17,10 @@ export rightone, leftone
 
 export triangle_equation, pentagon_equation, hexagon_equation
 
-export Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep
+export Trivial
+export Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep
+export D3Irrep, D4Irrep, DNIrrep, CU1Irrep
+export SU2Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
@@ -27,7 +30,7 @@ export IsingBimodule
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
-export ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, CU₁
+export Cyclic, ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, Dihedral, D₃, D₄, CU₁
 export fℤ₂, fU₁, fSU₂
 
 # imports
@@ -48,7 +51,7 @@ include("auxiliary.jl")
 include("sectors.jl")
 include("trivial.jl")
 include("groups.jl")
-include("irreps.jl")    # irreps of symmetry groups, with bosonic braiding
+include("irreps/irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("groupelements.jl") # group elements with cocycles, no braiding
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
