@@ -236,18 +236,18 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
 
     if c.j == 0
         if a.j == b.j == 0 || (iseven(N) && (a.j == b.j == (N >> 1)))
-            C[1] = 1
+            C[1, 1, 1] = 1
         else # a.j == b.j
             # 0\pm = 1/sqrt(2) (v_i^+ \otimes w_j^- \pm v_i^- \otimes w_j^+)
-            C[1, 2] = _invsqrt2
-            C[2, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
+            C[1, 2, 1] = _invsqrt2
+            C[2, 1, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
         end
     elseif iseven(N) && (c.j == (N >> 1))
         if (a.j == (N >> 1)) | (b.j == (N >> 1))
-            C[1] = 1
+            C[1, 1, 1] = 1
         else
-            C[1, 1] = _invsqrt2
-            C[2, 2] = c.isodd ? -_invsqrt2 : _invsqrt2
+            C[1, 1, 1] = _invsqrt2
+            C[2, 2, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
         end
     elseif a.j == 0
         C[1, 1, 1] = 1
