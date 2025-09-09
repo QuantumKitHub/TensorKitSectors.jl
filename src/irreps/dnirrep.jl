@@ -126,12 +126,12 @@ Base.eltype(::Type{DNIrrepProdIterator{N}}) where {N} = DNIrrep{N}
 Base.IteratorSize(x::DNIrrepProdIterator) = Base.HasLength()
 function Base.length(x::DNIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
-    if a.j == 0 || b.j == 0 || (iseven(N) && (a.j == N >> 1 || b.j == N >> 1))
+    if a.j == 0 || b.j == 0 || (N == 2 * a.j) || (N == 2 * b.j)
         return 1
     end
 
     Asplits = iszero(b.j - a.j)
-    Bsplits = iseven(N) & (a.j + b.j == N >> 1)
+    Bsplits = 2 * (a.j + b.j) == N
     return 2 + Asplits + Bsplits
 end
 
@@ -149,7 +149,7 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
             cj = b.j
 
             # A_i x B_j = B_{xor(i,j)}
-            if iseven(N) && (cj == N >> 1)
+            if 2 * cj == N
                 cisodd = xor(a.isodd, b.isodd)
                 return DNIrrep{N}(cj, cisodd), 5
             end
@@ -160,7 +160,7 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
 
         if a.j == b.j # != 0
             # B_i x B_j = A_{xor(i,j)}
-            if iseven(N) && b.j == N >> 1
+            if 2 * b.j == N
                 return DNIrrep{N}(0, xor(a.isodd, b.isodd)), 5
             end
 
@@ -169,7 +169,7 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
         end
 
         # rho_i x B_j = rho_{j-i}
-        if iseven(N) && b.j == (N >> 1)
+        if 2 * b.j == N
             return DNIrrep{N}(b.j - a.j, false), 5
         end
 
@@ -179,7 +179,7 @@ function Base.iterate(p::DNIrrepProdIterator{N}, state::Int = 1) where {N}
         return DNIrrep{N}(0, true), 3
     elseif state == 3
         cj = a.j + b.j
-        if iseven(N) && cj == (N >> 1)
+        if 2 * cj == N
             return DNIrrep{N}(cj, false), 4
         end
         if cj > (N >> 1)
@@ -195,7 +195,7 @@ end
 
 # Topological data
 # ----------------
-dim(a::DNIrrep{N}) where {N} = ifelse((a.j == 0) | (iseven(N) & (a.j == (N >> 1))), 1, 2)
+dim(a::DNIrrep{N}) where {N} = ifelse((a.j == 0) | (2 * a.j == N), 1, 2)
 
 function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
     j_satisfied = (c.j == min(a.j + b.j, N - (a.j + b.j))) | (c.j == max(a.j, b.j) - min(a.j, b.j))
@@ -225,7 +225,7 @@ end
 
 function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     R = convert(sectorscalartype(I), Nsymbol(a, b, c))
-    return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !(iseven(N) && (a.j == b.j == (N >> 1))), -R, R)
+    return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !((2 * a.j) == (2 * b.j) == N), -R, R)
 end
 
 
@@ -235,14 +235,14 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     Nsymbol(a, b, c) || return C
 
     if c.j == 0
-        if a.j == b.j == 0 || (iseven(N) && (a.j == b.j == (N >> 1)))
+        if a.j == b.j == 0 || (2 * a.j == 2 * b.j == N)
             C[1, 1, 1] = 1
         else # a.j == b.j
             # 0\pm = 1/sqrt(2) (v_i^+ \otimes w_j^- \pm v_i^- \otimes w_j^+)
             C[1, 2, 1] = T(sqrt(2) / 2)
             C[2, 1, 1] = c.isodd ? -C[1, 2, 1] : C[1, 2, 1]
         end
-    elseif iseven(N) && (c.j == (N >> 1))
+    elseif 2 * c.j == N
         if (a.j == (N >> 1)) | (b.j == (N >> 1))
             C[1, 1, 1] = 1
         else
@@ -255,10 +255,10 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     elseif b.j == 0
         C[1, 1, 1] = 1
         C[2, 1, 2] = b.isodd ? -1 : 1
-    elseif iseven(N) && (a.j == (N >> 1))
+    elseif 2 * a.j == N
         C[1, 1, 2] = 1
         C[1, 2, 1] = a.isodd ? -1 : 1
-    elseif iseven(N) && (b.j == (N >> 1))
+    elseif 2 * b.j == N
         C[1, 1, 2] = 1
         C[2, 1, 1] = b.isodd ? -1 : 1
         # from here on everything is 2D --------------------
