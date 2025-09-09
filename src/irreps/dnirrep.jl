@@ -228,10 +228,10 @@ function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !(iseven(N) && (a.j == b.j == (N >> 1))), -R, R)
 end
 
-const _invsqrt2 = 1 / sqrt(2)
 
 function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
-    C = fill(zero(sectorscalartype(I)), dim(a), dim(b), dim(c), 1)
+    T = sectorscalartype(I)
+    C = zeros(T, dim(a), dim(b), dim(c), 1)
     Nsymbol(a, b, c) || return C
 
     if c.j == 0
@@ -239,15 +239,15 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
             C[1, 1, 1] = 1
         else # a.j == b.j
             # 0\pm = 1/sqrt(2) (v_i^+ \otimes w_j^- \pm v_i^- \otimes w_j^+)
-            C[1, 2, 1] = _invsqrt2
-            C[2, 1, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
+            C[1, 2, 1] = T(sqrt(2) / 2)
+            C[2, 1, 1] = c.isodd ? -C[1, 2, 1] : C[1, 2, 1]
         end
     elseif iseven(N) && (c.j == (N >> 1))
         if (a.j == (N >> 1)) | (b.j == (N >> 1))
             C[1, 1, 1] = 1
         else
-            C[1, 1, 1] = _invsqrt2
-            C[2, 2, 1] = c.isodd ? -_invsqrt2 : _invsqrt2
+            C[1, 1, 1] = T(sqrt(2) / 2)
+            C[2, 2, 1] = c.isodd ? -C[1, 1, 1] : C[1, 1, 1]
         end
     elseif a.j == 0
         C[1, 1, 1] = 1
