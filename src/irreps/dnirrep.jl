@@ -65,19 +65,6 @@ function Base.show(io::IO, a::DNIrrep)
     print(io, "(", a.j, ", ", a.isodd, ")")
     return nothing
 end
-function Base.show(io::IO, ::MIME"text/plain", a::DNIrrep{N}) where {N}
-    print_type = get(io, :typeinfo, nothing) !== typeof(a)
-    print_type && print(io, type_repr(typeof(a)), "(")
-    print(io, '"')
-    if a.isodd
-        print(io, '-')
-    elseif a.j == 0 || (iseven(N) && a.j == N >> 1)
-        print(io, '+')
-    end
-    print(io, a.j, '"')
-    print_type && print(io, ")")
-    return nothing
-end
 
 # Sector iterator
 # ---------------
