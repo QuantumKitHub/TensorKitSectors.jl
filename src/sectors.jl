@@ -272,7 +272,7 @@ function Base.:&(f::F, g::G) where {F <: MultiFusionStyle, G <: FusionStyle}
         return SimpleMultiFusion()
     elseif g isa SimpleFusion # f isa UniqueMultiFusion
         return SimpleMultiFusion()
-    else 
+    else
         return UniqueMultiFusion()
     end
 end
