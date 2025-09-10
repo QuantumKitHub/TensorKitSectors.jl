@@ -110,6 +110,14 @@ See also [`leftone`](@ref) and [`Base.one`](@ref).
 rightone(a::Sector) = one(a)
 
 """
+    allones(I::Type{<:Sector}) -> Tuple{I}
+
+Return a tuple with all unit elements of the sector type `I`.
+For fusion categories, this will contain only one element.
+"""
+allones(I::Type{<:Sector}) = (one(I),)
+
+"""
     dual(a::Sector) -> Sector
 
 Return the conjugate label `conj(a)`.
