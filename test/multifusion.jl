@@ -4,6 +4,10 @@ Istr = TensorKitSectors.type_repr(I)
     @testset "Basic type properties" begin
         @test eval(Meta.parse(sprint(show, I))) == I
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
+
+        @test MultiFusionStyle(I) isa MultiplicityFreeMultiFusion
+        @test MultiFusionStyle(I) & GenericFusion() isa GenericMultiFusion
+        @test MultiFusionStyle(I) & SimpleFusion() == SimpleFusion() & MultiFusionStyle(I)
     end
 
     M = IsingBimodule(1, 2, 0)
