@@ -262,9 +262,10 @@ Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
 
 # combine fusion properties of tensor products between fusion and multifusion sectors
 # lift FusionStyle to MultiFusionStyle
-Base.:&(f::F, ::G) where {F <: MultiFusionStyle, G <: FusionStyle} = f
 
-function Base.:&(f::MultiFusionStyle, g::FusionStyle)
+Base.:&(g::G, f::F) where {F <: MultiFusionStyle, G <: FusionStyle} = f & g
+
+function Base.:&(f::F, g::G) where {F <: MultiFusionStyle, G <: FusionStyle}
     if f isa GenericMultiFusion || g isa GenericFusion
         return GenericMultiFusion()
     elseif f isa SimpleMultiFusion # g isa MultiplicityFreeFusion
