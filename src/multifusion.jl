@@ -54,7 +54,7 @@ function Base.convert(::Type{IsingAnyon}, a::IsingBimodule) # identify RepZ2 ⊕
     return IsingAnyon(a.label == 0 ? :I : :ψ)
 end
 
-FusionStyle(::Type{IsingBimodule}) = SimpleFusion() # no multiplicities
+MultiFusionStyle(::Type{IsingBimodule}) = SimpleMultiFusion() # no multiplicities
 BraidingStyle(::Type{IsingBimodule}) = NoBraiding() # because of module categories
 
 function Nsymbol(a::IsingBimodule, b::IsingBimodule, c::IsingBimodule)
@@ -90,6 +90,8 @@ Base.isone(a::IsingBimodule) = leftone(a) == a == rightone(a)
 function Base.one(::Type{IsingBimodule})
     throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
 end
+
+allones(::Type{IsingBimodule}) = (IsingBimodule(1, 1, 0), IsingBimodule(2, 2, 0))
 
 function Base.isless(a::IsingBimodule, b::IsingBimodule)
     return isless((a.col, a.row, a.label), (b.col, b.row, b.label))
