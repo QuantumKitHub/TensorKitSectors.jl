@@ -220,6 +220,54 @@ Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
 Base.:&(::GenericFusion, ::UniqueFusion) = GenericFusion()
 Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
+# similar, but for multifusion categories
+"""
+    MultiFusionStyle(::Sector)
+    MultiFusionStyle(I::Type{<:Sector})
+
+Trait to describe the fusion behavior of multifusion sectors of type `I`,
+which is based on the most general fusion behavior of the subcategories in
+the multifusion category. For all allowed fusions, the following types are possible:
+*   `UniqueMultiFusion()`: single fusion output;
+*   `SimpleMultiFusion()`: multiple outputs, but every output occurs at most once;
+*   `GenericMultiFusion()`: multiple outputs that can occur more than once.
+
+There is a type alias `MultiplicityFreeMultiFusion`
+for those fusion types which do not require muliplicity labels, i.e.
+`MultiplicityFreeMultiFusion = Union{UniqueMultiFusion,SimpleMultiFusion}`.
+"""
+abstract type MultiFusionStyle end
+MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
+
+struct UniqueMultiFusion <: MultiFusionStyle end
+struct SimpleMultiFusion <: MultiFusionStyle end
+struct GenericMultiFusion <: MultiFusionStyle end
+const MultiplicityFreeMultiFusion = Union{UniqueMultiFusion, SimpleMultiFusion}
+
+# combine fusion properties of tensor products of multifusion sectors
+Base.:&(f::F, ::F) where {F <: MultiFusionStyle} = f
+Base.:&(f₁::MultiFusionStyle, f₂::MultiFusionStyle) = f₂ & f₁
+
+Base.:&(::SimpleMultiFusion, ::UniqueMultiFusion) = SimpleMultiFusion()
+Base.:&(::GenericMultiFusion, ::UniqueMultiFusion) = GenericMultiFusion()
+Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
+
+# combine fusion properties of tensor products between fusion and multifusion sectors
+# lift FusionStyle to MultiFusionStyle
+Base.:&(f::F, ::G) where {F <: MultiFusionStyle, G <: FusionStyle} = f
+
+function Base.:&(f::MultiFusionStyle, g::FusionStyle)
+    if f isa GenericMultiFusion || g isa GenericFusion
+        return GenericMultiFusion()
+    elseif f isa SimpleMultiFusion # g isa MultiplicityFreeFusion
+        return SimpleMultiFusion()
+    elseif g isa SimpleFusion # f isa UniqueMultiFusion
+        return SimpleMultiFusion()
+    else 
+        return UniqueMultiFusion()
+    end
+end
+
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
 
