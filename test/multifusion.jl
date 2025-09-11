@@ -4,6 +4,9 @@ Istr = TensorKitSectors.type_repr(I)
     @testset "Basic type properties" begin
         @test eval(Meta.parse(sprint(show, I))) == I
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
+
+        @test MultiFusionStyle(I) & UniqueFusion() isa GenericMultiFusion
+        @test MultiFusionStyle(I) & FusionStyle(I) == FusionStyle(I) & MultiFusionStyle(I)
     end
 
     M = IsingBimodule(1, 2, 0)
@@ -26,6 +29,9 @@ Istr = TensorKitSectors.type_repr(I)
         @test @constinferred(isone(C0))
         @test isone(D0)
         @test !isone(C1) && !isone(D1) && !isone(M) && !isone(Mop)
+
+        @test length(allones(I)) == 2
+        @test allones(I) == (C0, D0)
 
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))

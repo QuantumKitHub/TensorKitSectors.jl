@@ -12,6 +12,7 @@ Istr = TKS.type_repr(I)
     @constinferred Nsymbol(s...)
     B = @constinferred Bsymbol(s...)
     F = @constinferred Fsymbol(s..., s...)
+    @test MultiFusionStyle(I) & FusionStyle(I) isa SimpleMultiFusion
     if BraidingStyle(I) isa HasBraiding
         R = @constinferred Rsymbol(s...)
         if FusionStyle(I) === SimpleFusion()
@@ -40,6 +41,7 @@ end
         i >= 10 && break
     end
     @test one(I) == first(values(I))
+    @test length(allones(I)) == 1
     @test (@constinferred findindex(values(I), one(I))) == 1
     for s in smallset(I)
         @test (@constinferred values(I)[findindex(values(I), s)]) == s

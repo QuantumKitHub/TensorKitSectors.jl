@@ -110,6 +110,14 @@ See also [`leftone`](@ref) and [`Base.one`](@ref).
 rightone(a::Sector) = one(a)
 
 """
+    allones(I::Type{<:Sector}) -> Tuple{I}
+
+Return a tuple with all units of the sector type `I`.
+For fusion categories, this will contain only one element.
+"""
+allones(I::Type{<:Sector}) = (one(I),)
+
+"""
     dual(a::Sector) -> Sector
 
 Return the conjugate label `conj(a)`.
@@ -219,6 +227,37 @@ Base.:&(f₁::FusionStyle, f₂::FusionStyle) = f₂ & f₁
 Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
 Base.:&(::GenericFusion, ::UniqueFusion) = GenericFusion()
 Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
+
+# similar, but for multifusion categories
+"""
+    MultiFusionStyle(::Sector)
+    MultiFusionStyle(I::Type{<:Sector})
+
+Trait to describe the semisimplicity of the unit sector of type `I`.
+This can be either
+*   `SimpleMultiFusion()`: the unit is simple (e.g. fusion categories);
+*   `GenericMultiFusion()`: the unit is semisimple.
+"""
+abstract type MultiFusionStyle end
+MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
+
+struct SimpleMultiFusion <: MultiFusionStyle end
+struct GenericMultiFusion <: MultiFusionStyle end
+
+MultiFusionStyle(::Type{<:Sector}) = SimpleMultiFusion() # default is simple unit
+
+# combine fusion properties of tensor products of multifusion sectors
+Base.:&(f::F, ::F) where {F <: MultiFusionStyle} = f
+Base.:&(f₁::MultiFusionStyle, f₂::MultiFusionStyle) = f₂ & f₁
+
+Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
+
+# combine fusion properties of tensor products between fusion and multifusion sectors
+Base.:&(g::G, f::F) where {F <: MultiFusionStyle, G <: FusionStyle} = f & g
+
+function Base.:&(::F, ::G) where {F <: MultiFusionStyle, G <: FusionStyle}
+    return F == GenericMultiFusion ? GenericMultiFusion() : SimpleMultiFusion()
+end
 
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
