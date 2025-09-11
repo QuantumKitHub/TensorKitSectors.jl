@@ -112,7 +112,7 @@ rightone(a::Sector) = one(a)
 """
     allones(I::Type{<:Sector}) -> Tuple{I}
 
-Return a tuple with all unit elements of the sector type `I`.
+Return a tuple with all units of the sector type `I`.
 For fusion categories, this will contain only one element.
 """
 allones(I::Type{<:Sector}) = (one(I),)
@@ -233,16 +233,10 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
     MultiFusionStyle(::Sector)
     MultiFusionStyle(I::Type{<:Sector})
 
-Trait to describe the fusion behavior of multifusion sectors of type `I`,
-which is based on the most general fusion behavior of the subcategories in
-the multifusion category. For all allowed fusions, the following types are possible:
-*   `UniqueMultiFusion()`: single fusion output;
-*   `SimpleMultiFusion()`: multiple outputs, but every output occurs at most once;
-*   `GenericMultiFusion()`: multiple outputs that can occur more than once.
-
-There is a type alias `MultiplicityFreeMultiFusion`
-for those fusion types which do not require muliplicity labels, i.e.
-`MultiplicityFreeMultiFusion = Union{UniqueMultiFusion,SimpleMultiFusion}`.
+Trait to describe the semisimplicity of the unit sector of type `I`.
+This can be either
+*   `SimpleMultiFusion()`: the unit is simple (e.g. fusion categories);
+*   `GenericMultiFusion()`: the unit is semisimple.
 """
 abstract type MultiFusionStyle end
 MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
