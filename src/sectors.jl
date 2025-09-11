@@ -247,34 +247,22 @@ for those fusion types which do not require muliplicity labels, i.e.
 abstract type MultiFusionStyle end
 MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
 
-struct UniqueMultiFusion <: MultiFusionStyle end
 struct SimpleMultiFusion <: MultiFusionStyle end
 struct GenericMultiFusion <: MultiFusionStyle end
-const MultiplicityFreeMultiFusion = Union{UniqueMultiFusion, SimpleMultiFusion}
+
+MultiFusionStyle(::Type{<:Sector}) = SimpleMultiFusion() # default is simple unit
 
 # combine fusion properties of tensor products of multifusion sectors
 Base.:&(f::F, ::F) where {F <: MultiFusionStyle} = f
 Base.:&(f₁::MultiFusionStyle, f₂::MultiFusionStyle) = f₂ & f₁
 
-Base.:&(::SimpleMultiFusion, ::UniqueMultiFusion) = SimpleMultiFusion()
-Base.:&(::GenericMultiFusion, ::UniqueMultiFusion) = GenericMultiFusion()
 Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
 
 # combine fusion properties of tensor products between fusion and multifusion sectors
-# lift FusionStyle to MultiFusionStyle
-
 Base.:&(g::G, f::F) where {F <: MultiFusionStyle, G <: FusionStyle} = f & g
 
-function Base.:&(f::F, g::G) where {F <: MultiFusionStyle, G <: FusionStyle}
-    if f isa GenericMultiFusion || g isa GenericFusion
-        return GenericMultiFusion()
-    elseif f isa SimpleMultiFusion # g isa MultiplicityFreeFusion
-        return SimpleMultiFusion()
-    elseif g isa SimpleFusion # f isa UniqueMultiFusion
-        return SimpleMultiFusion()
-    else
-        return UniqueMultiFusion()
-    end
+function Base.:&(::F, ::G) where {F <: MultiFusionStyle, G <: FusionStyle}
+    return F == GenericMultiFusion ? GenericMultiFusion() : SimpleMultiFusion()
 end
 
 """
