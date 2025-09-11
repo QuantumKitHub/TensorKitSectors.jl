@@ -54,7 +54,8 @@ function Base.convert(::Type{IsingAnyon}, a::IsingBimodule) # identify RepZ2 ⊕
     return IsingAnyon(a.label == 0 ? :I : :ψ)
 end
 
-MultiFusionStyle(::Type{IsingBimodule}) = SimpleMultiFusion() # no multiplicities
+FusionStyle(::Type{IsingBimodule}) = SimpleFusion() # no multiplicities
+MultiFusionStyle(::Type{IsingBimodule}) = GenericMultiFusion() # multiple units
 BraidingStyle(::Type{IsingBimodule}) = NoBraiding() # because of module categories
 
 function Nsymbol(a::IsingBimodule, b::IsingBimodule, c::IsingBimodule)
