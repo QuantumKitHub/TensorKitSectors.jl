@@ -12,7 +12,6 @@ Istr = TKS.type_repr(I)
     @constinferred Nsymbol(s...)
     B = @constinferred Bsymbol(s...)
     F = @constinferred Fsymbol(s..., s...)
-    @test MultiFusionStyle(I) & FusionStyle(I) isa SimpleMultiFusion
     if BraidingStyle(I) isa HasBraiding
         R = @constinferred Rsymbol(s...)
         if FusionStyle(I) === SimpleFusion()

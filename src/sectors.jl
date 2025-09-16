@@ -252,13 +252,6 @@ Base.:&(f₁::MultiFusionStyle, f₂::MultiFusionStyle) = f₂ & f₁
 
 Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
 
-# combine fusion properties of tensor products between fusion and multifusion sectors
-Base.:&(g::G, f::F) where {F <: MultiFusionStyle, G <: FusionStyle} = f & g
-
-function Base.:&(::F, ::G) where {F <: MultiFusionStyle, G <: FusionStyle}
-    return F == GenericMultiFusion ? GenericMultiFusion() : SimpleMultiFusion()
-end
-
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
 

@@ -5,9 +5,6 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(sprint(show, I))) == I
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
 
-        @test MultiFusionStyle(I) & UniqueFusion() isa GenericMultiFusion
-        @test MultiFusionStyle(I) & FusionStyle(I) == FusionStyle(I) & MultiFusionStyle(I)
-
         prodsec = I ⊠ Z2Irrep
         @test MultiFusionStyle(prodsec) isa GenericMultiFusion
         @test FusionStyle(prodsec) isa SimpleFusion
