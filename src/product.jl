@@ -62,7 +62,7 @@ end
 
 function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
     reduce(&, map(UnitStyle, _sectors(T))) == GenericUnit() &&
-        throw(DomainError(ProductSector{T}, "ProductSector $T has multiple units, use `allunits` instead of `one`"))
+        throw(DomainError(ProductSector{T}, "ProductSector $T has multiple units, use `allunits` instead of `unit`"))
 
     return only(allunits(ProductSector{T}))
 end

@@ -5,7 +5,7 @@ Istr = TKS.type_repr(I)
     @test eval(Meta.parse(TKS.type_repr(I))) == I
     @test eval(Meta.parse(sprint(show, s[1]))) == s[1]
     @test @constinferred(hash(s[1])) == hash(deepcopy(s[1]))
-    @test @constinferred(one(s[1])) == @constinferred(one(I))
+    @test @constinferred(unit(s[1])) == @constinferred(unit(I))
     @constinferred dual(s[1])
     @constinferred dim(s[1])
     @constinferred frobeniusschur(s[1])
@@ -31,7 +31,7 @@ Istr = TKS.type_repr(I)
 end
 @testset "Sector $Istr: Value iterator" begin
     @test eltype(values(I)) == I
-    sprev = one(I)
+    sprev = unit(I)
     for (i, s) in enumerate(values(I))
         @test !isless(s, sprev) # confirm compatibility with sort order
         @test s == @constinferred (values(I)[i])
@@ -39,9 +39,9 @@ end
         sprev = s
         i >= 10 && break
     end
-    @test one(I) == first(values(I))
+    @test unit(I) == first(values(I))
     @test length(allunits(I)) == 1
-    @test (@constinferred findindex(values(I), one(I))) == 1
+    @test (@constinferred findindex(values(I), unit(I))) == 1
     for s in smallset(I)
         @test (@constinferred values(I)[findindex(values(I), s)]) == s
     end

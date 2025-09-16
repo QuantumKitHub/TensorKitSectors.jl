@@ -88,7 +88,7 @@ end
 Base.isone(a::IsingBimodule) = leftunit(a) == a == rightunit(a)
 
 function unit(::Type{IsingBimodule})
-    throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
+    throw(ArgumentError("unit of Type IsingBimodule doesn't exist"))
 end
 
 allunits(::Type{IsingBimodule}) = (IsingBimodule(1, 1, 0), IsingBimodule(2, 2, 0))

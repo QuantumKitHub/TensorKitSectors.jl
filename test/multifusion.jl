@@ -50,7 +50,7 @@ Istr = TensorKitSectors.type_repr(I)
 
     @testset "$Istr: Value iterator" begin
         @test eltype(values(I)) == I
-        @test_throws ArgumentError one(I)
+        @test_throws ArgumentError unit(I)
         sprev = C0 # first in SectorValues
         for (i, s) in enumerate(values(I))
             @test !isless(s, sprev) # confirm compatibility with sort order
@@ -71,8 +71,8 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(sprint(show, M))) == M
         @test eval(Meta.parse(sprint(show, Mop))) == Mop
         @test eval(Meta.parse(sprint(show, D))) == D
-        @test_throws DomainError one(M)
-        @test_throws DomainError one(Mop)
+        @test_throws DomainError unit(M)
+        @test_throws DomainError unit(Mop)
     end
 
     @testset "$Istr Fusion rules and F-symbols" begin
@@ -88,7 +88,7 @@ Istr = TensorKitSectors.type_repr(I)
             @test !isempty(⊗(obs...))
         end
 
-        @test Nsymbol(C, C, one(C)) == Nsymbol(D, D, one(D)) == 1
+        @test Nsymbol(C, C, unit(C)) == Nsymbol(D, D, unit(D)) == 1
         @test Nsymbol(C, M, M) == Nsymbol(Mop, C, Mop) == 1
         @test Nsymbol(M, D, M) == Nsymbol(D, Mop, Mop) == 1
 
