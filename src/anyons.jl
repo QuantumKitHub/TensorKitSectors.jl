@@ -21,7 +21,6 @@ end
 findindex(::SectorValues{PlanarTrivial}, c::PlanarTrivial) = 1
 Base.isless(::PlanarTrivial, ::PlanarTrivial) = false
 
-unit(::Type{PlanarTrivial}) = PlanarTrivial()
 allunits(::Type{PlanarTrivial}) = (PlanarTrivial(),)
 dual(::PlanarTrivial) = PlanarTrivial()
 
@@ -72,7 +71,6 @@ end
 findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isone
 
 Base.convert(::Type{FibonacciAnyon}, s::Symbol) = FibonacciAnyon(s)
-unit(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
 allunits(::Type{FibonacciAnyon}) = (FibonacciAnyon(:I),)
 dual(s::FibonacciAnyon) = s
 
