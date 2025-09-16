@@ -25,7 +25,7 @@ end
 Base.convert(::Type{NewSU2Irrep}, j::Real) = NewSU2Irrep(j)
 
 const _su2one = NewSU2Irrep(zero(HalfInt))
-unit(::Type{NewSU2Irrep}) = _su2one
+allunits(::Type{NewSU2Irrep}) = (_su2one,)
 dual(s::NewSU2Irrep) = s
 function ⊗(s1::NewSU2Irrep, s2::NewSU2Irrep)
     return SectorSet{NewSU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))
