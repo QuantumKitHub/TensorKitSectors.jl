@@ -6,7 +6,7 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
 
         prodsec = I ⊠ Z2Irrep
-        @test MultiFusionStyle(prodsec) isa GenericMultiFusion
+        @test UnitStyle(prodsec) isa GenericUnit
         @test FusionStyle(prodsec) isa SimpleFusion
         @test_throws DomainError unit(prodsec)
         @test length(allunits(prodsec)) == 2

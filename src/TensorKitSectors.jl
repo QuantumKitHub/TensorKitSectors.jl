@@ -11,7 +11,7 @@ export dim, sqrtdim, invsqrtdim, frobeniusschur, twist, fusiontensor, dual
 export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
     MultiplicityFreeFusion
-export MultiFusionStyle, SimpleMultiFusion, GenericMultiFusion
+export UnitStyle, SimpleUnit, GenericUnit
 export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
 export SectorSet, SectorValues, findindex
 export unit, rightunit, leftunit, allunits

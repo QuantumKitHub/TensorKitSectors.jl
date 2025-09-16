@@ -234,27 +234,27 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
 # similar, but for multifusion categories
 """
-    MultiFusionStyle(::Sector)
-    MultiFusionStyle(I::Type{<:Sector})
+    UnitStyle(::Sector)
+    UnitStyle(I::Type{<:Sector})
 
 Trait to describe the semisimplicity of the unit sector of type `I`.
 This can be either
-*   `SimpleMultiFusion()`: the unit is simple (e.g. fusion categories);
-*   `GenericMultiFusion()`: the unit is semisimple.
+*   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
+*   `GenericUnit()`: the unit is semisimple.
 """
-abstract type MultiFusionStyle end #TODO: rename
-MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
+abstract type UnitStyle end #TODO: rename
+UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
-struct SimpleMultiFusion <: MultiFusionStyle end
-struct GenericMultiFusion <: MultiFusionStyle end
+struct SimpleUnit <: UnitStyle end
+struct GenericUnit <: UnitStyle end
 
-MultiFusionStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleMultiFusion() : GenericMultiFusion()
+UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
 # combine fusion properties of tensor products of multifusion sectors
-Base.:&(f::F, ::F) where {F <: MultiFusionStyle} = f
-Base.:&(f₁::MultiFusionStyle, f₂::MultiFusionStyle) = f₂ & f₁
+Base.:&(f::F, ::F) where {F <: UnitStyle} = f
+Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
 
-Base.:&(::GenericMultiFusion, ::SimpleMultiFusion) = GenericMultiFusion()
+Base.:&(::GenericUnit, ::SimpleUnit) = GenericUnit()
 
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}

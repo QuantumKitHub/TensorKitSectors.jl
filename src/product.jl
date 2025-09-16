@@ -61,7 +61,7 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
 end
 
 function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    reduce(&, map(MultiFusionStyle, _sectors(T))) == GenericMultiFusion() &&
+    reduce(&, map(UnitStyle, _sectors(T))) == GenericUnit() &&
         throw(DomainError(ProductSector{T}, "ProductSector $T has multiple units, use `allunits` instead of `one`"))
 
     return only(allunits(ProductSector{T}))
@@ -213,8 +213,8 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(FusionStyle, _sectors(T))...)
 end
-function MultiFusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(MultiFusionStyle, _sectors(T))...)
+function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return Base.:&(map(UnitStyle, _sectors(T))...)
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(BraidingStyle, _sectors(T))...)
