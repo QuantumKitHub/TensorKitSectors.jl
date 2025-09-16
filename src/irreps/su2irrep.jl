@@ -31,6 +31,7 @@ Base.convert(::Type{SU2Irrep}, j::Real) = SU2Irrep(j)
 
 const _su2one = SU2Irrep(zero(HalfInt))
 Base.one(::Type{SU2Irrep}) = _su2one
+allones(::Type{SU2Irrep}) = (_su2one,)
 Base.conj(s::SU2Irrep) = s
 ⊗(s1::SU2Irrep, s2::SU2Irrep) = SectorSet{SU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))
 

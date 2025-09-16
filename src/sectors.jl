@@ -91,7 +91,7 @@ end
 
 Return the unit element within this type of sector.
 """
-Base.one(a::Sector) = one(typeof(a))
+Base.one(a::Sector) = only(allones(typeof(a))) #TODO: add for type
 
 """
     leftone(a::Sector) -> Sector
@@ -115,7 +115,7 @@ rightone(a::Sector) = one(a)
 Return a tuple with all units of the sector type `I`.
 For fusion categories, this will contain only one element.
 """
-allones(I::Type{<:Sector}) = (one(I),)
+allones(I::Type{<:Sector}) = (one(I),) # do we need/want this fallback? or change it to evaluate a sector?
 
 """
     dual(a::Sector) -> Sector

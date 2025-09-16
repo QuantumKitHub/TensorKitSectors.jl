@@ -35,6 +35,7 @@ BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
 cocycle(a::I, b::I, c::I) where {I <: AbstractGroupElement} = 1
 ⊗(a::I, b::I) where {I <: AbstractGroupElement} = (a * b,)
 Base.one(a::AbstractGroupElement) = one(typeof(a))
+allones(a::Type{<:AbstractGroupElement}) = (one(a),)
 Base.conj(a::AbstractGroupElement) = inv(a)
 Nsymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement} = c == a * b
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbstractGroupElement}
@@ -125,6 +126,7 @@ const Z3Element{p} = ZNElement{3, p}
 const Z4Element{p} = ZNElement{4, p}
 
 Base.one(::Type{Z}) where {Z <: ZNElement} = Z(0)
+allones(::Type{Z}) where {Z <: ZNElement} = (Z(0),)
 Base.inv(c::ZNElement) = typeof(c)(-c.n)
 Base.:*(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} =
     ZNElement{N, p}(mod(c1.n + c2.n, N))
