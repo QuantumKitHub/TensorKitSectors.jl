@@ -7,6 +7,10 @@ Istr = TensorKitSectors.type_repr(I)
 
         @test MultiFusionStyle(I) & UniqueFusion() isa GenericMultiFusion
         @test MultiFusionStyle(I) & FusionStyle(I) == FusionStyle(I) & MultiFusionStyle(I)
+
+        prodsec = I ⊠ Z2Irrep
+        @test MultiFusionStyle(prodsec) isa GenericMultiFusion
+        @test FusionStyle(prodsec) isa SimpleFusion
     end
 
     M = IsingBimodule(1, 2, 0)

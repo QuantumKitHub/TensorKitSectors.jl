@@ -203,6 +203,9 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(FusionStyle, _sectors(T))...)
 end
+function MultiFusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return Base.:&(map(MultiFusionStyle, _sectors(T))...)
+end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(BraidingStyle, _sectors(T))...)
 end
