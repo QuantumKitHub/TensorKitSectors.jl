@@ -82,7 +82,7 @@ leftone(a::IsingBimodule) = IsingBimodule(a.row, a.row, 0)
 
 function Base.one(a::IsingBimodule)
     a.row == a.col ||
-        throw(DomainError("unit of module category ($(a.row), $(a.col)) doesn't exist"))
+        throw(DomainError(a, "unit of module category ($(a.row), $(a.col)) doesn't exist"))
     return IsingBimodule(a.row, a.col, 0)
 end
 
