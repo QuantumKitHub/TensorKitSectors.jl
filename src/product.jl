@@ -67,12 +67,8 @@ function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg
     return only(allunits(ProductSector{T}))
 end
 function allunits(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    head, rest = Base.tuple_type_head(T), Base.tuple_type_tail(T)
-    if rest == Tuple{}
-        return allunits(head)
-    else
-        return (h ⊠ r for h in allunits(head), r in allunits(ProductSector{rest})) |> Tuple
-    end
+    iterators = map(allunits, _sectors(T))
+    return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
 end
 
 dual(p::ProductSector) = ProductSector(map(conj, p.sectors))
