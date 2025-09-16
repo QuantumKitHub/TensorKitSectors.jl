@@ -245,7 +245,7 @@ MultiFusionStyle(a::Sector) = MultiFusionStyle(typeof(a))
 struct SimpleMultiFusion <: MultiFusionStyle end
 struct GenericMultiFusion <: MultiFusionStyle end
 
-MultiFusionStyle(::Type{<:Sector}) = SimpleMultiFusion() # default is simple unit
+MultiFusionStyle(::Type{I}) where {I<:Sector} = length(allones(I)) == 1 ? SimpleMultiFusion() : GenericMultiFusion()
 
 # combine fusion properties of tensor products of multifusion sectors
 Base.:&(f::F, ::F) where {F <: MultiFusionStyle} = f
