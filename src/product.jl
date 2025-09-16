@@ -60,9 +60,19 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
     return ProductSector{T}(convert(T, t))
 end
 
-Base.one(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I}} = ProductSector((one(I),))
 function Base.one(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    return one(I) ⊠ one(ProductSector{Base.tuple_type_tail(T)})
+    reduce(&, map(MultiFusionStyle, _sectors(T))) == GenericMultiFusion() &&
+        throw(DomainError(ProductSector{T}, "ProductSector $T has multiple units, use `allones` instead of `one`"))
+
+    return only(allones(ProductSector{T}))
+end
+function allones(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
+    head, rest = Base.tuple_type_head(T), Base.tuple_type_tail(T)
+    if rest == Tuple{}
+        return allones(head)
+    else
+        return (h ⊠ r for h in allones(head), r in allones(ProductSector{rest})) |> Tuple
+    end
 end
 
 Base.conj(p::ProductSector) = ProductSector(map(conj, p.sectors))

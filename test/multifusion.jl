@@ -8,6 +8,8 @@ Istr = TensorKitSectors.type_repr(I)
         prodsec = I ⊠ Z2Irrep
         @test MultiFusionStyle(prodsec) isa GenericMultiFusion
         @test FusionStyle(prodsec) isa SimpleFusion
+        @test_throws DomainError one(prodsec)
+        @test length(allones(prodsec)) == 2
     end
 
     M = IsingBimodule(1, 2, 0)
