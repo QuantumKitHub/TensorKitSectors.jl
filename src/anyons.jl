@@ -193,7 +193,6 @@ function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
 end
 
 Base.convert(::Type{IsingAnyon}, s::Symbol) = IsingAnyon(s)
-Base.one(::Type{IsingAnyon}) = IsingAnyon(:I)
 allones(::Type{IsingAnyon}) = (IsingAnyon(:I),)
 Base.conj(s::IsingAnyon) = s
 

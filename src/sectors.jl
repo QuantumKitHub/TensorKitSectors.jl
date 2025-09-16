@@ -91,7 +91,8 @@ end
 
 Return the unit element within this type of sector.
 """
-Base.one(a::Sector) = only(allones(typeof(a))) #TODO: add for type
+Base.one(a::Sector) = only(allones(typeof(a)))
+Base.one(::Type{I}) where {I <: Sector} = only(allones(I))
 
 """
     leftone(a::Sector) -> Sector

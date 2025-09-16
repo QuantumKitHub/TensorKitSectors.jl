@@ -28,7 +28,6 @@ function Base.getindex(::SectorValues{FermionParity}, i::Int)
 end
 findindex(::SectorValues{FermionParity}, f::FermionParity) = f.isodd ? 2 : 1
 
-Base.one(::Type{FermionParity}) = FermionParity(false)
 allones(::Type{FermionParity}) = (FermionParity(false),)
 Base.conj(f::FermionParity) = f
 dim(f::FermionParity) = 1
