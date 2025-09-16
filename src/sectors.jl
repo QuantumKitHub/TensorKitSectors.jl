@@ -6,7 +6,7 @@ and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a 
 compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
 
 Every new `I<:Sector` should implement the following methods:
-*   `unit(::Type{I})`: unit element of `I` #TODO: change to allunits
+*   `allunits(::Type{I})`: collection of unit elements of `I`
 *   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
 *   `⊗(a::I, b::I)`: iterable with unique fusion outputs of ``a ⊗ b``
     (i.e. don't repeat in case of multiplicities)
@@ -85,6 +85,14 @@ function findindex(v::SectorValues{I}, c::I) where {I <: Sector}
     throw(ArgumentError(lazy"Cannot locate sector $c"))
 end
 
+
+"""
+    allunits(I::Type{<:Sector}) -> Tuple{I}
+
+Return a tuple with all units of the sector type `I`.
+For fusion categories, this will contain only one element.
+"""
+
 """
     unit(::Sector) -> Sector
     unit(::Type{<:Sector}) -> Sector
@@ -113,13 +121,6 @@ Return the right unit element within this type of sector.
 See also [`leftunit`](@ref) and [`unit`](@ref).
 """
 rightunit(a::Sector) = unit(a)
-
-"""
-    allunits(I::Type{<:Sector}) -> Tuple{I}
-
-Return a tuple with all units of the sector type `I`.
-For fusion categories, this will contain only one element.
-"""
 
 """
     dual(a::Sector) -> Sector
@@ -289,9 +290,9 @@ function dim(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
-        abs(1 / Fsymbol(a, conj(a), a, a, leftunit(a), rightunit(a)))
+        abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
-        abs(1 / Fsymbol(a, conj(a), a, a, leftunit(a), rightunit(a))[1])
+        abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
@@ -304,9 +305,9 @@ Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
-        sign(Fsymbol(a, conj(a), a, a, leftunit(a), rightunit(a)))
+        sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
-        sign(Fsymbol(a, conj(a), a, a, leftunit(a), rightunit(a))[1])
+        sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
 
@@ -314,11 +315,11 @@ end
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
+            dual(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
+                dual(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
     end
@@ -555,7 +556,7 @@ function Rsymbol(
 end
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
-dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(conj(c.a))
+dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(dual(c.a))
 function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
 end
