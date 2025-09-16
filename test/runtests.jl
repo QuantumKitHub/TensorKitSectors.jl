@@ -61,7 +61,7 @@ end
         @constinferred I1 ⊠ I2
         @test typeof(a ⊠ b) == I1 ⊠ I2
 
-        @test @constinferred(length(allones(I1 ⊠ I2))) == 1
+        @test @constinferred(length(allunits(I1 ⊠ I2))) == 1
     end
     @test @constinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
     @test @constinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3

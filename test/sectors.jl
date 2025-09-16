@@ -40,7 +40,7 @@ end
         i >= 10 && break
     end
     @test one(I) == first(values(I))
-    @test length(allones(I)) == 1
+    @test length(allunits(I)) == 1
     @test (@constinferred findindex(values(I), one(I))) == 1
     for s in smallset(I)
         @test (@constinferred values(I)[findindex(values(I), s)]) == s

@@ -21,8 +21,8 @@ end
 findindex(::SectorValues{PlanarTrivial}, c::PlanarTrivial) = 1
 Base.isless(::PlanarTrivial, ::PlanarTrivial) = false
 
-Base.one(::Type{PlanarTrivial}) = PlanarTrivial()
-allones(::Type{PlanarTrivial}) = (PlanarTrivial(),)
+unit(::Type{PlanarTrivial}) = PlanarTrivial()
+allunits(::Type{PlanarTrivial}) = (PlanarTrivial(),)
 Base.conj(::PlanarTrivial) = PlanarTrivial()
 
 FusionStyle(::Type{PlanarTrivial}) = UniqueFusion()
@@ -72,8 +72,8 @@ end
 findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isone
 
 Base.convert(::Type{FibonacciAnyon}, s::Symbol) = FibonacciAnyon(s)
-Base.one(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
-allones(::Type{FibonacciAnyon}) = (FibonacciAnyon(:I),)
+unit(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
+allunits(::Type{FibonacciAnyon}) = (FibonacciAnyon(:I),)
 Base.conj(s::FibonacciAnyon) = s
 
 const _goldenratio = Float64(MathConstants.golden)
@@ -193,7 +193,7 @@ function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
 end
 
 Base.convert(::Type{IsingAnyon}, s::Symbol) = IsingAnyon(s)
-allones(::Type{IsingAnyon}) = (IsingAnyon(:I),)
+allunits(::Type{IsingAnyon}) = (IsingAnyon(:I),)
 Base.conj(s::IsingAnyon) = s
 
 dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0

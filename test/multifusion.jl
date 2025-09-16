@@ -8,8 +8,8 @@ Istr = TensorKitSectors.type_repr(I)
         prodsec = I ⊠ Z2Irrep
         @test MultiFusionStyle(prodsec) isa GenericMultiFusion
         @test FusionStyle(prodsec) isa SimpleFusion
-        @test_throws DomainError one(prodsec)
-        @test length(allones(prodsec)) == 2
+        @test_throws DomainError unit(prodsec)
+        @test length(allunits(prodsec)) == 2
     end
 
     M = IsingBimodule(1, 2, 0)
@@ -23,18 +23,18 @@ Istr = TensorKitSectors.type_repr(I)
     s = rand((M, Mop, C, D))
 
     @testset "Basic properties" begin
-        @test @constinferred(one(C1)) == @constinferred(leftone(C1)) ==
-            @constinferred(rightone(C1))
-        @test one(D1) == leftone(D1) == rightone(D1)
-        @test one(C1) == leftone(M) == rightone(Mop)
-        @test one(D1) == rightone(M) == leftone(Mop)
+        @test @constinferred(unit(C1)) == @constinferred(leftunit(C1)) ==
+            @constinferred(rightunit(C1))
+        @test unit(D1) == leftunit(D1) == rightunit(D1)
+        @test unit(C1) == leftunit(M) == rightunit(Mop)
+        @test unit(D1) == rightunit(M) == leftunit(Mop)
 
         @test @constinferred(isone(C0))
         @test isone(D0)
         @test !isone(C1) && !isone(D1) && !isone(M) && !isone(Mop)
 
-        @test length(allones(I)) == 2
-        @test allones(I) == (C0, D0)
+        @test length(allunits(I)) == 2
+        @test allunits(I) == (C0, D0)
 
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
