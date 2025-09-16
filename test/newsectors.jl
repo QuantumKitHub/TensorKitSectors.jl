@@ -13,7 +13,7 @@ using WignerSymbols
 using TensorKitSectors
 
 import TensorKitSectors: FusionStyle, BraidingStyle, Nsymbol, Fsymbol, Rsymbol, dim,
-    fusiontensor, ⊗
+    fusiontensor, ⊗, allunits, dual
 
 struct NewSU2Irrep <: Sector
     j::HalfInt
