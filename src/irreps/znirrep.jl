@@ -26,7 +26,7 @@ const Z3Irrep = ZNIrrep{3}
 const Z4Irrep = ZNIrrep{4}
 
 allunits(::Type{ZNIrrep{N}}) where {N} = (ZNIrrep{N}(0),)
-Base.conj(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
+dual(c::ZNIrrep{N}) where {N} = ZNIrrep{N}(-c.n)
 ⊗(c1::ZNIrrep{N}, c2::ZNIrrep{N}) where {N} = (ZNIrrep{N}(c1.n + c2.n),)
 
 Base.IteratorSize(::Type{SectorValues{ZNIrrep{N}}}) where {N} = HasLength()

@@ -29,7 +29,7 @@ end
 findindex(::SectorValues{FermionParity}, f::FermionParity) = f.isodd ? 2 : 1
 
 allunits(::Type{FermionParity}) = (FermionParity(false),)
-Base.conj(f::FermionParity) = f
+dual(f::FermionParity) = f
 dim(f::FermionParity) = 1
 
 FusionStyle(::Type{FermionParity}) = UniqueFusion()

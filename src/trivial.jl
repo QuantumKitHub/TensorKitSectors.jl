@@ -20,7 +20,7 @@ findindex(::SectorValues{Trivial}, c::Trivial) = 1
 
 # basic properties
 allunits(::Type{Trivial}) = (Trivial(),)
-Base.conj(::Trivial) = Trivial()
+dual(::Trivial) = Trivial()
 
 Base.isreal(::Type{Trivial}) = true
 Base.isless(::Trivial, ::Trivial) = false

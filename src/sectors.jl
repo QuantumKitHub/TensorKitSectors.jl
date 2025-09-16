@@ -6,8 +6,8 @@ and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a 
 compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
 
 Every new `I<:Sector` should implement the following methods:
-*   `unit(::Type{I})`: unit element of `I`
-*   `conj(a::I)`: ``a̅``, conjugate or dual label of ``a``
+*   `unit(::Type{I})`: unit element of `I` #TODO: change to allunits
+*   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
 *   `⊗(a::I, b::I)`: iterable with unique fusion outputs of ``a ⊗ b``
     (i.e. don't repeat in case of multiplicities)
 *   `Nsymbol(a::I, b::I, c::I)`: number of times `c` appears in `a ⊗ b`, i.e. the
@@ -124,9 +124,10 @@ For fusion categories, this will contain only one element.
 """
     dual(a::Sector) -> Sector
 
-Return the conjugate label `conj(a)`.
+Return the dual label of `a`, i.e. the unique label `a^*` such that 
+Nsymbol(a, a^*, leftunit(a)) = 1 and Nsymbol(a^*, a, rightunit(a)) = 1.
 """
-dual(a::Sector) = conj(a)
+Base.conj(a::Sector) = dual(a)
 
 """
     sectorscalartype(I::Type{<:Sector}) -> Type
@@ -554,7 +555,7 @@ function Rsymbol(
 end
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
-Base.conj(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(conj(c.a))
+dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(conj(c.a))
 function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
 end

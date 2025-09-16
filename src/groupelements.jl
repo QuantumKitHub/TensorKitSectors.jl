@@ -35,7 +35,7 @@ BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
 cocycle(a::I, b::I, c::I) where {I <: AbstractGroupElement} = 1
 ⊗(a::I, b::I) where {I <: AbstractGroupElement} = (a * b,)
 allunits(a::Type{<:AbstractGroupElement}) = (unit(a),)
-Base.conj(a::AbstractGroupElement) = inv(a)
+dual(a::AbstractGroupElement) = inv(a)
 Nsymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement} = c == a * b
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbstractGroupElement}
     ω = cocycle(a, b, c)

@@ -20,7 +20,7 @@ Base.getindex(::IrrepTable, ::Type{U₁}) = U1Irrep
 Base.convert(::Type{U1Irrep}, c::Real) = U1Irrep(c)
 
 allunits(::Type{U1Irrep}) = (U1Irrep(0),)
-Base.conj(c::U1Irrep) = U1Irrep(-c.charge)
+dual(c::U1Irrep) = U1Irrep(-c.charge)
 ⊗(c1::U1Irrep, c2::U1Irrep) = (U1Irrep(c1.charge + c2.charge),)
 
 Base.IteratorSize(::Type{SectorValues{U1Irrep}}) = IsInfinite()

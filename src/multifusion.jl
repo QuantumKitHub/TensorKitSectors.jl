@@ -74,7 +74,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: IsingBimodule}
 end
 
 # ℳ ↔ ℳop when conjugating elements within these
-Base.conj(a::IsingBimodule) = IsingBimodule(a.col, a.row, a.label)
+dual(a::IsingBimodule) = IsingBimodule(a.col, a.row, a.label)
 
 rightunit(a::IsingBimodule) = IsingBimodule(a.col, a.col, 0)
 leftunit(a::IsingBimodule) = IsingBimodule(a.row, a.row, 0)

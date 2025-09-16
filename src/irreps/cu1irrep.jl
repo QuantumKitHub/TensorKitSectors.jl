@@ -67,7 +67,7 @@ Base.convert(::Type{CU1Irrep}, j::Real) = CU1Irrep(j)
 Base.convert(::Type{CU1Irrep}, js::Tuple{Real, Int}) = CU1Irrep(js...)
 
 allunits(::Type{CU1Irrep}) = (CU1Irrep(zero(HalfInt), 0),)
-Base.conj(c::CU1Irrep) = c
+dual(c::CU1Irrep) = c
 
 struct CU1ProdIterator
     a::CU1Irrep

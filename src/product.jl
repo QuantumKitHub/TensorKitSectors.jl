@@ -75,7 +75,7 @@ function allunits(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Va
     end
 end
 
-Base.conj(p::ProductSector) = ProductSector(map(conj, p.sectors))
+dual(p::ProductSector) = ProductSector(map(conj, p.sectors))
 function ⊗(p1::P, p2::P) where {P <: ProductSector}
     if FusionStyle(P) isa UniqueFusion
         (P(first(product(map(⊗, p1.sectors, p2.sectors)...))),)

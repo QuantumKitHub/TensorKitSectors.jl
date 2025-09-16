@@ -48,7 +48,7 @@ sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
 Base.isreal(::Type{DNIrrep{N}}) where {N} = true
 
 allunits(::Type{DNIrrep{N}}) where {N} = (DNIrrep{N}(0, false),)
-Base.conj(a::DNIrrep) = a
+dual(a::DNIrrep) = a
 
 Base.hash(a::DNIrrep, h::UInt) = hash(a.data, h)
 Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
