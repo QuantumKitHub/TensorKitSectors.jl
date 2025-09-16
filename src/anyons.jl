@@ -44,7 +44,7 @@ corresponding to the trivial sector `FibonacciAnyon(:I)` and the non-trivial sec
 `FibonacciAnyon(:τ)` with fusion rules ``τ ⊗ τ = 1 ⊕ τ``.
 
 ## Fields
-- `isone::Bool`: indicates whether the sector corresponds the to trivial anyon `:I`
+- `isone::Bool`: indicates whether the sector corresponds to the trivial anyon `:I`
   (`true`), or the non-trivial anyon `:τ` (`false`).
 """
 struct FibonacciAnyon <: Sector
