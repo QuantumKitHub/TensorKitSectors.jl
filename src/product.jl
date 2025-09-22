@@ -218,10 +218,6 @@ end
 function Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(isreal, &, _sectors(T))
 end
-_isreal(::Type{Tuple{}}) = true
-function _isreal(T::Type{<:SectorTuple})
-    return isreal(Base.tuple_type_head(T)) && _isreal(Base.tuple_type_tail(T))
-end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
 
