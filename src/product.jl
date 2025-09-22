@@ -213,9 +213,11 @@ function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(BraidingStyle, &, _sectors(T)) 
+    return mapreduce(BraidingStyle, &, _sectors(T))
 end
-Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple} = _isreal(T)
+function Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(isreal, &, _sectors(T))
+end
 _isreal(::Type{Tuple{}}) = true
 function _isreal(T::Type{<:SectorTuple})
     return isreal(Base.tuple_type_head(T)) && _isreal(Base.tuple_type_tail(T))
