@@ -207,13 +207,13 @@ function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector
 end
 
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(FusionStyle, _sectors(T))...)
+    return mapreduce(FusionStyle, &, _sectors(T))
 end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(BraidingStyle, _sectors(T))...)
+    return mapreduce(BraidingStyle, &, _sectors(T)) 
 end
 Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple} = _isreal(T)
 _isreal(::Type{Tuple{}}) = true
