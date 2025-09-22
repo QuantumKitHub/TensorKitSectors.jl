@@ -13,7 +13,7 @@ using WignerSymbols
 using TensorKitSectors
 
 import TensorKitSectors: FusionStyle, BraidingStyle, Nsymbol, Fsymbol, Rsymbol, dim,
-    fusiontensor, ⊗, allunits, dual
+    fusiontensor, ⊗, unit, dual
 
 struct NewSU2Irrep <: Sector
     j::HalfInt
@@ -25,7 +25,7 @@ end
 Base.convert(::Type{NewSU2Irrep}, j::Real) = NewSU2Irrep(j)
 
 const _su2one = NewSU2Irrep(zero(HalfInt))
-allunits(::Type{NewSU2Irrep}) = (_su2one,)
+unit(::Type{NewSU2Irrep}) = _su2one
 dual(s::NewSU2Irrep) = s
 function ⊗(s1::NewSU2Irrep, s2::NewSU2Irrep)
     return SectorSet{NewSU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))

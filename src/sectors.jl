@@ -6,7 +6,8 @@ and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a 
 compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
 
 Every new `I<:Sector` should implement the following methods:
-*   `allunits(::Type{I})`: collection of unit elements of `I`
+*   `unit(::Type{I})`: unit element of `I`. If there are multiple, implement `allunits(::Type{I})`
+    instead.
 *   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
 *   `⊗(a::I, b::I)`: iterable with unique fusion outputs of ``a ⊗ b``
     (i.e. don't repeat in case of multiplicities)
@@ -92,6 +93,7 @@ end
 Return a tuple with all units of the sector type `I`.
 For fusion categories, this will contain only one element.
 """
+allunits(::Type{I}) where {I <: Sector} = (unit(I),)
 
 """
     unit(::Sector) -> Sector
@@ -99,8 +101,7 @@ For fusion categories, this will contain only one element.
 
 Return the unit element within this type of sector.
 """
-unit(a::Sector) = only(allunits(typeof(a)))
-unit(::Type{I}) where {I <: Sector} = only(allunits(I))
+unit(a::Sector) = unit(typeof(a))
 Base.one(a::Sector) = unit(a)
 Base.one(::Type{I}) where {I <: Sector} = unit(I)
 
@@ -555,6 +556,7 @@ function Rsymbol(
     return adjoint(Rsymbol(a.a, b.a, c.a))
 end
 
+unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
 allunits(::Type{TimeReversed{I}}) where {I <: Sector} = (TimeReversed{I}(u) for u in allunits(I))
 dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(dual(c.a))
 function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
