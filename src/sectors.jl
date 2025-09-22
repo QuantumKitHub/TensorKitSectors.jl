@@ -557,7 +557,7 @@ function Rsymbol(
 end
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
-allunits(::Type{TimeReversed{I}}) where {I <: Sector} = (TimeReversed{I}(u) for u in allunits(I))
+allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
 dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(dual(c.a))
 function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
