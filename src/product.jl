@@ -61,7 +61,7 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
 end
 
 function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    reduce(&, map(UnitStyle, _sectors(T))) == GenericUnit() &&
+    any(c -> UnitStyle(c) == GenericUnit(), _sectors(T)) &&
         throw(DomainError(ProductSector{T}, "ProductSector $T has multiple units, use `allunits` instead of `unit`"))
 
     return only(allunits(ProductSector{T}))
@@ -71,7 +71,7 @@ function allunits(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Va
     return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
 end
 
-dual(p::ProductSector) = ProductSector(map(conj, p.sectors))
+dual(p::ProductSector) = ProductSector(map(dual, p.sectors))
 function ⊗(p1::P, p2::P) where {P <: ProductSector}
     if FusionStyle(P) isa UniqueFusion
         (P(first(product(map(⊗, p1.sectors, p2.sectors)...))),)
@@ -210,7 +210,7 @@ function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(FusionStyle, _sectors(T))...)
 end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(UnitStyle, _sectors(T))...)
+    return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return Base.:&(map(BraidingStyle, _sectors(T))...)
