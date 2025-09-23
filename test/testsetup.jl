@@ -25,7 +25,7 @@ end
 function randsector(::Type{I}) where {I <: Sector}
     s = collect(smallset(I))
     a = rand(s)
-    while a == unit(a) # don't use trivial label
+    while isunit(a) # don't use trivial label
         a = rand(s)
     end
     return a
