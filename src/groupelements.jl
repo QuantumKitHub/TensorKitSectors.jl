@@ -18,7 +18,7 @@ For the fusion structure, a specific `SomeGroupElement<:AbstractGroupElement{Som
 should only implement the following methods
 ```julia
 Base.:*(c1::GroupElement, c2::GroupElement) -> GroupElement
-unit(::Type{GroupElement}) -> GroupElement
+Base.one(::Type{GroupElement}) -> GroupElement
 Base.inv(c::GroupElement) -> GroupElement
 # and optionally
 TensorKitSectors.cocycle(c1::GroupElement, c2::GroupElement, c3::GroupElement) -> Number
@@ -123,7 +123,8 @@ const Z2Element{p} = ZNElement{2, p}
 const Z3Element{p} = ZNElement{3, p}
 const Z4Element{p} = ZNElement{4, p}
 
-unit(::Type{Z}) where {Z <: ZNElement} = Z(0)
+unit(::Type{Z}) where {Z <: ZNElement} = one(Z)
+Base.one(::Type{Z}) where {Z <: ZNElement} = Z(0)
 Base.inv(c::ZNElement) = typeof(c)(-c.n)
 Base.:*(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} =
     ZNElement{N, p}(mod(c1.n + c2.n, N))
