@@ -66,7 +66,7 @@ function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg
 
     return only(allunits(ProductSector{T}))
 end
-function allunits(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
+function allunits(::Type{ProductSector{T}}) where {T}
     iterators = map(allunits, _sectors(T))
     return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
 end
