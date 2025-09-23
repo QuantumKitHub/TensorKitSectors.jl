@@ -43,11 +43,11 @@ corresponding to the trivial sector `FibonacciAnyon(:I)` and the non-trivial sec
 `FibonacciAnyon(:τ)` with fusion rules ``τ ⊗ τ = 1 ⊕ τ``.
 
 ## Fields
-- `isone::Bool`: indicates whether the sector corresponds to the trivial anyon `:I`
+- `isunit::Bool`: indicates whether the sector corresponds to the trivial anyon `:I`
   (`true`), or the non-trivial anyon `:τ` (`false`).
 """
 struct FibonacciAnyon <: Sector
-    isone::Bool
+    isunit::Bool
     function FibonacciAnyon(s::Symbol)
         s in (:I, :τ, :tau) || throw(ArgumentError("Unknown FibonacciAnyon $s."))
         return new(s === :I)
@@ -68,7 +68,7 @@ function Base.getindex(S::SectorValues{FibonacciAnyon}, i::Int)
         throw(BoundsError(S, i))
     end
 end
-findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isone
+findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isunit
 
 Base.convert(::Type{FibonacciAnyon}, s::Symbol) = FibonacciAnyon(s)
 unit(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
@@ -149,8 +149,8 @@ function Base.show(io::IO, a::FibonacciAnyon)
         print(io, s) : print(io, "FibonacciAnyon(", s, ")")
 end
 
-Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isone, h)
-Base.isless(a::FibonacciAnyon, b::FibonacciAnyon) = isless(!a.isone, !b.isone)
+Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isunit, h)
+Base.isless(a::FibonacciAnyon, b::FibonacciAnyon) = isless(!a.isunit, !b.isunit)
 
 # IsingAnyons
 """
