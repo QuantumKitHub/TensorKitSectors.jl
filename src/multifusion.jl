@@ -85,8 +85,6 @@ function unit(a::IsingBimodule)
     return IsingBimodule(a.row, a.col, 0)
 end
 
-Base.isone(a::IsingBimodule) = leftunit(a) == a == rightunit(a)
-
 function unit(::Type{IsingBimodule})
     throw(ArgumentError("unit of Type IsingBimodule doesn't exist"))
 end

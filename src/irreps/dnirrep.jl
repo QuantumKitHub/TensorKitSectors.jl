@@ -195,7 +195,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
     (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
 
     # tensoring with units gives 1
-    (isone(a) || isone(b) || isone(c)) && return one(T)
+    (isunit(a) || isunit(b) || isunit(c)) && return one(T)
 
     # fallback through fusiontensor
     A = fusiontensor(a, b, e)

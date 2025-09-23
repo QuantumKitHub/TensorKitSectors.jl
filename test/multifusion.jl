@@ -29,9 +29,9 @@ Istr = TensorKitSectors.type_repr(I)
         @test unit(C1) == leftunit(M) == rightunit(Mop)
         @test unit(D1) == rightunit(M) == leftunit(Mop)
 
-        @test @constinferred(isone(C0))
-        @test isone(D0)
-        @test !isone(C1) && !isone(D1) && !isone(M) && !isone(Mop)
+        @test @constinferred(isunit(C0))
+        @test isunit(D0)
+        @test !isunit(C1) && !isunit(D1) && !isunit(M) && !isunit(Mop)
 
         @test length(allunits(I)) == 2
         @test allunits(I) == (C0, D0)

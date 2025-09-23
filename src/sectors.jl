@@ -105,7 +105,19 @@ unit(a::Sector) = unit(typeof(a))
 Base.one(a::Sector) = unit(a)
 Base.one(::Type{I}) where {I <: Sector} = unit(I)
 
-#TODO: define isunit function with isone fallback?
+"""
+    isunit(::Sector) -> Bool
+
+Return whether the sector is a unit element.
+"""
+function isunit(a::Sector)
+    return if UnitStyle(a) === SimpleUnit()
+        a == unit(a)
+    else
+        leftunit(a) == a == rightunit(a)
+    end
+end
+Base.isone(a::Sector) = isunit(a)
 
 """
     leftunit(a::Sector) -> Sector

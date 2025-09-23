@@ -75,7 +75,7 @@ unit(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
 dual(s::FibonacciAnyon) = s
 
 const _goldenratio = Float64(MathConstants.golden)
-dim(a::FibonacciAnyon) = isone(a) ? one(_goldenratio) : _goldenratio
+dim(a::FibonacciAnyon) = isunit(a) ? one(_goldenratio) : _goldenratio
 
 FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
@@ -89,7 +89,7 @@ struct FibonacciIterator
 end
 Base.IteratorSize(::Type{FibonacciIterator}) = Base.HasLength()
 Base.IteratorEltype(::Type{FibonacciIterator}) = Base.HasEltype()
-Base.length(iter::FibonacciIterator) = (isone(iter.a) || isone(iter.b)) ? 1 : 2
+Base.length(iter::FibonacciIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
 Base.eltype(::Type{FibonacciIterator}) = FibonacciAnyon
 function Base.iterate(iter::FibonacciIterator, state = 1)
     I = FibonacciAnyon(:I)
@@ -107,7 +107,7 @@ function Base.iterate(iter::FibonacciIterator, state = 1)
 end
 
 function Nsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon)
-    return isone(a) + isone(b) + isone(c) != 2
+    return isunit(a) + isunit(b) + isunit(c) != 2
 end # zero if one tau and two ones
 
 function Fsymbol(
@@ -136,15 +136,15 @@ end
 
 function Rsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon)
     Nsymbol(a, b, c) || return 0 * cispi(0 / 1)
-    if isone(a) || isone(b)
+    if isunit(a) || isunit(b)
         return cispi(0 / 1)
     else
-        return isone(c) ? cispi(4 / 5) : cispi(-3 / 5)
+        return isunit(c) ? cispi(4 / 5) : cispi(-3 / 5)
     end
 end
 
 function Base.show(io::IO, a::FibonacciAnyon)
-    s = isone(a) ? ":I" : ":τ"
+    s = isunit(a) ? ":I" : ":τ"
     return get(io, :typeinfo, nothing) === FibonacciAnyon ?
         print(io, s) : print(io, "FibonacciAnyon(", s, ")")
 end
