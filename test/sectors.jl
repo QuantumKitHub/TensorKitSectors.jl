@@ -11,6 +11,7 @@ Istr = TKS.type_repr(I)
     @constinferred frobenius_schur_phase(s[1])
     @constinferred frobenius_schur_indicator(s[1])
     @constinferred Nsymbol(s...)
+    @constinferred Asymbol(s...)
     B = @constinferred Bsymbol(s...)
     F = @constinferred Fsymbol(s..., s...)
     if BraidingStyle(I) isa HasBraiding
