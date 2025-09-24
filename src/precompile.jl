@@ -25,7 +25,8 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(unit, (I,))
     precompile(allunits, (I,))
     precompile(twist, (I,))
-    precompile(frobeniusschur, (I,))
+    precompile(frobenius_schur_phase, (I,))
+    precompile(frobenius_schur_indicator, (I,))
     precompile(fusiontensor, (I, I, I))
 
     return nothing

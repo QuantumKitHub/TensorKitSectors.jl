@@ -251,4 +251,4 @@ function fusiontensor(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
     end
     return C
 end
-frobeniusschur(::CU1Irrep) = 1
+frobenius_schur_phase(::CU1Irrep) = 1

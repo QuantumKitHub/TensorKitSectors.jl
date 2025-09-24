@@ -22,7 +22,8 @@ Every new `I<:Sector` should implement the following methods:
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
 and optionally
 *   `dim(a::I)`: quantum dimension of sector `a`
-*   `frobeniusschur(a::I)`: Frobenius-Schur indicator of `a`
+*   `frobenius_schur_indicator(a::I)`: Frobenius-Schur indicator of `a` (1, 0, -1)
+*   `frobenius_schur_phase(a::I)`: Frobenius-Schur phase of `a` (±1)
 *   `Bsymbol(a::I, b::I, c::I)`: B-symbol: scalar (in case of
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
 *   `twist(a::I)` -> twist of sector `a`
@@ -316,11 +317,14 @@ sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
 
 """
-    frobeniusschur(a::Sector)
+    frobenius_schur_phase(a::Sector)
 
-Return the Frobenius-Schur indicator of a sector `a`.
+Return the Frobenius-Schur phase of a sector ``\\kappa_a ∈ {1, -1}``, which coincides with
+the Frobenius-Schur indicator if `a == dual(a)`, and can otherwise be gauged to be `1`.
+
+See also [`frobenius_schur_indicator`](@ref) for the group-theoretic version.
 """
-function frobeniusschur(a::Sector)
+function frobenius_schur_phase(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
@@ -328,15 +332,28 @@ function frobeniusschur(a::Sector)
     end
 end
 
+"""
+    frobenius_schur_indicator(a::Sector)
+
+Return the Frobenius-Schur indicator of a sector ``\\nu_a ∈ {1, 0, -1}``, which distinguishes
+between real, complex and quaternionic representations.
+
+See also [`frobenius_schur_phase`](@ref) for the category-theoretic version.
+"""
+function frobenius_schur_indicator(a::Sector)
+    ν = frobenius_schur_phase(a)
+    return a == conj(a) ? zero(ν) : ν
+end
+
 # Not necessary
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
+            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
+                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
     end
