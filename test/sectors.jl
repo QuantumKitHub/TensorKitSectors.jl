@@ -12,7 +12,7 @@ Istr = TKS.type_repr(I)
     @constinferred Nsymbol(s...)
     B = @constinferred Bsymbol(s...)
     F = @constinferred Fsymbol(s..., s...)
-    if BraidingStyle(I) isa HasBraiding
+    if hasbraiding(BraidingStyle(I))
         R = @constinferred Rsymbol(s...)
         if !hasmultiplicity(FusionStyle(I))
             @test typeof(R * F) <: @constinferred sectorscalartype(I)
@@ -45,7 +45,7 @@ end
         @test (@constinferred values(I)[findindex(values(I), s)]) == s
     end
 end
-if BraidingStyle(I) isa Bosonic && hasfusiontensor(I)
+if BraidingStyle(I) === Bosonic() && hasfusiontensor(I)
     @testset "Sector $Istr: fusion tensor and F-move and R-move" begin
         for a in smallset(I), b in smallset(I)
             for c in ⊗(a, b)
@@ -123,7 +123,7 @@ end
         @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
-if BraidingStyle(I) isa HasBraiding
+if hasbraiding(BraidingStyle(I))
     @testset "Sector $Istr: Hexagon equation" begin
         for a in smallset(I), b in smallset(I), c in smallset(I)
             @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)

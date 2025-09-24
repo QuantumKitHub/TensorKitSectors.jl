@@ -335,9 +335,11 @@ Return the type of braiding and twist behavior of sectors of type `I`, which can
 *   `Anyonic()`: general ``R_(a,b)^c`` phase or matrix (depending on `SimpleFusion` or
     `GenericFusion` fusion) and arbitrary twists
 
-Note that `Bosonic` and `Fermionic` are subtypes of `SymmetricBraiding`, which means that
-braids are in fact equivalent to crossings (i.e. braiding twice is an identity:
-`isone(Rsymbol(b,a,c)*Rsymbol(a,b,c)) == true`) and permutations are uniquely defined.
+Note that `b = Bosonic()` and `b = Fermionic()` imply `hassymmetricbraiding(b) == true`,
+such that braids are in fact equivalent to crossings (i.e. braiding twice is an identity:
+`isone(Rsymbol(b, a, c) * Rsymbol(a, b, c)) == true`) and permutations are uniquely defined.
+
+See also [`hasbraiding`](@ref) and [`hassymmetricbraiding`](@ref).
 """
 abstract type BraidingStyle end
 BraidingStyle(a::Sector) = BraidingStyle(typeof(a))
@@ -357,6 +359,25 @@ Base.:&(::Fermionic, ::Anyonic) = Anyonic()
 Base.:&(::Bosonic, ::NoBraiding) = NoBraiding()
 Base.:&(::Fermionic, ::NoBraiding) = NoBraiding()
 Base.:&(::Anyonic, ::NoBraiding) = NoBraiding()
+
+"""
+    hasbraiding(b::BraidingStyle)
+    hasbraiding(::Type{B}) where {B <: BraidingStyle}
+
+Test if braiding is allowed.
+"""
+hasbraiding(b::BraidingStyle) = b !== NoBraiding()
+hasbraiding(::Type{B}) where {B <: BraidingStyle} = hasbraiding(B())
+
+"""
+    hassymmetricbraiding(b::BraidingStyle)
+    hassymmetricbraiding(::Type{B}) where {B <: BraidingStyle}
+
+Test if braiding is symmetric, such that braiding can be safely replaced with crossings.
+In particular this requires that `inv(Rsymbol(a, b, c)) == Rsymbol(b, a, c)`.
+"""
+hassymmetricbraiding(b::BraidingStyle) = b === Bosonic() || b === Fermionic()
+hassymmetricbraiding(::Type{B}) where {B <: BraidingStyle} = hassymmetricbraiding(B())
 
 """
     Rsymbol(a::I, b::I, c::I) where {I<:Sector}
@@ -500,9 +521,8 @@ end
 struct TimeReversed{I <: Sector} <: Sector
     a::I
     function TimeReversed{I}(a::I) where {I <: Sector}
-        if BraidingStyle(I) isa NoBraiding
+        hasbraiding(BraidingStyle(I)) ||
             throw(ArgumentError("TimeReversed is not defined for sectors $I with no braiding"))
-        end
         return new{I}(a)
     end
 end

@@ -16,8 +16,6 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(⊗, (I, I, I, I))
 
     precompile(FusionStyle, (I,))
-    precompile(hasmultiplefusion, (I,))
-    precompile(hasmultiplicity, (I,))
     precompile(BraidingStyle, (I,))
 
     precompile(dim, (I,))
