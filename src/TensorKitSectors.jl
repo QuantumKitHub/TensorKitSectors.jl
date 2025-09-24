@@ -74,4 +74,8 @@ function __precompile__()
     return
 end
 
+# deprecate
+# ---------
+@deprecate frobeniusschur(a::Sector) frobenius_schur_phase(a)
+
 end # module TensorKitSectors
