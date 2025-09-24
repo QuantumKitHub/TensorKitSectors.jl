@@ -130,12 +130,12 @@ function sectorscalartype(::Type{I}) where {I <: Sector}
 end
 function _Fscalartype(::Type{I}) where {I <: Sector}
     Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
-    return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
+    return hasmultiplefusion(FusionStyle(I)) ? eltype(Ftype) : Ftype
 end
 function _Rscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
     Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-    return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
+    return hasmultiplefusion(FusionStyle(I)) ? eltype(Rtype) : Rtype
 end
 
 """
@@ -165,7 +165,7 @@ const otimes = ⊗
 # NOTE: the following inline is extremely important for performance, especially
 # in the case of UniqueFusion, because ⊗(...) is computed very often
 @inline function ⊗(a::I, b::I, c::I, rest::Vararg{I}) where {I <: Sector}
-    if FusionStyle(I) isa UniqueFusion
+    if !hasmultiplefusion(FusionStyle(I))
         return a ⊗ first(⊗(b, c, rest...))
     else
         s = Set{I}()
@@ -192,25 +192,22 @@ function Nsymbol end
     FusionStyle(I::Type{<:Sector})
 
 Trait to describe the fusion behavior of sectors of type `I`, which can be either
+
 *   `UniqueFusion()`: single fusion output when fusing two sectors;
 *   `SimpleFusion()`: multiple outputs, but every output occurs at most one,
     also known as multiplicity-free (e.g. irreps of ``SU(2)``);
 *   `GenericFusion()`: multiple outputs that can occur more than once (e.g. irreps
     of ``SU(3)``).
 
-There is an abstract supertype `MultipleFusion` of which both `SimpleFusion` and
-`GenericFusion` are subtypes. Furthermore, there is a type alias `MultiplicityFreeFusion`
-for those fusion types which do not require muliplicity labels, i.e.
-`MultiplicityFreeFusion = Union{UniqueFusion,SimpleFusion}`.
+See also [`hasmultiplefusion`](@ref) and [`hasmultiplicity`](@ref) to distinguish different
+subclasses.
 """
 abstract type FusionStyle end
 FusionStyle(a::Sector) = FusionStyle(typeof(a))
 
 struct UniqueFusion <: FusionStyle end # unique fusion output when fusing two sectors
-abstract type MultipleFusion <: FusionStyle end
-struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity free
-struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
-const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
+struct SimpleFusion <: FusionStyle end # multiple fusion but multiplicity free
+struct GenericFusion <: FusionStyle end # multiple fusion with multiplicities
 
 # combine fusion properties of tensor products of sectors
 Base.:&(f::F, ::F) where {F <: FusionStyle} = f
@@ -219,6 +216,25 @@ Base.:&(f₁::FusionStyle, f₂::FusionStyle) = f₂ & f₁
 Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
 Base.:&(::GenericFusion, ::UniqueFusion) = GenericFusion()
 Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
+
+"""
+    hasmultiplefusion(f::FusionStyle)
+    hasmultiplefusion(::Type{F}) where {F <: FusionStyle}
+
+Test if the fusion style might result in multiple outputs.
+"""
+hasmultiplefusion(f::FusionStyle) = f !== UniqueFusion()
+hasmultiplefusion(::Type{F}) where {F <: FusionStyle} = hasmultiplefusion(F())
+
+"""
+    hasmultiplicity(f::FusionStyle)
+    hasmultiplicity(::Type{F}) where {F <: FusionStyle}
+
+Test if the fusion behavior of sectors of the given type has multiplicities, i.e. has multiple
+outputs that can occur more than once.
+"""
+hasmultiplicity(f::FusionStyle) = f === GenericFusion()
+hasmultiplicity(::Type{F}) where {F <: FusionStyle} = hasmultiplicity(F())
 
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
@@ -249,16 +265,12 @@ function Fsymbol end
 Return the (quantum) dimension of the sector `a`.
 """
 function dim(a::Sector)
-    return if FusionStyle(a) isa UniqueFusion
-        1
-    elseif FusionStyle(a) isa SimpleFusion
-        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
-    else
-        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
-    end
+    hasmultiplefusion(FusionStyle(a)) || return 1
+    f = Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))
+    return hasmultiplicity(FusionStyle(a)) ? abs(1 / f[1]) : abs(1 / f)
 end
-sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
-invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
+sqrtdim(a::Sector) = hasmultiplefusion(FusionStyle(a)) ? sqrt(dim(a)) : 1
+invsqrtdim(a::Sector) = hasmultiplefusion(FusionStyle(a)) ? inv(sqrt(dim(a))) : 1
 
 """
     frobeniusschur(a::Sector)
@@ -266,16 +278,13 @@ invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a))
 Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
-    return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
-        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
-    else
-        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
-    end
+    f = Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))
+    return hasmultiplicity(FusionStyle(a)) ? sign(f[1]) : sign(f)
 end
 
 # Not necessary
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+    return if !hasmultiplicity(FusionStyle(I))
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
             conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c))
     else
@@ -302,7 +311,7 @@ number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
 function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+    return if !hasmultiplicity(FusionStyle(I))
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a))
     else
         reshape(
@@ -383,7 +392,7 @@ function triangle_equation(a::I, b::I; kwargs...) where {I <: Sector}
         F3 = Fsymbol(a, b, rightone(b), c, c, b)
 
         isapproxone(F) = isapprox(F, one(F); kwargs...)
-        if FusionStyle(I) isa MultiplicityFreeFusion
+        if !hasmultiplicity(FusionStyle(I))
             all(isapproxone, (F1, F2, F3)) || return false
         else
             N = Nsymbol(a, b, c)
@@ -401,7 +410,7 @@ function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I <: Sector
     for f in ⊗(a, b), h in ⊗(c, d)
         for g in ⊗(f, c), i in ⊗(b, h)
             for e in intersect(⊗(g, d), ⊗(a, i))
-                if FusionStyle(I) isa MultiplicityFreeFusion
+                if !hasmultiplicity(FusionStyle(I))
                     p1 = Fsymbol(f, c, d, e, g, h) * Fsymbol(a, b, h, e, f, i)
                     p2 = zero(p1)
                     for j in ⊗(b, c)
@@ -440,7 +449,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
         throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
-            if FusionStyle(I) isa MultiplicityFreeFusion
+            if !hasmultiplicity(FusionStyle(I))
                 p1 = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
                 p2 = zero(p1)
                 for g in ⊗(a, b)

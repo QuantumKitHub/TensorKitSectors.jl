@@ -14,13 +14,13 @@ Istr = TKS.type_repr(I)
     F = @constinferred Fsymbol(s..., s...)
     if BraidingStyle(I) isa HasBraiding
         R = @constinferred Rsymbol(s...)
-        if FusionStyle(I) === SimpleFusion()
+        if !hasmultiplicity(FusionStyle(I))
             @test typeof(R * F) <: @constinferred sectorscalartype(I)
         else
             @test Base.promote_op(*, eltype(R), eltype(F)) <: @constinferred sectorscalartype(I)
         end
     else
-        if FusionStyle(I) === SimpleFusion()
+        if !hasmultiplicity(FusionStyle(I))
             @test typeof(F) <: @constinferred sectorscalartype(I)
         else
             @test eltype(F) <: @constinferred sectorscalartype(I)
@@ -66,7 +66,7 @@ if BraidingStyle(I) isa Bosonic && hasfusiontensor(I)
                     Y2 = fusiontensor(a, f, d)
                     @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
                         conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
-                    if FusionStyle(I) isa MultiplicityFreeFusion
+                    if !hasmultiplicity(FusionStyle(I))
                         f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
                     else
                         f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
@@ -95,7 +95,7 @@ end
         for d in ⊗(a, b, c)
             es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
             fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
-            if FusionStyle(I) isa MultiplicityFreeFusion
+            if !hasmultiplicity(FusionStyle(I))
                 @test length(es) == length(fs)
                 F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
             else

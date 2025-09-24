@@ -67,7 +67,7 @@ end
 
 Base.conj(p::ProductSector) = ProductSector(map(conj, p.sectors))
 function ⊗(p1::P, p2::P) where {P <: ProductSector}
-    if FusionStyle(P) isa UniqueFusion
+    if !hasmultiplefusion(FusionStyle(P))
         (P(first(product(map(⊗, p1.sectors, p2.sectors)...))),)
     else
         return SectorSet{P}(product(map(⊗, p1.sectors, p2.sectors)...))
