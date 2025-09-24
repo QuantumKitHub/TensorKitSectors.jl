@@ -22,6 +22,8 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(sqrtdim, (I,))
     precompile(invsqrtdim, (I,))
     precompile(dual, (I,))
+    precompile(unit, (I,))
+    precompile(allunits, (I,))
     precompile(twist, (I,))
     precompile(frobeniusschur, (I,))
     precompile(fusiontensor, (I, I, I))
