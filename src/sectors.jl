@@ -265,6 +265,10 @@ struct GenericUnit <: UnitStyle end
 
 UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
+@noinline function throw_genericunit_error(I)
+    throw(DomainError(I, "Sector has multiple units, use `allunits` instead of `unit`"))
+end
+
 # combine fusion properties of tensor products of multifusion sectors
 Base.:&(f::F, ::F) where {F <: UnitStyle} = f
 Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁

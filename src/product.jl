@@ -60,11 +60,9 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
     return ProductSector{T}(convert(T, t))
 end
 
-function unit(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    any(c -> UnitStyle(c) == GenericUnit(), _sectors(T)) &&
-        throw(DomainError(ProductSector{T}, "ProductSector has multiple units, use `allunits` instead of `unit`"))
-
-    return only(allunits(ProductSector{T}))
+function unit(::Type{T}) where {T <: ProductSector}
+    UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
+    return only(allunits(T))
 end
 function allunits(::Type{ProductSector{T}}) where {T}
     iterators = map(allunits, _sectors(T))
