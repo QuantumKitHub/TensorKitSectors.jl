@@ -6,8 +6,9 @@ and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a 
 compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
 
 Every new `I<:Sector` should implement the following methods:
-*   `one(::Type{I})`: unit element of `I`
-*   `conj(a::I)`: ``a̅``, conjugate or dual label of ``a``
+*   `unit(::Type{I})`: unit element of `I`. If there are multiple, implement `allunits(::Type{I})`
+    instead.
+*   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
 *   `⊗(a::I, b::I)`: iterable with unique fusion outputs of ``a ⊗ b``
     (i.e. don't repeat in case of multiplicities)
 *   `Nsymbol(a::I, b::I, c::I)`: number of times `c` appears in `a ⊗ b`, i.e. the
@@ -85,36 +86,62 @@ function findindex(v::SectorValues{I}, c::I) where {I <: Sector}
     throw(ArgumentError(lazy"Cannot locate sector $c"))
 end
 
+
 """
-    one(::Sector) -> Sector
-    one(::Type{<:Sector}) -> Sector
+    allunits(I::Type{<:Sector}) -> Tuple{I}
+
+Return a tuple with all units of the sector type `I`.
+For fusion categories, this will contain only one element.
+"""
+allunits(::Type{I}) where {I <: Sector} = (unit(I),)
+
+"""
+    unit(::Sector) -> Sector
+    unit(::Type{<:Sector}) -> Sector
 
 Return the unit element within this type of sector.
 """
-Base.one(a::Sector) = one(typeof(a))
+unit(a::Sector) = unit(typeof(a))
+Base.one(a::Sector) = unit(a)
+Base.one(::Type{I}) where {I <: Sector} = unit(I)
 
 """
-    leftone(a::Sector) -> Sector
+    isunit(::Sector) -> Bool
+
+Return whether the sector is a unit element.
+"""
+function isunit(a::Sector)
+    return if UnitStyle(a) === SimpleUnit()
+        a == unit(a)
+    else
+        leftunit(a) == a == rightunit(a)
+    end
+end
+Base.isone(a::Sector) = isunit(a)
+
+"""
+    leftunit(a::Sector) -> Sector
 
 Return the left unit element within this type of sector.
-See also [`rightone`](@ref) and [`Base.one`](@ref).
+See also [`rightunit`](@ref) and [`unit`](@ref).
 """
-leftone(a::Sector) = one(a)
+leftunit(a::Sector) = unit(a)
 
 """
-    rightone(a::Sector) -> Sector
+    rightunit(a::Sector) -> Sector
 
 Return the right unit element within this type of sector.
-See also [`leftone`](@ref) and [`Base.one`](@ref).
+See also [`leftunit`](@ref) and [`unit`](@ref).
 """
-rightone(a::Sector) = one(a)
+rightunit(a::Sector) = unit(a)
 
 """
     dual(a::Sector) -> Sector
 
-Return the conjugate label `conj(a)`.
+Return the dual label of `a`, i.e. the unique label `a^*` such that 
+Nsymbol(a, a^*, leftunit(a)) = 1 and Nsymbol(a^*, a, rightunit(a)) = 1.
 """
-dual(a::Sector) = conj(a)
+Base.conj(a::Sector) = dual(a)
 
 """
     sectorscalartype(I::Type{<:Sector}) -> Type
@@ -220,6 +247,34 @@ Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
 Base.:&(::GenericFusion, ::UniqueFusion) = GenericFusion()
 Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
+# similar, but for multifusion categories
+"""
+    UnitStyle(::Sector)
+    UnitStyle(I::Type{<:Sector})
+
+Trait to describe the semisimplicity of the unit sector of type `I`.
+This can be either
+*   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
+*   `GenericUnit()`: the unit is semisimple.
+"""
+abstract type UnitStyle end #TODO: rename
+UnitStyle(a::Sector) = UnitStyle(typeof(a))
+
+struct SimpleUnit <: UnitStyle end
+struct GenericUnit <: UnitStyle end
+
+UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
+
+@noinline function throw_genericunit_error(I)
+    throw(DomainError(I, "Sector has multiple units, use `allunits` instead of `unit`"))
+end
+
+# combine fusion properties of tensor products of multifusion sectors
+Base.:&(f::F, ::F) where {F <: UnitStyle} = f
+Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
+
+Base.:&(::GenericUnit, ::SimpleUnit) = GenericUnit()
+
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
 
@@ -252,9 +307,9 @@ function dim(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
-        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
+        abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
-        abs(1 / Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
+        abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
@@ -267,9 +322,9 @@ Return the Frobenius-Schur indicator of a sector `a`.
 """
 function frobeniusschur(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
-        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a)))
+        sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
-        sign(Fsymbol(a, conj(a), a, a, leftone(a), rightone(a))[1])
+        sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
 
@@ -277,11 +332,11 @@ end
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c))
+            conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftone(a), c)),
+                conj(frobeniusschur(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
     end
@@ -303,10 +358,10 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
-        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a))
+        (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
     else
         reshape(
-            (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightone(a)),
+            (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a)),
             (Nsymbol(a, b, c), Nsymbol(c, dual(b), a))
         )
     end
@@ -378,9 +433,9 @@ twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 # requirement that certain F-moves involving unit objects are trivial
 function triangle_equation(a::I, b::I; kwargs...) where {I <: Sector}
     for c in ⊗(a, b)
-        F1 = Fsymbol(leftone(a), a, b, c, a, c)
-        F2 = Fsymbol(a, rightone(a), b, c, a, b)
-        F3 = Fsymbol(a, b, rightone(b), c, c, b)
+        F1 = Fsymbol(leftunit(a), a, b, c, a, c)
+        F2 = Fsymbol(a, rightunit(a), b, c, a, b)
+        F3 = Fsymbol(a, b, rightunit(b), c, c, b)
 
         isapproxone(F) = isapprox(F, one(F); kwargs...)
         if FusionStyle(I) isa MultiplicityFreeFusion
@@ -517,10 +572,11 @@ function Rsymbol(
     return adjoint(Rsymbol(a.a, b.a, c.a))
 end
 
-Base.one(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(one(I))
-Base.conj(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(conj(c.a))
+unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
+allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
+dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(dual(c.a))
 function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
-    return Iterators.map(TimeReversed{I}, c1.a ⊗ c2.a)
+    return SectorSet{TimeReversed{I}}(TimeReversed{I}, c1.a ⊗ c2.a)
 end
 function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I <: Sector}
     return Base.IteratorSize(values(I))

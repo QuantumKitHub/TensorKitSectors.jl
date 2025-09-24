@@ -4,6 +4,12 @@ Istr = TensorKitSectors.type_repr(I)
     @testset "Basic type properties" begin
         @test eval(Meta.parse(sprint(show, I))) == I
         @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
+
+        prodsec = I ⊠ Z2Irrep
+        @test UnitStyle(prodsec) isa GenericUnit
+        @test FusionStyle(prodsec) isa SimpleFusion
+        @test_throws DomainError unit(prodsec)
+        @test length(allunits(prodsec)) == 2
     end
 
     M = IsingBimodule(1, 2, 0)
@@ -17,15 +23,18 @@ Istr = TensorKitSectors.type_repr(I)
     s = rand((M, Mop, C, D))
 
     @testset "Basic properties" begin
-        @test @constinferred(one(C1)) == @constinferred(leftone(C1)) ==
-            @constinferred(rightone(C1))
-        @test one(D1) == leftone(D1) == rightone(D1)
-        @test one(C1) == leftone(M) == rightone(Mop)
-        @test one(D1) == rightone(M) == leftone(Mop)
+        @test @constinferred(unit(C1)) == @constinferred(leftunit(C1)) ==
+            @constinferred(rightunit(C1))
+        @test unit(D1) == leftunit(D1) == rightunit(D1)
+        @test unit(C1) == leftunit(M) == rightunit(Mop)
+        @test unit(D1) == rightunit(M) == leftunit(Mop)
 
-        @test @constinferred(isone(C0))
-        @test isone(D0)
-        @test !isone(C1) && !isone(D1) && !isone(M) && !isone(Mop)
+        @test @constinferred(isunit(C0))
+        @test isunit(D0)
+        @test !isunit(C1) && !isunit(D1) && !isunit(M) && !isunit(Mop)
+
+        @test length(allunits(I)) == 2
+        @test allunits(I) == (C0, D0)
 
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
@@ -41,7 +50,7 @@ Istr = TensorKitSectors.type_repr(I)
 
     @testset "$Istr: Value iterator" begin
         @test eltype(values(I)) == I
-        @test_throws ArgumentError one(I)
+        @test_throws ArgumentError unit(I)
         sprev = C0 # first in SectorValues
         for (i, s) in enumerate(values(I))
             @test !isless(s, sprev) # confirm compatibility with sort order
@@ -62,8 +71,8 @@ Istr = TensorKitSectors.type_repr(I)
         @test eval(Meta.parse(sprint(show, M))) == M
         @test eval(Meta.parse(sprint(show, Mop))) == Mop
         @test eval(Meta.parse(sprint(show, D))) == D
-        @test_throws DomainError one(M)
-        @test_throws DomainError one(Mop)
+        @test_throws DomainError unit(M)
+        @test_throws DomainError unit(Mop)
     end
 
     @testset "$Istr Fusion rules and F-symbols" begin
@@ -79,7 +88,7 @@ Istr = TensorKitSectors.type_repr(I)
             @test !isempty(⊗(obs...))
         end
 
-        @test Nsymbol(C, C, one(C)) == Nsymbol(D, D, one(D)) == 1
+        @test Nsymbol(C, C, unit(C)) == Nsymbol(D, D, unit(D)) == 1
         @test Nsymbol(C, M, M) == Nsymbol(Mop, C, Mop) == 1
         @test Nsymbol(M, D, M) == Nsymbol(D, Mop, Mop) == 1
 

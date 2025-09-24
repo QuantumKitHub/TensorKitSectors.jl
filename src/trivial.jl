@@ -19,8 +19,8 @@ end
 findindex(::SectorValues{Trivial}, c::Trivial) = 1
 
 # basic properties
-Base.one(::Type{Trivial}) = Trivial()
-Base.conj(::Trivial) = Trivial()
+unit(::Type{Trivial}) = Trivial()
+dual(::Trivial) = Trivial()
 
 Base.isreal(::Type{Trivial}) = true
 Base.isless(::Trivial, ::Trivial) = false

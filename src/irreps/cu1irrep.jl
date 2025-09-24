@@ -66,8 +66,8 @@ end
 Base.convert(::Type{CU1Irrep}, j::Real) = CU1Irrep(j)
 Base.convert(::Type{CU1Irrep}, js::Tuple{Real, Int}) = CU1Irrep(js...)
 
-Base.one(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
-Base.conj(c::CU1Irrep) = c
+unit(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
+dual(c::CU1Irrep) = c
 
 struct CU1ProdIterator
     a::CU1Irrep
@@ -82,7 +82,7 @@ function Base.iterate(p::CU1ProdIterator, s::Int = 1)
         elseif p.b.j == zero(HalfInt)
             return p.a, 4
         elseif p.a == p.b # != zero
-            return one(CU1Irrep), 2
+            return unit(CU1Irrep), 2
         else
             return CU1Irrep(abs(p.a.j - p.b.j)), 3
         end

@@ -47,8 +47,8 @@ FusionStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? UniqueFusion() : SimpleFusio
 sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
 Base.isreal(::Type{DNIrrep{N}}) where {N} = true
 
-Base.one(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
-Base.conj(a::DNIrrep) = a
+unit(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
+dual(a::DNIrrep) = a
 
 Base.hash(a::DNIrrep, h::UInt) = hash(a.data, h)
 Base.convert(::Type{DNIrrep{N}}, (j, n)::Tuple{Integer, Bool}) where {N} = DNIrrep{N}(j, n)
@@ -195,7 +195,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
     (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
 
     # tensoring with units gives 1
-    (isone(a) || isone(b) || isone(c)) && return one(T)
+    (isunit(a) || isunit(b) || isunit(c)) && return one(T)
 
     # fallback through fusiontensor
     A = fusiontensor(a, b, e)

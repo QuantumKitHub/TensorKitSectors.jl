@@ -74,22 +74,22 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: IsingBimodule}
 end
 
 # ℳ ↔ ℳop when conjugating elements within these
-Base.conj(a::IsingBimodule) = IsingBimodule(a.col, a.row, a.label)
+dual(a::IsingBimodule) = IsingBimodule(a.col, a.row, a.label)
 
-rightone(a::IsingBimodule) = IsingBimodule(a.col, a.col, 0)
-leftone(a::IsingBimodule) = IsingBimodule(a.row, a.row, 0)
+rightunit(a::IsingBimodule) = IsingBimodule(a.col, a.col, 0)
+leftunit(a::IsingBimodule) = IsingBimodule(a.row, a.row, 0)
 
-function Base.one(a::IsingBimodule)
+function unit(a::IsingBimodule)
     a.row == a.col ||
-        throw(DomainError("unit of module category ($(a.row), $(a.col)) doesn't exist"))
+        throw(DomainError(a, "unit of a module category is not defined"))
     return IsingBimodule(a.row, a.col, 0)
 end
 
-Base.isone(a::IsingBimodule) = leftone(a) == a == rightone(a)
-
-function Base.one(::Type{IsingBimodule})
-    throw(ArgumentError("one of Type IsingBimodule doesn't exist"))
+function unit(::Type{IsingBimodule})
+    throw(ArgumentError("unit of Type IsingBimodule doesn't exist"))
 end
+
+allunits(::Type{IsingBimodule}) = (IsingBimodule(1, 1, 0), IsingBimodule(2, 2, 0))
 
 function Base.isless(a::IsingBimodule, b::IsingBimodule)
     return isless((a.col, a.row, a.label), (b.col, b.row, b.label))

@@ -21,8 +21,8 @@ end
 findindex(::SectorValues{PlanarTrivial}, c::PlanarTrivial) = 1
 Base.isless(::PlanarTrivial, ::PlanarTrivial) = false
 
-Base.one(::Type{PlanarTrivial}) = PlanarTrivial()
-Base.conj(::PlanarTrivial) = PlanarTrivial()
+unit(::Type{PlanarTrivial}) = PlanarTrivial()
+dual(::PlanarTrivial) = PlanarTrivial()
 
 FusionStyle(::Type{PlanarTrivial}) = UniqueFusion()
 BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
@@ -43,11 +43,11 @@ corresponding to the trivial sector `FibonacciAnyon(:I)` and the non-trivial sec
 `FibonacciAnyon(:τ)` with fusion rules ``τ ⊗ τ = 1 ⊕ τ``.
 
 ## Fields
-- `isone::Bool`: indicates whether the sector corresponds the to trivial anyon `:I`
+- `isunit::Bool`: indicates whether the sector corresponds to the trivial anyon `:I`
   (`true`), or the non-trivial anyon `:τ` (`false`).
 """
 struct FibonacciAnyon <: Sector
-    isone::Bool
+    isunit::Bool
     function FibonacciAnyon(s::Symbol)
         s in (:I, :τ, :tau) || throw(ArgumentError("Unknown FibonacciAnyon $s."))
         return new(s === :I)
@@ -68,14 +68,14 @@ function Base.getindex(S::SectorValues{FibonacciAnyon}, i::Int)
         throw(BoundsError(S, i))
     end
 end
-findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isone
+findindex(::SectorValues{FibonacciAnyon}, s::FibonacciAnyon) = 2 - s.isunit
 
 Base.convert(::Type{FibonacciAnyon}, s::Symbol) = FibonacciAnyon(s)
-Base.one(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
-Base.conj(s::FibonacciAnyon) = s
+unit(::Type{FibonacciAnyon}) = FibonacciAnyon(:I)
+dual(s::FibonacciAnyon) = s
 
 const _goldenratio = Float64(MathConstants.golden)
-dim(a::FibonacciAnyon) = isone(a) ? one(_goldenratio) : _goldenratio
+dim(a::FibonacciAnyon) = isunit(a) ? one(_goldenratio) : _goldenratio
 
 FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
@@ -89,7 +89,7 @@ struct FibonacciIterator
 end
 Base.IteratorSize(::Type{FibonacciIterator}) = Base.HasLength()
 Base.IteratorEltype(::Type{FibonacciIterator}) = Base.HasEltype()
-Base.length(iter::FibonacciIterator) = (isone(iter.a) || isone(iter.b)) ? 1 : 2
+Base.length(iter::FibonacciIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
 Base.eltype(::Type{FibonacciIterator}) = FibonacciAnyon
 function Base.iterate(iter::FibonacciIterator, state = 1)
     I = FibonacciAnyon(:I)
@@ -107,7 +107,7 @@ function Base.iterate(iter::FibonacciIterator, state = 1)
 end
 
 function Nsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon)
-    return isone(a) + isone(b) + isone(c) != 2
+    return isunit(a) + isunit(b) + isunit(c) != 2
 end # zero if one tau and two ones
 
 function Fsymbol(
@@ -136,21 +136,21 @@ end
 
 function Rsymbol(a::FibonacciAnyon, b::FibonacciAnyon, c::FibonacciAnyon)
     Nsymbol(a, b, c) || return 0 * cispi(0 / 1)
-    if isone(a) || isone(b)
+    if isunit(a) || isunit(b)
         return cispi(0 / 1)
     else
-        return isone(c) ? cispi(4 / 5) : cispi(-3 / 5)
+        return isunit(c) ? cispi(4 / 5) : cispi(-3 / 5)
     end
 end
 
 function Base.show(io::IO, a::FibonacciAnyon)
-    s = isone(a) ? ":I" : ":τ"
+    s = isunit(a) ? ":I" : ":τ"
     return get(io, :typeinfo, nothing) === FibonacciAnyon ?
         print(io, s) : print(io, "FibonacciAnyon(", s, ")")
 end
 
-Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isone, h)
-Base.isless(a::FibonacciAnyon, b::FibonacciAnyon) = isless(!a.isone, !b.isone)
+Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isunit, h)
+Base.isless(a::FibonacciAnyon, b::FibonacciAnyon) = isless(!a.isunit, !b.isunit)
 
 # IsingAnyons
 """
@@ -191,8 +191,8 @@ function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
 end
 
 Base.convert(::Type{IsingAnyon}, s::Symbol) = IsingAnyon(s)
-Base.one(::Type{IsingAnyon}) = IsingAnyon(:I)
-Base.conj(s::IsingAnyon) = s
+unit(::Type{IsingAnyon}) = IsingAnyon(:I)
+dual(s::IsingAnyon) = s
 
 dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0
 

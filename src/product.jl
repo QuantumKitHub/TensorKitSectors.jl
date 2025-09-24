@@ -60,12 +60,16 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
     return ProductSector{T}(convert(T, t))
 end
 
-Base.one(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I}} = ProductSector((one(I),))
-function Base.one(::Type{ProductSector{T}}) where {I <: Sector, T <: Tuple{I, Vararg{Sector}}}
-    return one(I) ⊠ one(ProductSector{Base.tuple_type_tail(T)})
+function unit(::Type{T}) where {T <: ProductSector}
+    UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
+    return only(allunits(T))
+end
+function allunits(::Type{ProductSector{T}}) where {T}
+    iterators = map(allunits, _sectors(T))
+    return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
 end
 
-Base.conj(p::ProductSector) = ProductSector(map(conj, p.sectors))
+dual(p::ProductSector) = ProductSector(map(dual, p.sectors))
 function ⊗(p1::P, p2::P) where {P <: ProductSector}
     if FusionStyle(P) isa UniqueFusion
         (P(first(product(map(⊗, p1.sectors, p2.sectors)...))),)
@@ -201,15 +205,16 @@ function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector
 end
 
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(FusionStyle, _sectors(T))...)
+    return mapreduce(FusionStyle, &, _sectors(T))
+end
+function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return Base.:&(map(BraidingStyle, _sectors(T))...)
+    return mapreduce(BraidingStyle, &, _sectors(T))
 end
-Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple} = _isreal(T)
-_isreal(::Type{Tuple{}}) = true
-function _isreal(T::Type{<:SectorTuple})
-    return isreal(Base.tuple_type_head(T)) && _isreal(Base.tuple_type_tail(T))
+function Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(isreal, &, _sectors(T))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
