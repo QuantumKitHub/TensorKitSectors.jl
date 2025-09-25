@@ -28,6 +28,10 @@ ProductSector{T}(x) where {T} = ProductSector{T}(convert(T, x))
 ProductSector{T}(x, y...) where {T} = ProductSector{T}((x, y...))
 ProductSector{T}(x::Sector) where {T} = ProductSector{T}((x,))
 
+# necessary in Julia 1.10:
+ProductSector{NamedTuple{K, V}}(x::V) where {K, V} = ProductSector{NamedTuple{K, V}}(NamedTuple{K}(x))
+ProductSector{NamedTuple{K, V}}(x::Tuple) where {K, V} = ProductSector{NamedTuple{K, V}}(NamedTuple{K}(V(x)))
+
 const TupleProductSector{T <: SectorTuple} = ProductSector{T}
 const NamedProductSector{T <: SectorTuple} = ProductSector{<:NamedTuple{<:Any, T}}
 
