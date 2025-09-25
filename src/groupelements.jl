@@ -24,7 +24,7 @@ Base.inv(c::GroupElement) -> GroupElement
 TensorKitSectors.cocycle(c1::GroupElement, c2::GroupElement, c3::GroupElement) -> Number
 ```
 The methods `conj`, `dual`, `⊗`, `Nsymbol`, `Fsymbol`, `dim`, `Asymbol`, `Bsymbol` and
-`frobeniusschur` will then be automatically defined. If no `cocycle` method is defined,
+`frobenius_schur_phase` will then be automatically defined. If no `cocycle` method is defined,
 the cocycle will be assumed to be trivial, i.e. equal to `1`.
 
 """
@@ -46,9 +46,9 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbstractGroupEl
     end
 end
 dim(c::AbstractGroupElement) = 1
-frobeniusschur(c::AbstractGroupElement) = cocycle(c, inv(c), c)
+frobenius_schur_phase(c::AbstractGroupElement) = cocycle(c, inv(c), c)
 function Asymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement}
-    A = frobeniusschur(dual(a)) * cocycle(inv(a), a, b)
+    A = frobenius_schur_phase(dual(a)) * cocycle(inv(a), a, b)
     return c == a * b ? A : zero(A)
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement}

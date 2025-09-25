@@ -41,7 +41,7 @@ Istr = TensorKitSectors.type_repr(I)
         @constinferred dual(s)
         @test dual(dual(s)) == s
         @constinferred dim(s)
-        @constinferred frobeniusschur(s)
+        @constinferred frobenius_schur_phase(s)
         @constinferred convert(IsingAnyon, s)
 
         @constinferred Bsymbol(C, C, C)

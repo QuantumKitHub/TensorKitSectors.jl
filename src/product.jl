@@ -191,7 +191,8 @@ function Asymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
 end
 
-frobeniusschur(p::ProductSector) = prod(map(frobeniusschur, p.sectors))
+frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
+frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
 
 function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector}
     return _kron(
