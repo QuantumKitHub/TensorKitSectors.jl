@@ -535,7 +535,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
 end
 
 # SectorSet:
-#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
 # Custom generator to represent sets of sectors with type inference
 struct SectorSet{I <: Sector, F, S}
     f::F
@@ -558,6 +558,34 @@ function Base.iterate(s::SectorSet{I}, args...) where {I <: Sector}
     val, state = next
     return convert(I, s.f(val)), state
 end
+
+# SectorProductIterator:
+#-------------------------------------------------------------------------------------------
+"""
+    SectorProductIterator(a::I, b::I) where {I <: Sector}
+
+Custom iterator to represent the (unique) fusion outputs of ``a ⊗ b``. 
+
+For a sector type `I` that aims to use this, the following functionality should be
+implemented:
+
+* `TensorKitSectors.⊗(a::I, b::I) where I = SectorProductIterator(a, b)`: return an
+  instance of `SectorProductIterator{I}` when fusing two sectors
+* `Base.iterate(::SectorProductIterator{I}, state...) where {I <: Sector}`: iterate over
+  the fusion outputs of `a ⊗ b`
+* `Base.IteratorSize(::Type{SectorProductIterator{I}}) where {I <: Sector}`: `HasLength()`, `SizeUnknown()` or
+  `IsInfinite()` depending on whether the number of fusion outputs is finite (and sufficiently
+  small) or infinite; for a large number of fusion outputs, `SizeUnknown()` is recommended.
+* `Base.length(::SectorProductIterator{I}) where {I <: Sector}`: the number of different
+  fusion outputs, if `IteratorSize` is `HasLength()`
+"""
+struct SectorProductIterator{I <: Sector}
+    a::I
+    b::I
+end
+
+Base.IteratorEltype(::Type{<:SectorProductIterator}) = HasEltype()
+Base.eltype(::Type{SectorProductIterator{I}}) where {I} = I
 
 # Time reversed sector
 struct TimeReversed{I <: Sector} <: Sector
