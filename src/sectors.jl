@@ -587,6 +587,27 @@ end
 Base.IteratorEltype(::Type{<:SectorProductIterator}) = HasEltype()
 Base.eltype(::Type{SectorProductIterator{I}}) where {I} = I
 
+function Base.show(io::IO, it::SectorProductIterator)
+    show(io, it.a)
+    print(io, " ⊗ ")
+    show(io, it.b)
+    return nothing
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", ab::SectorProductIterator)
+    show(io, ab.a)
+    print(io, " ⊗ ")
+    show(io, ab.b)
+    get(io, :compact, false) && return nothing
+    print(io, ":")
+    ioc = IOContext(io, :typeinfo => eltype(ab))
+    for c in ab
+        print(io, "\n ")
+        show(ioc, mime, c)
+    end
+    return nothing
+end
+
 # Time reversed sector
 struct TimeReversed{I <: Sector} <: Sector
     a::I
