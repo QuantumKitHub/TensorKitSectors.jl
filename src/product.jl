@@ -1,6 +1,6 @@
 # Deligne tensor product of different sectors: ⊠
 #------------------------------------------------------------------------------#
-const SectorTuple = Tuple{Vararg{Sector}}
+const SectorTuple = Tuple{Sector, Vararg{Sector}}
 const SectorNamedTuple = NamedTuple{<:Any, <:SectorTuple}
 const AnySectorTuple = Union{SectorTuple, SectorNamedTuple}
 
@@ -35,17 +35,22 @@ ProductSector{NamedTuple{K, V}}(x::Tuple) where {K, V} = ProductSector{NamedTupl
 const TupleProductSector{T <: SectorTuple} = ProductSector{T}
 const NamedProductSector{T <: SectorTuple} = ProductSector{<:NamedTuple{<:Any, T}}
 
-TupleProductSector(s::NamedProductSector) = ProductSector(values(s.sectors))
+TupleProductSector(s::NamedProductSector) = ProductSector(values(Tuple(s)))
 
 Base.Tuple(a::ProductSector) = Tuple(a.sectors)
 
-Base.getindex(s::ProductSector, i::Int) = getindex(s.sectors, i)
-Base.length(s::ProductSector) = length(s.sectors)
-Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
+Base.getindex(s::ProductSector, i::Int) = getindex(Tuple(s), i)
+Base.length(s::ProductSector) = length(Tuple(s))
+Base.iterate(s::ProductSector, args...) = iterate(Tuple(s), args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
-Base.@constprop :aggressive function Base.getproperty(s::NamedProductSector, f::Symbol)
-    return f === :sectors ? getfield(s, f) : getproperty(s.sectors, f)
+Base.@constprop :aggressive function Base.getproperty(s::ProductSector{<:NamedTuple}, f::Symbol)
+    sectors = getfield(s, :sectors)
+    if f === :sectors
+        return sectors
+    else
+        return getproperty(sectors, f)
+    end
 end
 Base.propertynames(s::NamedProductSector) = (:sectors, propertynames(fieldtype(typeof(s), :sectors))...)
 
@@ -111,8 +116,8 @@ function Nsymbol(a::P, b::P, c::P) where {P <: ProductSector}
     return prod(map(Nsymbol, a.sectors, b.sectors, c.sectors))
 end
 
-_firstsector(x::ProductSector) = x.sectors[1]
-_tailsector(x::ProductSector) = ProductSector(Base.tail(Tuple(x.sectors)))
+_firstsector(x::ProductSector) = Base.first(Tuple(x))
+_tailsector(x::ProductSector) = ProductSector(Base.tail(Tuple(x)))
 
 function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c, d, e, f))
@@ -210,8 +215,8 @@ function Asymbol(a::P, b::P, c::P) where {P <: ProductSector}
     end
 end
 
-frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
-frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
+frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, Tuple(p))
+frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, Tuple(p))
 
 function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c))
@@ -305,7 +310,7 @@ Base.@assume_effects :foldable function _deligneproduct_impl(
 end
 
 function Base.show(io::IO, P::TupleProductSector)
-    sectors = P.sectors
+    sectors = Tuple(P)
     compact = get(io, :typeinfo, nothing) === typeof(P)
     sep = compact ? ", " : " ⊠ "
     print(io, "(")
@@ -396,7 +401,7 @@ See Julia issues #29988, #29428, #22363, #28983.
 Base.show(io::IO, P::Type{<:ProductSector}) = print(io, type_repr(P))
 ==============================================================================#
 function Base.show(io::IO, P::ProductSector{T}) where {T <: Tuple{Vararg{AbstractIrrep}}}
-    sectors = P.sectors
+    sectors = Tuple(P)
     get(io, :typeinfo, nothing) === typeof(P) || print(io, type_repr(typeof(P)))
     print(io, "(")
     for i in 1:length(sectors)
