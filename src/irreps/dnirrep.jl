@@ -102,15 +102,11 @@ end
 
 # Product iterator
 # ----------------
-struct DNIrrepProdIterator{N}
-    a::DNIrrep{N}
-    b::DNIrrep{N}
-end
 
-⊗(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = a <= b ? DNIrrepProdIterator(a, b) : DNIrrepProdIterator(b, a)
+const DNIrrepProdIterator{N} = SectorProductIterator{DNIrrep{N}}
+⊗(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = SectorProductIterator((a <= b ? (a, b) : (b, a))...)
 
-Base.eltype(::Type{DNIrrepProdIterator{N}}) where {N} = DNIrrep{N}
-Base.IteratorSize(x::DNIrrepProdIterator) = Base.HasLength()
+Base.IteratorSize(::Type{DNIrrepProdIterator{N}}) where {N} = Base.HasLength()
 function Base.length(x::DNIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
     if a.j == 0 || b.j == 0 || (N == 2 * a.j) || (N == 2 * b.j)
