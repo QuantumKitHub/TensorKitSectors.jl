@@ -81,17 +81,13 @@ FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
 Base.isreal(::Type{FibonacciAnyon}) = false
 
-⊗(a::FibonacciAnyon, b::FibonacciAnyon) = FibonacciIterator(a, b)
+const FibonacciAnyonProdIterator = SectorProductIterator{FibonacciAnyon}
+⊗(a::FibonacciAnyon, b::FibonacciAnyon) = SectorProductIterator(a, b)
 
-struct FibonacciIterator
-    a::FibonacciAnyon
-    b::FibonacciAnyon
-end
-Base.IteratorSize(::Type{FibonacciIterator}) = Base.HasLength()
-Base.IteratorEltype(::Type{FibonacciIterator}) = Base.HasEltype()
-Base.length(iter::FibonacciIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
-Base.eltype(::Type{FibonacciIterator}) = FibonacciAnyon
-function Base.iterate(iter::FibonacciIterator, state = 1)
+Base.IteratorSize(::Type{FibonacciAnyonProdIterator}) = Base.HasLength()
+Base.length(iter::FibonacciAnyonProdIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
+
+function Base.iterate(iter::FibonacciAnyonProdIterator, state = 1)
     I = FibonacciAnyon(:I)
     τ = FibonacciAnyon(:τ)
     if state == 1 # first iteration
