@@ -32,7 +32,16 @@ Base.convert(::Type{SU2Irrep}, j::Real) = SU2Irrep(j)
 const _su2one = SU2Irrep(zero(HalfInt))
 unit(::Type{SU2Irrep}) = _su2one
 dual(s::SU2Irrep) = s
-⊗(s1::SU2Irrep, s2::SU2Irrep) = SectorSet{SU2Irrep}(abs(s1.j - s2.j):(s1.j + s2.j))
+
+const SU2IrrepProdIterator = SectorProductIterator{SU2Irrep}
+⊗(a::SU2Irrep, b::SU2Irrep) = SectorProductIterator(a, b)
+
+Base.IteratorSize(::Type{SU2IrrepProdIterator}) = Base.HasLength()
+Base.length(it::SU2IrrepProdIterator) = length(abs(it.a.j - it.b.j):(it.a.j + it.b.j))
+
+function Base.iterate(it::SU2IrrepProdIterator, state = abs(it.a.j - it.b.j))
+    return state > (it.a.j + it.b.j) ? nothing : (SU2Irrep(state), state + 1)
+end
 
 Base.IteratorSize(::Type{SectorValues{SU2Irrep}}) = IsInfinite()
 Base.iterate(::SectorValues{SU2Irrep}, i::Int = 0) = (SU2Irrep(half(i)), i + 1)
