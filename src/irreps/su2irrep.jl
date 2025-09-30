@@ -34,7 +34,6 @@ unit(::Type{SU2Irrep}) = _su2one
 dual(s::SU2Irrep) = s
 
 const SU2IrrepProdIterator = SectorProductIterator{SU2Irrep}
-⊗(a::SU2Irrep, b::SU2Irrep) = SectorProductIterator(a, b)
 
 Base.IteratorSize(::Type{SU2IrrepProdIterator}) = Base.HasLength()
 Base.length(it::SU2IrrepProdIterator) = length(abs(it.a.j - it.b.j):(it.a.j + it.b.j))

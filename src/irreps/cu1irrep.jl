@@ -70,7 +70,6 @@ unit(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
 dual(c::CU1Irrep) = c
 
 const CU1IrrepProdIterator = SectorProductIterator{CU1Irrep}
-⊗(a::CU1Irrep, b::CU1Irrep) = SectorProductIterator(a, b)
 
 Base.IteratorSize(::Type{CU1IrrepProdIterator}) = Base.HasLength()
 function Base.length(p::CU1IrrepProdIterator)

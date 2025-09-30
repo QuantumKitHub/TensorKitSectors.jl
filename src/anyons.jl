@@ -82,7 +82,6 @@ BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
 Base.isreal(::Type{FibonacciAnyon}) = false
 
 const FibonacciAnyonProdIterator = SectorProductIterator{FibonacciAnyon}
-⊗(a::FibonacciAnyon, b::FibonacciAnyon) = SectorProductIterator(a, b)
 
 Base.IteratorSize(::Type{FibonacciAnyonProdIterator}) = Base.HasLength()
 Base.length(iter::FibonacciAnyonProdIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
@@ -197,7 +196,6 @@ BraidingStyle(::Type{IsingAnyon}) = Anyonic()
 Base.isreal(::Type{IsingAnyon}) = false
 
 const IsingAnyonProdIterator = SectorProductIterator{IsingAnyon}
-⊗(a::IsingAnyon, b::IsingAnyon) = SectorProductIterator(a, b)
 
 Base.IteratorSize(::Type{IsingAnyonProdIterator}) = Base.HasLength()
 function Base.length(iter::IsingAnyonProdIterator)
