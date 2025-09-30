@@ -196,23 +196,16 @@ FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
 BraidingStyle(::Type{IsingAnyon}) = Anyonic()
 Base.isreal(::Type{IsingAnyon}) = false
 
-⊗(a::IsingAnyon, b::IsingAnyon) = IsingIterator(a, b)
+const IsingAnyonProdIterator = SectorProductIterator{IsingAnyon}
+⊗(a::IsingAnyon, b::IsingAnyon) = SectorProductIterator(a, b)
 
-struct IsingIterator
-    a::IsingAnyon
-    b::IsingAnyon
-end
-
-Base.IteratorSize(::Type{IsingIterator}) = Base.HasLength()
-Base.IteratorEltype(::Type{IsingIterator}) = Base.HasEltype()
-Base.eltype(::Type{IsingIterator}) = IsingAnyon
-
-function Base.length(iter::IsingIterator)
+Base.IteratorSize(::Type{IsingAnyonProdIterator}) = Base.HasLength()
+function Base.length(iter::IsingAnyonProdIterator)
     σ = IsingAnyon(:σ)
     return (iter.a == σ && iter.b == σ) ? 2 : 1
 end
 
-function Base.iterate(iter::IsingIterator, state = 1)
+function Base.iterate(iter::IsingAnyonProdIterator, state = 1)
     I, σ, ψ = all_isinganyons
     if state == 1 # first iteration
         iter.a == I && return (iter.b, 2)
