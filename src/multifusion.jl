@@ -27,18 +27,12 @@ Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.SizeUnknown()
 Base.iterate(::SectorValues{IsingBimodule}, i = 1) = iterate(all_isingbimod_objects, i)
 Base.length(::SectorValues{IsingBimodule}) = length(all_isingbimod_objects)
 
-⊗(a::IsingBimodule, b::IsingBimodule) = IsingBimoduleIterator(a, b)
+const IsingBimoduleProdIterator = SectorProductIterator{IsingBimodule}
+⊗(a::IsingBimodule, b::IsingBimodule) = SectorProductIterator(a, b)
 
-struct IsingBimoduleIterator
-    a::IsingBimodule
-    b::IsingBimodule
-end
+Base.IteratorSize(::Type{IsingBimoduleProdIterator}) = Base.SizeUnknown()
 
-Base.IteratorSize(::Type{IsingBimoduleIterator}) = Base.SizeUnknown()
-Base.IteratorEltype(::Type{IsingBimoduleIterator}) = Base.HasEltype()
-Base.eltype(::Type{IsingBimoduleIterator}) = IsingBimodule
-
-function Base.iterate(iter::IsingBimoduleIterator, state = 0)
+function Base.iterate(iter::IsingBimoduleProdIterator, state = 0)
     a, b = iter.a, iter.b
     a.col == b.row || return nothing
 

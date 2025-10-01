@@ -88,6 +88,16 @@ end
     @test size(Rsymbol(a, b, c)) == (0, 0)
 end
 
+@testset "SectorProduct printing" begin
+    a = SU2Irrep(1)
+    @test repr(a ⊗ a) == "Irrep[SU₂](1) ⊗ Irrep[SU₂](1)"
+    @test repr("text/plain", a ⊗ a) == "Irrep[SU₂](1) ⊗ Irrep[SU₂](1):\n 0\n 1\n 2"
+
+    b = D4Irrep(1)
+    @test repr(b ⊗ b) == "Irrep[D₄](1, false) ⊗ Irrep[D₄](1, false)"
+    @test repr("text/plain", b ⊗ b) == "Irrep[D₄](1, false) ⊗ Irrep[D₄](1, false):\n (0, false)\n (0, true)\n (2, false)\n (2, true)"
+end
+
 include("multifusion.jl")
 
 @testset "Aqua" begin

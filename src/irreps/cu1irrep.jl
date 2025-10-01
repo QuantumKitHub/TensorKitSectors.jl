@@ -69,11 +69,20 @@ Base.convert(::Type{CU1Irrep}, js::Tuple{Real, Int}) = CU1Irrep(js...)
 unit(::Type{CU1Irrep}) = CU1Irrep(zero(HalfInt), 0)
 dual(c::CU1Irrep) = c
 
-struct CU1ProdIterator
-    a::CU1Irrep
-    b::CU1Irrep
+const CU1IrrepProdIterator = SectorProductIterator{CU1Irrep}
+
+Base.IteratorSize(::Type{CU1IrrepProdIterator}) = Base.HasLength()
+function Base.length(p::CU1IrrepProdIterator)
+    if p.a.j == zero(HalfInt) || p.b.j == zero(HalfInt)
+        return 1
+    elseif p.a == p.b
+        return 3
+    else
+        return 2
+    end
 end
-function Base.iterate(p::CU1ProdIterator, s::Int = 1)
+
+function Base.iterate(p::CU1IrrepProdIterator, s::Int = 1)
     if s == 1
         if p.a.j == p.b.j == zero(HalfInt)
             return CU1Irrep(zero(HalfInt), xor(p.a.s, p.b.s)), 4
@@ -94,18 +103,6 @@ function Base.iterate(p::CU1ProdIterator, s::Int = 1)
         return nothing
     end
 end
-function Base.length(p::CU1ProdIterator)
-    if p.a.j == zero(HalfInt) || p.b.j == zero(HalfInt)
-        return 1
-    elseif p.a == p.b
-        return 3
-    else
-        return 2
-    end
-end
-Base.eltype(::Type{CU1ProdIterator}) = CU1Irrep
-
-⊗(a::CU1Irrep, b::CU1Irrep) = CU1ProdIterator(a, b)
 
 dim(c::CU1Irrep) = ifelse(c.j == zero(HalfInt), 1, 2)
 

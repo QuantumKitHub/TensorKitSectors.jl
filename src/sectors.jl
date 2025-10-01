@@ -207,6 +207,54 @@ const otimes = ⊗
 end
 
 """
+    SectorProductIterator(a::I, b::I) where {I <: Sector}
+
+Custom iterator to represent the (unique) fusion outputs of ``a ⊗ b``.
+
+Custom sectors that aim to use this have to provide the following functionality:
+
+* `Base.iterate(::SectorProductIterator{I}, state...) where {I <: Sector}`: iterate over
+    the fusion outputs of `a ⊗ b`
+
+If desired and it is possible to easily compute the number of unique fusion outputs, it is also
+possible to define `Base.IteratorSize(::Type{SectorProductIterator{I}}) = Base.HasLength()`, in which
+case `Base.length(::SectorProductIterator{I})` has to be implemented.
+
+See also [`⊗`](@ref).
+"""
+struct SectorProductIterator{I <: Sector}
+    a::I
+    b::I
+end
+
+⊗(a::I, b::I) where {I <: Sector} = SectorProductIterator(a, b)
+
+Base.IteratorSize(::Type{SectorProductIterator{I}}) where {I} = Base.SizeUnknown()
+Base.IteratorEltype(::Type{SectorProductIterator{I}}) where {I} = Base.HasEltype()
+Base.eltype(::Type{SectorProductIterator{I}}) where {I} = I
+
+function Base.show(io::IO, it::SectorProductIterator)
+    show(io, it.a)
+    print(io, " ⊗ ")
+    show(io, it.b)
+    return nothing
+end
+
+function Base.show(io::IO, mime::MIME"text/plain", ab::SectorProductIterator)
+    show(io, ab.a)
+    print(io, " ⊗ ")
+    show(io, ab.b)
+    get(io, :compact, false) && return nothing
+    print(io, ":")
+    ioc = IOContext(io, :typeinfo => eltype(ab))
+    for c in ab
+        print(io, "\n ")
+        show(ioc, mime, c)
+    end
+    return nothing
+end
+
+"""
     Nsymbol(a::I, b::I, c::I) where {I<:Sector} -> Integer
 
 Return an `Integer` representing the number of times `c` appears in the fusion product
@@ -535,7 +583,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
 end
 
 # SectorSet:
-#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------------------
 # Custom generator to represent sets of sectors with type inference
 struct SectorSet{I <: Sector, F, S}
     f::F

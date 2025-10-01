@@ -81,17 +81,12 @@ FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
 Base.isreal(::Type{FibonacciAnyon}) = false
 
-⊗(a::FibonacciAnyon, b::FibonacciAnyon) = FibonacciIterator(a, b)
+const FibonacciAnyonProdIterator = SectorProductIterator{FibonacciAnyon}
 
-struct FibonacciIterator
-    a::FibonacciAnyon
-    b::FibonacciAnyon
-end
-Base.IteratorSize(::Type{FibonacciIterator}) = Base.HasLength()
-Base.IteratorEltype(::Type{FibonacciIterator}) = Base.HasEltype()
-Base.length(iter::FibonacciIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
-Base.eltype(::Type{FibonacciIterator}) = FibonacciAnyon
-function Base.iterate(iter::FibonacciIterator, state = 1)
+Base.IteratorSize(::Type{FibonacciAnyonProdIterator}) = Base.HasLength()
+Base.length(iter::FibonacciAnyonProdIterator) = (isunit(iter.a) || isunit(iter.b)) ? 1 : 2
+
+function Base.iterate(iter::FibonacciAnyonProdIterator, state = 1)
     I = FibonacciAnyon(:I)
     τ = FibonacciAnyon(:τ)
     if state == 1 # first iteration
@@ -200,23 +195,15 @@ FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
 BraidingStyle(::Type{IsingAnyon}) = Anyonic()
 Base.isreal(::Type{IsingAnyon}) = false
 
-⊗(a::IsingAnyon, b::IsingAnyon) = IsingIterator(a, b)
+const IsingAnyonProdIterator = SectorProductIterator{IsingAnyon}
 
-struct IsingIterator
-    a::IsingAnyon
-    b::IsingAnyon
-end
-
-Base.IteratorSize(::Type{IsingIterator}) = Base.HasLength()
-Base.IteratorEltype(::Type{IsingIterator}) = Base.HasEltype()
-Base.eltype(::Type{IsingIterator}) = IsingAnyon
-
-function Base.length(iter::IsingIterator)
+Base.IteratorSize(::Type{IsingAnyonProdIterator}) = Base.HasLength()
+function Base.length(iter::IsingAnyonProdIterator)
     σ = IsingAnyon(:σ)
     return (iter.a == σ && iter.b == σ) ? 2 : 1
 end
 
-function Base.iterate(iter::IsingIterator, state = 1)
+function Base.iterate(iter::IsingAnyonProdIterator, state = 1)
     I, σ, ψ = all_isinganyons
     if state == 1 # first iteration
         iter.a == I && return (iter.b, 2)
