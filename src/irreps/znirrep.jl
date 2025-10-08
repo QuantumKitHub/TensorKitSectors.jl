@@ -1,16 +1,20 @@
 # ZNIrrep: irreps of Z_N are labelled by integers mod N; do we ever want N > 64?
 """
-    struct ZNIrrep{N} <: AbstractIrrep{ℤ{N}}
+    struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
     ZNIrrep{N}(n::Integer)
     Irrep[ℤ{N}](n::Integer)
 
-Represents irreps of the group ``ℤ_N`` for some value of `N<64`. (We need 2*(N-1) <= 127 in
-order for a ⊗ b to work correctly.) For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced
-by `ℤ₂`, `ℤ₃`, `ℤ₄`. An arbitrary `Integer` `n` can be provided to the constructor, but only
-the value `mod(n, N)` is relevant.
+Represents irreps of the group ``ℤ_N`` for some value of `N`.
+For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced by [`ℤ₂`](@ref), [`ℤ₃`](@ref), and [`ℤ₄`](@ref).
+An arbitrary `Integer` `n` can be provided to the constructor, but only the value `mod(n, N)` is relevant.
+
+The type of the stored integer `T` can either be explicitly provided, or will automatically be determined
+to be the smallest unsigned integer type that fits all possible irreps for the given `N`.
+
+See also [`charge`](@ref)` and [`modulus`](@ref) to extract the relevant data.
 
 ## Fields
-- `n::Int8`: the integer label of the irrep, modulo `N`.
+- `n::T`: the integer label of the irrep, modulo `N`.
 """
 struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
     n::T
@@ -25,10 +29,21 @@ struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
     end
 end
 
+"""
+    modulus(c::ZNIrrep{N}) -> N
+    modulus(::Type{<:ZNIrrep{N}}) -> N
+
+The order of the cyclic group, or the modulus of the charge labels.
+"""
 modulus(c::ZNIrrep) = modulus(typeof(c))
 modulus(::Type{<:ZNIrrep{N}}) where {N} = N
 
-charge(c::ZNIrrep) = Int(c.N)
+"""
+    charge(c::ZNIrrep) -> Int
+
+The charge label of the irrep `c`.
+"""
+charge(c::ZNIrrep) = Int(c.n)
 
 Base.@assume_effects :foldable function _integer_type(N::Integer)
     N <= 0 && throw(DomainError(N, "N should be positive"))
