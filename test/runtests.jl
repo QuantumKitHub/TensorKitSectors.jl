@@ -15,7 +15,7 @@ include("newsectors.jl")
 using .NewSectors
 
 const sectorlist = (
-    Z2Irrep, Z3Irrep, Z4Irrep, U1Irrep,
+    Z2Irrep, Z3Irrep, Z4Irrep, Irrep[ℤ{200}], U1Irrep,
     DNIrrep{3}, DNIrrep{4}, DNIrrep{5}, CU1Irrep,
     SU2Irrep, NewSU2Irrep,
     FibonacciAnyon, IsingAnyon, FermionParity,
