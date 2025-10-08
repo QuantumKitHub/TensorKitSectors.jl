@@ -98,6 +98,23 @@ end
     @test repr("text/plain", b ⊗ b) == "Irrep[D₄](1, false) ⊗ Irrep[D₄](1, false):\n (0, false)\n (0, true)\n (2, false)\n (2, true)"
 end
 
+@testset "ZNIrrep edge cases" begin
+    a = Irrep[Cyclic{255}](254)
+    @test typeof(a) == ZNIrrep{255, UInt8}
+    @test charge(dual(a)) == mod(-charge(a), 255)
+    @test charge(only(a ⊗ a)) == mod(charge(a) + charge(a), 255)
+
+    b = Irrep[Cyclic{256}](255)
+    @test typeof(b) == ZNIrrep{256, UInt8}
+    @test charge(dual(b)) == mod(-charge(b), 256)
+    @test charge(only(b ⊗ b)) == mod(charge(b) + charge(b), 256)
+
+    c = Irrep[Cyclic{257}](256)
+    @test typeof(c) == ZNIrrep{257, UInt16}
+    @test charge(dual(c)) == mod(-charge(c), 257)
+    @test charge(only(c ⊗ c)) == mod(charge(c) + charge(c), 257)
+end
+
 include("multifusion.jl")
 
 @testset "Aqua" begin
