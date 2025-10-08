@@ -23,7 +23,7 @@ struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
         return new{N, T}(T(mod(n, N)))
     end
     function ZNIrrep{N, T}(n::Integer) where {N, T <: Unsigned}
-        N ≤ typemax(T) ||
+        N ≤ typemax(T) + 1 ||
             throw(TypeError(:ZNIrrep, ZNIrrep{N, T}, ZNIrrep{N, _integer_type(N)}))
         return new{N, T}(mod(n, N))
     end
@@ -48,7 +48,8 @@ charge(c::ZNIrrep) = Int(c.n)
 Base.@assume_effects :foldable function _integer_type(N::Integer)
     N <= 0 && throw(DomainError(N, "N should be positive"))
     for T in (UInt8, UInt16, UInt32, UInt64)
-        N ≤ typemax(T) && return T
+        # T needs to fit a
+        N ≤ (typemax(T) + 1) && return T
     end
     throw(DomainError(N, "N is too large"))
 end
@@ -60,8 +61,9 @@ const Z3Irrep = ZNIrrep{3, UInt8}
 const Z4Irrep = ZNIrrep{4, UInt8}
 
 unit(::Type{ZNIrrep{N, T}}) where {N, T} = ZNIrrep{N, T}(zero(T))
+# be careful with `-` for unsigned integers!
 dual(c::ZNIrrep{N, T}) where {N, T} = ZNIrrep{N, T}(N - c.n)
-⊗(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = (ZNIrrep{N, T}(c1.n + c2.n),)
+⊗(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = (ZNIrrep{N, T}(modular_add(c1.n, c2.n, Val(N))),)
 
 Base.IteratorSize(::Type{SectorValues{ZNIrrep{N, T}}}) where {N, T} = HasLength()
 Base.length(::SectorValues{ZNIrrep{N, T}}) where {N, T} = N
@@ -75,3 +77,12 @@ findindex(::SectorValues{ZNIrrep{N, T}}, c::ZNIrrep{N, T}) where {N, T} = c.n + 
 
 Base.hash(c::ZNIrrep{N, T}, h::UInt) where {N, T} = hash(c.n, h)
 Base.isless(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = isless(c1.n, c2.n)
+
+# compute x + y mod N, requires 0 <= x < N and 0 <= y < N (unchecked!)
+function modular_add(x::T, y::T, ::Val{N}) where {T <: Unsigned, N}
+    Tmax = typemax(T) + 1
+    0 < N ≤ Tmax || throw(DomainError(N, "N is too large"))
+    N ≤ (typemax(T) + 1) ÷ 2 && return x + y
+    r, flag = Base.add_with_overflow(x, y)
+    return ifelse(flag, (Tmax - N) + r, r)
+end
