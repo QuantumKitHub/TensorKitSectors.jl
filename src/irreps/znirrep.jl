@@ -78,6 +78,16 @@ findindex(::SectorValues{ZNIrrep{N, T}}, c::ZNIrrep{N, T}) where {N, T} = c.n + 
 Base.hash(c::ZNIrrep{N, T}, h::UInt) where {N, T} = hash(c.n, h)
 Base.isless(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = isless(c1.n, c2.n)
 
+# ensure the printing uses `Int`.
+function Base.show(io::IO, c::ZNIrrep)
+    I = typeof(c)
+    print_type = get(io, :typeinfo, nothing) !== I
+    print_type && print(io, type_repr(I), '(')
+    print(io, charge(c))
+    print_type && print(io, ')')
+    return nothing
+end
+
 # compute x + y mod N, requires 0 <= x < N and 0 <= y < N (unchecked!)
 function modular_add(x::T, y::T, ::Val{N}) where {T <: Unsigned, N}
     Tmax = typemax(T) + 1
