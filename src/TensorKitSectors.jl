@@ -28,6 +28,9 @@ export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
 export IsingBimodule
 
+# accessors
+export charge, modulus
+
 # unicode exports
 # ---------------
 export ⊠, ⊗, ×
