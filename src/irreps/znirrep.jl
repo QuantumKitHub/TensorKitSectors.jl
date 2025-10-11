@@ -63,6 +63,7 @@ const Z4Irrep = ZNIrrep{4, UInt8}
 unit(::Type{ZNIrrep{N, T}}) where {N, T} = ZNIrrep{N, T}(zero(T))
 # be careful with `-` for unsigned integers!
 dual(c::ZNIrrep{N, T}) where {N, T} = ZNIrrep{N, T}(N - c.n)
+Base.conj(c::ZNIrrep{N, T}) where {N, T} = dual(c)
 ⊗(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = (ZNIrrep{N, T}(modular_add(c1.n, c2.n, Val(N))),)
 
 Base.IteratorSize(::Type{SectorValues{ZNIrrep{N, T}}}) where {N, T} = HasLength()
