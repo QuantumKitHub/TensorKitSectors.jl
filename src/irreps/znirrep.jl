@@ -61,6 +61,7 @@ const Z3Irrep = ZNIrrep{3, UInt8}
 const Z4Irrep = ZNIrrep{4, UInt8}
 
 unit(::Type{ZNIrrep{N, T}}) where {N, T} = ZNIrrep{N, T}(zero(T))
+Base.one(z::Type{ZNIrrep{N, T}}) where {N, T} = unit(z)
 # be careful with `-` for unsigned integers!
 dual(c::ZNIrrep{N, T}) where {N, T} = ZNIrrep{N, T}(N - c.n)
 Base.conj(c::ZNIrrep{N, T}) where {N, T} = dual(c)
