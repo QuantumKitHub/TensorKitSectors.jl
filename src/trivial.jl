@@ -30,6 +30,7 @@ Base.isless(::Trivial, ::Trivial) = false
 Nsymbol(::Trivial, ::Trivial, ::Trivial) = true
 FusionStyle(::Type{Trivial}) = UniqueFusion()
 Fsymbol(::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial) = 1
+fusiontensor(::Trivial, ::Trivial, ::Trivial) = fill(1, (1, 1, 1, 1))
 
 # braiding rules
 Rsymbol(::Trivial, ::Trivial, ::Trivial) = 1
