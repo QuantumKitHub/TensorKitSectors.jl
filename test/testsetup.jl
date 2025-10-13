@@ -30,6 +30,8 @@ function randsector(::Type{I}) where {I <: Sector}
     end
     return a
 end
+randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = one(I)
+
 function hasfusiontensor(I::Type{<:Sector})
     try
         fusiontensor(unit(I), unit(I), unit(I))
