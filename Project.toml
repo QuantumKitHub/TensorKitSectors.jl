@@ -12,7 +12,7 @@ WignerSymbols = "9f57e263-0b3d-5e2e-b1be-24f2bb48858b"
 [compat]
 Aqua = "0.8"
 HalfIntegers = "1"
-JET = "0.9"
+JET = "0.9, 0.10"
 julia = "1.10"
 LinearAlgebra = "1"
 Random = "1"
