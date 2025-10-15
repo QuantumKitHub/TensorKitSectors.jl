@@ -92,8 +92,8 @@ end
     ZNElement{N, p}(n::Integer)
     GroupElement[ℤ{N}, p](n::Integer)
 
-Represents an element of the group ``ℤ_N`` for some value of `N<64`. (We need 2*(N-1) <= 127 in
-order for a ⊗ b to work correctly.) For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced
+Represents an element of the group ``ℤ_N`` for some value of `N<64`. (We need `2*(N-1) <= 127`
+in order for `a ⊗ b` to work correctly.) For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced
 by `ℤ₂`, `ℤ₃`, `ℤ₄`. An arbitrary `Integer` `n` can be provided to the constructor, but only
 the value `mod(n, N)` is relevant. The second type parameter `p` should also be specified as
 an integer ` 0 <= p < N` and specifies the 3-cocycle, which is then being given by 

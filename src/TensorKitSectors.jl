@@ -57,6 +57,7 @@ include("trivial.jl")
 include("groups.jl")
 include("irreps/irreps.jl")    # irreps of symmetry groups, with bosonic braiding
 include("groupelements.jl") # group elements with cocycles, no braiding
+include("timereversed.jl")   # direct product of different sectors
 include("product.jl")   # direct product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors

@@ -1,7 +1,7 @@
 # Sectors corresponding to irreducible representations of compact groups
 #------------------------------------------------------------------------------#
 """
-    abstract type AbstractIrrep{G <: Group} <: Sector end
+    abstract type AbstractIrrep{G <: Group} <: Sector
 
 Abstract supertype for sectors which corresponds to irreps (irreducible representations) of
 a group `G`. As we assume unitary representations, these would be finite groups or compact

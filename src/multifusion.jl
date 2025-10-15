@@ -5,6 +5,17 @@
 
 # 𝒞   ℳ
 # ℳᵒᵖ 𝒟
+
+"""
+    struct IsingBimodule <: Sector
+
+Type to represent the simple objects in the Ising category reinterpreted as a bimodule
+category composed of two copies of the category 𝒞 = 𝒟 = Irrep[ℤ₂], thetwo simple objects of which
+can be identified with the Ising anyons {I, ψ}, and the bimodule categories ℳ = ℳᵒᵖ = Vec,
+with a single simple object that can be identified with the Ising anyon σ. This constitutes the
+easiest example of a multifusion category and is implemented here for testing purposes and to
+illustrate how to implement such categories in TensorKitSectors.jl.
+"""
 struct IsingBimodule <: Sector
     row::Int
     col::Int

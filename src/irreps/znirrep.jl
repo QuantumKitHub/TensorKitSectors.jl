@@ -11,7 +11,7 @@ An arbitrary `Integer` `n` can be provided to the constructor, but only the valu
 The type of the stored integer `T` can either be explicitly provided, or will automatically be determined
 to be the smallest unsigned integer type that fits all possible irreps for the given `N`.
 
-See also [`charge`](@ref)` and [`modulus`](@ref) to extract the relevant data.
+See also [`charge`](@ref) and [`modulus`](@ref) to extract the relevant data.
 
 ## Fields
 - `n::T`: the integer label of the irrep, modulo `N`.
