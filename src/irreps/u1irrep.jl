@@ -24,7 +24,7 @@ Base.convert(::Type{U1Irrep}, c::Real) = U1Irrep(c)
 
 The charge label of the irrep `c`.
 """
-charge(c::U1Irrep) = Int(c.charge)
+charge(c::U1Irrep) = c.charge
 
 unit(::Type{U1Irrep}) = U1Irrep(0)
 dual(c::U1Irrep) = U1Irrep(-charge(c))
