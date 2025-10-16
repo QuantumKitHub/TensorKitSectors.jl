@@ -141,13 +141,12 @@ See also [`leftunit`](@ref) and [`unit`](@ref).
 """
 rightunit(a::Sector) = unit(a)
 
-"""
+@doc """
     dual(a::Sector) -> Sector
 
 Return the dual label of `a`, i.e. the unique label `ā = dual(a)` such that 
 `Nsymbol(a, ā, leftunit(a)) == 1` and `Nsymbol(ā, a, rightunit(a)) == 1`.
-"""
-function dual end
+""" dual(::Sector)
 Base.conj(a::Sector) = dual(a)
 
 """
