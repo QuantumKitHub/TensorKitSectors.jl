@@ -2,10 +2,6 @@
 # 𝒞 = 𝒟 = RepZ2 ≅ {1, ψ}, while ℳ = Vec ≅ {σ}
 # this is mainly meant for testing within TensorKit without relying on MultiTensorKit
 #------------------------------------------------------------------------------#
-
-# 𝒞   ℳ
-# ℳᵒᵖ 𝒟
-
 """
     struct IsingBimodule <: Sector
 
