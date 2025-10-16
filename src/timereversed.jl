@@ -5,8 +5,7 @@
 
 Represents the time-reversed version of the sector `I`, i.e. the
 sector with the same fusion rules and `F`-symbols, but with the
-inverse braiding. This is only defined for sectors with non-trivial
-braiding.
+inverse braiding.
 """
 struct TimeReversed{I <: Sector} <: Sector
     a::I

@@ -42,7 +42,7 @@ abstract type Dihedral{N} <: Group end
 """
     abstract type U₁ <: AbelianGroup end
 
-Type to represent the group U(1) of complex numbers of unit modulus,
+Type to represent the group ``U(1)`` of complex numbers of unit modulus,
 which is a compact Abelian Lie group.
 """
 abstract type U₁ <: AbelianGroup end
@@ -50,7 +50,7 @@ abstract type U₁ <: AbelianGroup end
 """
     abstract type SU{N} <: Group end
 
-Type to represent the special unitary group SU(N), which is a
+Type to represent the special unitary group ``SU(N)``, which is a
 compact non-Abelian Lie group.
 """
 abstract type SU{N} <: Group end

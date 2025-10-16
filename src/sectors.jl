@@ -373,11 +373,11 @@ invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a))
 """
     frobenius_schur_phase(a::Sector)
 
-Return the Frobenius-Schur phase ``\\kappa_a`` of a sector ``a``, which is a complex phase that
+Return the Frobenius-Schur phase ``κₐ`` of a sector ``a``, which is a complex phase that
 appears in the context of bending lines and is obtained from ``F^{a a̅ a}_a``.
-When `a == dual(a)`, it is restricted to ``\\kappa_a ∈ \\{1, -1\\}`` and coincides with
+When `a == dual(a)`, it is restricted to ``κₐ ∈ \\{1, -1\\}`` and coincides with
 the group-theoretic version [`frobenius_schur_indicator`](@ref).
-When `a != dual(a)`, the value of ``\\kappa_a`` can be gauged to be `1`, though is not required to be.
+When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
 function frobenius_schur_phase(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
@@ -390,7 +390,7 @@ end
 """
     frobenius_schur_indicator(a::Sector)
 
-Return the Frobenius-Schur indicator of a sector ``\\nu_a ∈ \\{1, 0, -1\\}``, which distinguishes
+Return the Frobenius-Schur indicator of a sector ``νₐ ∈ \\{1, 0, -1\\}``, which distinguishes
 between real, complex and quaternionic representations.
 
 See also [`frobenius_schur_phase`](@ref) for the category-theoretic version that appears in the
