@@ -3,7 +3,8 @@
 const SectorTuple = Tuple{Vararg{Sector}}
 
 """
-    ProductSector{T<:SectorTuple}
+    struct ProductSector{T<:SectorTuple}
+    ProductSector((s₁, s₂, ...))
 
 Represents the Deligne tensor product of sectors. The type parameter `T` is a tuple of the
 component sectors. The recommended way to construct a `ProductSector` is using the
