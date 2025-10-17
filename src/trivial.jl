@@ -1,5 +1,5 @@
 """
-    struct Trivial <: Sector
+    struct Trivial <: Sector end
     Trivial()
 
 Singleton type to represent the trivial sector, i.e. the trivial representation of the

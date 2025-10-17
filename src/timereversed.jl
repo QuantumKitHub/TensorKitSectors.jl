@@ -1,7 +1,8 @@
 # Time reversed sector
 
 """
-    TimeReversed{I<:Sector}
+    struct TimeReversed{I<:Sector}
+    TimeReversed(a::I) where {I<:Sector}
 
 Represents the time-reversed version of the sector `I`, i.e. the
 sector with the same fusion rules and `F`-symbols, but with the

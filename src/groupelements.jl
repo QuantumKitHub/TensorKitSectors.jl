@@ -2,7 +2,7 @@
 # associator given by a 3-cocycle.
 #------------------------------------------------------------------------------#
 """
-    abstract type AbstractGroupElement{G<:Group} <: Sector end
+    abstract type AbstractGroupElement{G<:Group} <: Sector
 
 Abstract supertype for sectors which corresponds to group elements of a group `G`.
 

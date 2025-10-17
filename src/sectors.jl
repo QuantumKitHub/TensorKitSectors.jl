@@ -1,5 +1,5 @@
 """
-    abstract type Sector end
+    abstract type Sector
 
 Abstract type for representing the (isomorphism classes of) simple objects in (unitary
 and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a finite or
@@ -212,6 +212,7 @@ const otimes = ⊗
 end
 
 """
+    struct SectorProductIterator{I <: Sector}
     SectorProductIterator(a::I, b::I) where {I <: Sector}
 
 Custom iterator to represent the (unique) fusion outputs of ``a ⊗ b``.
@@ -269,6 +270,7 @@ function Nsymbol end
 
 # trait to describe the fusion of superselection sectors
 """
+    abstract type FusionStyle
     FusionStyle(::Sector)
     FusionStyle(I::Type{<:Sector})
 
@@ -303,6 +305,7 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
 # similar, but for multifusion categories
 """
+    abstract type UnitStyle
     UnitStyle(::Sector)
     UnitStyle(I::Type{<:Sector})
 
@@ -444,6 +447,7 @@ end
 # trait to describe type to denote how the elementary spaces in a tensor product space
 # interact under permutations or actions of the braid group
 """
+    abstract type BradingStyle
     BraidingStyle(::Sector) -> ::BraidingStyle
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
