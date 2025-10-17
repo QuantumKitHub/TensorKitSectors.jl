@@ -1,12 +1,3 @@
-# SU2Irrep: irreps of SU2 are labelled by half integers j
-struct SU2IrrepException <: Exception end
-function Base.show(io::IO, ::SU2IrrepException)
-    return print(
-        io,
-        "Irreps of (bosonic or fermionic) `SU₂` should be labelled by non-negative half integers, i.e. elements of `Rational{Int}` with denominator 1 or 2"
-    )
-end
-
 """
     struct SU2Irrep <: AbstractIrrep{SU₂}
     SU2Irrep(j::Real)
