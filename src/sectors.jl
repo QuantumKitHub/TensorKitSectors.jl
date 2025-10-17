@@ -24,12 +24,17 @@ and optionally
 *   `dim(a::I)`: quantum dimension of sector `a`
 *   `frobenius_schur_indicator(a::I)`: Frobenius-Schur indicator of `a` (1, 0, -1)
 *   `frobenius_schur_phase(a::I)`: Frobenius-Schur phase of `a` (±1)
+#   `sectorscalartype(::Type{I})`: scalar type of F- and R-symbols
 *   `Bsymbol(a::I, b::I, c::I)`: B-symbol: scalar (in case of
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
 *   `twist(a::I)` -> twist of sector `a`
 
 Furthermore, `iterate` and `Base.IteratorSize` should be made to work for the singleton type
 [`SectorValues{I}`](@ref).
+
+To help with the implementation of `⊗(a::I, b::I)` as an iterator, the provided `struct` type
+[`SectorProductIterator{I}`](@ref) can be used, which stores `a` and `b` and requires the
+implementation of `Base.iterate(::SectorProductIterator{I}, state...)`.
 """
 abstract type Sector end
 
@@ -136,12 +141,12 @@ See also [`leftunit`](@ref) and [`unit`](@ref).
 """
 rightunit(a::Sector) = unit(a)
 
-"""
+@doc """
     dual(a::Sector) -> Sector
 
-Return the dual label of `a`, i.e. the unique label `a^*` such that 
-Nsymbol(a, a^*, leftunit(a)) = 1 and Nsymbol(a^*, a, rightunit(a)) = 1.
-"""
+Return the dual label of `a`, i.e. the unique label `ā = dual(a)` such that 
+`Nsymbol(a, ā, leftunit(a)) == 1` and `Nsymbol(ā, a, rightunit(a)) == 1`.
+""" dual(::Sector)
 Base.conj(a::Sector) = dual(a)
 
 """
@@ -367,10 +372,11 @@ invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a))
 """
     frobenius_schur_phase(a::Sector)
 
-Return the Frobenius-Schur phase of a sector ``\\kappa_a ∈ {1, -1}``, which coincides with
-the Frobenius-Schur indicator if `a == dual(a)`, and can otherwise be gauged to be `1`.
-
-See also [`frobenius_schur_indicator`](@ref) for the group-theoretic version.
+Return the Frobenius-Schur phase ``κₐ`` of a sector ``a``, which is a complex phase that
+appears in the context of bending lines and is obtained from ``F^{a a̅ a}_a``.
+When `a == dual(a)`, it is restricted to ``κₐ ∈ \\{1, -1\\}`` and coincides with
+the group-theoretic version [`frobenius_schur_indicator`](@ref).
+When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
 function frobenius_schur_phase(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
@@ -383,10 +389,11 @@ end
 """
     frobenius_schur_indicator(a::Sector)
 
-Return the Frobenius-Schur indicator of a sector ``\\nu_a ∈ {1, 0, -1}``, which distinguishes
+Return the Frobenius-Schur indicator of a sector ``νₐ ∈ \\{1, 0, -1\\}``, which distinguishes
 between real, complex and quaternionic representations.
 
-See also [`frobenius_schur_phase`](@ref) for the category-theoretic version.
+See also [`frobenius_schur_phase`](@ref) for the category-theoretic version that appears in the
+context of line bending.
 """
 function frobenius_schur_indicator(a::Sector)
     ν = frobenius_schur_phase(a)
@@ -443,7 +450,7 @@ end
 Return the type of braiding and twist behavior of sectors of type `I`, which can be either
 *   `Bosonic()`: symmetric braiding with trivial twist (i.e. identity)
 *   `Fermionic()`: symmetric braiding with non-trivial twist (squares to identity)
-*   `Anyonic()`: general ``R_(a,b)^c`` phase or matrix (depending on `SimpleFusion` or
+*   `Anyonic()`: general ``R^{ab}_c`` phase or matrix (depending on `SimpleFusion` or
     `GenericFusion` fusion) and arbitrary twists
 
 Note that `Bosonic` and `Fermionic` are subtypes of `SymmetricBraiding`, which means that
@@ -489,7 +496,7 @@ function Rsymbol end
 """
     twist(a::Sector)
 
-Return the twist of a sector `a`
+Return the twist of a sector `a`.
 """
 twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
@@ -605,68 +612,4 @@ function Base.iterate(s::SectorSet{I}, args...) where {I <: Sector}
     next === nothing && return nothing
     val, state = next
     return convert(I, s.f(val)), state
-end
-
-# Time reversed sector
-struct TimeReversed{I <: Sector} <: Sector
-    a::I
-    function TimeReversed{I}(a::I) where {I <: Sector}
-        if BraidingStyle(I) isa NoBraiding
-            throw(ArgumentError("TimeReversed is not defined for sectors $I with no braiding"))
-        end
-        return new{I}(a)
-    end
-end
-FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
-BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
-function Nsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
-    ) where {I <: Sector}
-    return Nsymbol(a.a, b.a, c.a)
-end
-
-function Fsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
-        d::TimeReversed{I}, e::TimeReversed{I}, f::TimeReversed{I}
-    ) where {I <: Sector}
-    return Fsymbol(a.a, b.a, c.a, d.a, e.a, f.a)
-end
-function Rsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
-    ) where {I <: Sector}
-    return adjoint(Rsymbol(a.a, b.a, c.a))
-end
-
-unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
-allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
-dual(c::TimeReversed{I}) where {I <: Sector} = TimeReversed{I}(dual(c.a))
-function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
-    return SectorSet{TimeReversed{I}}(TimeReversed{I}, c1.a ⊗ c2.a)
-end
-function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I <: Sector}
-    return Base.IteratorSize(values(I))
-end
-function Base.length(::SectorValues{TimeReversed{I}}) where {I <: Sector}
-    return length(values(I))
-end
-function Base.getindex(::SectorValues{TimeReversed{I}}, i::Int) where {I <: Sector}
-    return TimeReversed{I}(getindex(values(I), i))
-end
-function Base.iterate(::SectorValues{TimeReversed{I}}, state...) where {I <: Sector}
-    next = iterate(values(I), state...)
-    if isnothing(next)
-        return nothing
-    else
-        obj, nextstate = next
-        return TimeReversed{I}(obj), nextstate
-    end
-end
-function findindex(
-        ::SectorValues{TimeReversed{I}}, a::TimeReversed{I}
-    ) where {I <: Sector}
-    return findindex(values(I), a.a)
-end
-
-function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
-    return isless(c1.a, c2.a)
 end
