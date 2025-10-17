@@ -1,7 +1,8 @@
 """
-    FermionParity <: Sector
+    struct FermionParity <: Sector
+    FermionParity(isodd::Bool)
 
-Represents sectors with fermion parity. The fermion parity is a ℤ₂ quantum number that
+Represents sectors with fermion parity. The fermion parity is a ``ℤ₂`` quantum number that
 yields an additional sign when two odd fermions are exchanged, corresponding to a
 [`BraidingStyle`](@ref) that is `Fermionic()`.
 

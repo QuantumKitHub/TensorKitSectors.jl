@@ -37,6 +37,12 @@ export ⊠, ⊗, ×
 export Cyclic, ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, Dihedral, D₃, D₄, CU₁
 export fℤ₂, fU₁, fSU₂
 
+# public
+# ------
+@static if VERSION >= v"1.11.0-DEV.469"
+    eval(Expr(:public, :type_repr))
+end
+
 # imports
 # -------
 using Base: SizeUnknown, HasLength, IsInfinite

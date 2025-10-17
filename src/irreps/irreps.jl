@@ -1,7 +1,7 @@
 # Sectors corresponding to irreducible representations of compact groups
 #------------------------------------------------------------------------------#
 """
-    abstract type AbstractIrrep{G <: Group} <: Sector end
+    abstract type AbstractIrrep{G <: Group} <: Sector
 
 Abstract supertype for sectors which corresponds to irreps (irreducible representations) of
 a group `G`. As we assume unitary representations, these would be finite groups or compact
@@ -20,7 +20,7 @@ struct IrrepTable end
 """
     const Irrep
 
-A constant of a singleton type used as `Irrep[G]` with `G<:Group` a type of group, to
+A constant of a singleton type used as `Irrep[G]` with `G <: Group` a type of group, to
 construct or obtain a concrete subtype of `AbstractIrrep{G}` that implements the data
 structure used to represent irreducible representations of the group `G`.
 """

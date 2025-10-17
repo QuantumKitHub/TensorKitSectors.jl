@@ -1,11 +1,11 @@
 """
-    abstract type Sector end
+    abstract type Sector
 
 Abstract type for representing the (isomorphism classes of) simple objects in (unitary
 and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a finite or
-compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
+compact group. Subtypes `I <: Sector` as the set of labels of a `GradedSpace`.
 
-Every new `I<:Sector` should implement the following methods:
+Every new `I <: Sector` should implement the following methods:
 *   `unit(::Type{I})`: unit element of `I`. If there are multiple, implement `allunits(::Type{I})`
     instead.
 *   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
@@ -38,10 +38,18 @@ implementation of `Base.iterate(::SectorProductIterator{I}, state...)`.
 """
 abstract type Sector end
 
+"""
+    type_repr(T::Type)
+
+Return a string representation of the type `T`, which is used to modify the default
+way in which `Sector` subtypes are displayed in other objects that depend on them.
+"""
+type_repr(T::Type) = repr(T)
+
 # iterator over the values (i.e., elements of representative set of simple objects)
 # in the sector
 """
-    struct SectorValues{I<:Sector}
+    struct SectorValues{I <: Sector}
 
 Singleton type to represent an iterator over the possible values of type `I`, whose
 instance is obtained as `values(I)`. For a new `I::Sector`, the following should be defined
@@ -105,16 +113,16 @@ allunits(::Type{I}) where {I <: Sector} = (unit(I),)
     unit(::Sector) -> Sector
     unit(::Type{<:Sector}) -> Sector
 
-Return the unit element within this type of sector.
+Return the unit element of this type of sector, provided it is unique.
 """
 unit(a::Sector) = unit(typeof(a))
 Base.one(a::Sector) = unit(a)
 Base.one(::Type{I}) where {I <: Sector} = unit(I)
 
 """
-    isunit(::Sector) -> Bool
+    isunit(a::Sector) -> Bool
 
-Return whether the sector is a unit element.
+Return whether sector `a` is a unit element.
 """
 function isunit(a::Sector)
     return if UnitStyle(a) === SimpleUnit()
@@ -128,7 +136,8 @@ Base.isone(a::Sector) = isunit(a)
 """
     leftunit(a::Sector) -> Sector
 
-Return the left unit element within this type of sector.
+Return the left unit element corresponding to `a`;
+this is necessary for multifusion categories, where the unit may not be unique.
 See also [`rightunit`](@ref) and [`unit`](@ref).
 """
 leftunit(a::Sector) = unit(a)
@@ -136,7 +145,8 @@ leftunit(a::Sector) = unit(a)
 """
     rightunit(a::Sector) -> Sector
 
-Return the right unit element within this type of sector.
+Return the right unit element corresponding to `a`;
+this is necessary for multifusion categories, where the unit may not be unique.
 See also [`leftunit`](@ref) and [`unit`](@ref).
 """
 rightunit(a::Sector) = unit(a)
@@ -174,16 +184,16 @@ end
 """
     isreal(::Type{<:Sector}) -> Bool
 
-Return whether the topological data (Fsymbol, Rsymbol) of the sector is real or not (in
-which case it is complex).
+Return whether the topological data (Fsymbol, Rsymbol) of the sector is real or not
+(in which case it is complex).
 """
 Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
 
 # FusionStyle: the most important aspect of Sector
 #---------------------------------------------
 """
-    ⊗(a::I, b::I...) where {I<:Sector}
-    otimes(a::I, b::I...) where {I<:Sector}
+    ⊗(a::I, b::I...) where {I <: Sector}
+    otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
 
@@ -212,6 +222,7 @@ const otimes = ⊗
 end
 
 """
+    struct SectorProductIterator{I <: Sector}
     SectorProductIterator(a::I, b::I) where {I <: Sector}
 
 Custom iterator to represent the (unique) fusion outputs of ``a ⊗ b``.
@@ -260,7 +271,7 @@ function Base.show(io::IO, mime::MIME"text/plain", ab::SectorProductIterator)
 end
 
 """
-    Nsymbol(a::I, b::I, c::I) where {I<:Sector} -> Integer
+    Nsymbol(a::I, b::I, c::I) where {I <: Sector} -> Integer
 
 Return an `Integer` representing the number of times `c` appears in the fusion product
 `a ⊗ b`. Could be a `Bool` if `FusionStyle(I) == UniqueFusion()` or `SimpleFusion()`.
@@ -269,6 +280,7 @@ function Nsymbol end
 
 # trait to describe the fusion of superselection sectors
 """
+    abstract type FusionStyle
     FusionStyle(::Sector)
     FusionStyle(I::Type{<:Sector})
 
@@ -293,6 +305,10 @@ struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity fre
 struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
 const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
 
+@doc (@doc FusionStyle) UniqueFusion
+@doc (@doc FusionStyle) SimpleFusion
+@doc (@doc FusionStyle) GenericFusion
+
 # combine fusion properties of tensor products of sectors
 Base.:&(f::F, ::F) where {F <: FusionStyle} = f
 Base.:&(f₁::FusionStyle, f₂::FusionStyle) = f₂ & f₁
@@ -303,6 +319,7 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
 # similar, but for multifusion categories
 """
+    abstract type UnitStyle
     UnitStyle(::Sector)
     UnitStyle(I::Type{<:Sector})
 
@@ -317,6 +334,9 @@ UnitStyle(a::Sector) = UnitStyle(typeof(a))
 struct SimpleUnit <: UnitStyle end
 struct GenericUnit <: UnitStyle end
 
+@doc (@doc UnitStyle) SimpleUnit
+@doc (@doc UnitStyle) GenericUnit
+
 UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
 @noinline function throw_genericunit_error(I)
@@ -330,7 +350,7 @@ Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
 Base.:&(::GenericUnit, ::SimpleUnit) = GenericUnit()
 
 """
-    Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I<:Sector}
+    Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
 
 Return the F-symbol ``F^{abc}_d`` that associates the two different fusion orders of sectors
 `a`, `b` and `c` into an ouput sector `d`, using either an intermediate sector ``a ⊗ b → e``
@@ -351,7 +371,7 @@ it is a rank 4 array of size
 function Fsymbol end
 
 # properties that can be determined in terms of the F symbol
-# TODO: find mechanism for returning these numbers with custom type T<:AbstractFloat
+# TODO: find mechanism for returning these numbers with custom type T <: AbstractFloat
 """
     dim(a::Sector)
 
@@ -415,13 +435,13 @@ function Asymbol(a::I, b::I, c::I) where {I <: Sector}
 end
 
 """
-    Bsymbol(a::I, b::I, c::I) where {I<:Sector}
+    Bsymbol(a::I, b::I, c::I) where {I <: Sector}
 
 Return the value of ``B^{ab}_c`` which appears in transforming a splitting vertex
 into a fusion vertex using the transformation
 ```
 a -<-μ-<- c                                                    a -<-ν-<- c
-     ∨          -> √(dim(c)/dim(a)) * Bsymbol(a,b,c)[μ,ν]           ∧
+     ∨       -> √(dim(c) / dim(a)) * Bsymbol(a, b, c)[μ, ν]         ∧
      b                                                            dual(b)
 ```
 If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the B-symbol is a
@@ -444,10 +464,12 @@ end
 # trait to describe type to denote how the elementary spaces in a tensor product space
 # interact under permutations or actions of the braid group
 """
+    abstract type BradingStyle
     BraidingStyle(::Sector) -> ::BraidingStyle
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
 Return the type of braiding and twist behavior of sectors of type `I`, which can be either
+*   `NoBraiding()`: no braiding structure
 *   `Bosonic()`: symmetric braiding with trivial twist (i.e. identity)
 *   `Fermionic()`: symmetric braiding with non-trivial twist (squares to identity)
 *   `Anyonic()`: general ``R^{ab}_c`` phase or matrix (depending on `SimpleFusion` or
@@ -467,6 +489,11 @@ struct Bosonic <: SymmetricBraiding end # all twists are one
 struct Fermionic <: SymmetricBraiding end # twists one and minus one
 struct Anyonic <: HasBraiding end
 
+@doc (@doc BraidingStyle) NoBraiding
+@doc (@doc BraidingStyle) Bosonic
+@doc (@doc BraidingStyle) Fermionic
+@doc (@doc BraidingStyle) Anyonic
+
 Base.:&(b::B, ::B) where {B <: BraidingStyle} = b
 Base.:&(B1::BraidingStyle, B2::BraidingStyle) = B2 & B1
 Base.:&(::Bosonic, ::Fermionic) = Fermionic()
@@ -477,17 +504,17 @@ Base.:&(::Fermionic, ::NoBraiding) = NoBraiding()
 Base.:&(::Anyonic, ::NoBraiding) = NoBraiding()
 
 """
-    Rsymbol(a::I, b::I, c::I) where {I<:Sector}
+    Rsymbol(a::I, b::I, c::I) where {I <: Sector}
 
 Returns the R-symbol ``R^{ab}_c`` that maps between ``c → a ⊗ b`` and ``c → b ⊗ a`` as in
 ```
 a -<-μ-<- c                                 b -<-ν-<- c
-     ∨          -> Rsymbol(a,b,c)[μ,ν]           v
+     ∨        -> Rsymbol(a, b, c)[μ, ν]          v
      b                                           a
 ```
 If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the R-symbol is a
 number. Otherwise it is a square matrix with row and column size
-`Nsymbol(a,b,c) == Nsymbol(b,a,c)`.
+`Nsymbol(a, b, c) == Nsymbol(b, a, c)`.
 """
 function Rsymbol end
 
