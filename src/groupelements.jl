@@ -14,7 +14,7 @@ All group elements have [`FusionStyle`](@ref) equal to `UniqueFusion()`.
 Furthermore, the [`BraidingStyle`](@ref) is set to `NoBraiding()`, although this can be
 overridden by a concrete implementation of `AbstractGroupElement`.
 
-For the fusion structure, a specific `SomeGroupElement<:AbstractGroupElement{SomeGroup}`
+For the fusion structure, a specific `SomeGroupElement <: AbstractGroupElement{SomeGroup}`
 should only implement the following methods
 ```julia
 Base.:*(c1::GroupElement, c2::GroupElement) -> GroupElement
@@ -60,10 +60,10 @@ struct ElementTable end
 """
     const GroupElement
 
-A constant of a singleton type used as `GroupElement[G]` or `GroupElement[G,ω]` with `G<:Group`
-a type of group, to construct or obtain a concrete subtype of `AbstractElement{G}`
-that implements the data structure used to represent elements of the group `G`, possibly
-with a second argument `ω` that specifies the associated 3-cocycle.
+A constant of a singleton type used as `GroupElement[G]` or `GroupElement[G, ω]` with
+`G <: Group` a type of group, to construct or obtain a concrete subtype of
+`AbstractElement{G}` that implements the data structure used to represent elements of the
+group `G`, possibly with a second argument `ω` that specifies the associated 3-cocycle.
 """
 const GroupElement = ElementTable()
 
@@ -92,11 +92,12 @@ end
     ZNElement{N, p}(n::Integer)
     GroupElement[ℤ{N}, p](n::Integer)
 
-Represents an element of the group ``ℤ_N`` for some value of `N<64`. (We need `2*(N-1) <= 127`
-in order for `a ⊗ b` to work correctly.) For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced
-by `ℤ₂`, `ℤ₃`, `ℤ₄`. An arbitrary `Integer` `n` can be provided to the constructor, but only
-the value `mod(n, N)` is relevant. The second type parameter `p` should also be specified as
-an integer ` 0 <= p < N` and specifies the 3-cocycle, which is then being given by 
+Represents an element of the group ``ℤ_N`` for some value of `N < 64`. (We need
+`2 * (N - 1) <= 127` in order for `a ⊗ b` to work correctly.) For `N` equals `2`, `3` or
+`4`, `ℤ{N}` can be replaced by `ℤ₂`, `ℤ₃`, `ℤ₄`. An arbitrary `Integer` `n` can be provided
+to the constructor, but only the value `mod(n, N)` is relevant. The second type parameter
+`p` should also be specified as an integer ` 0 <= p < N` and specifies the 3-cocycle, which
+is then being given by
 
 ```julia
 cocycle(a, b, c) = cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N))
