@@ -77,6 +77,7 @@ const SU₂ = SU{2}
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
 type_repr(::Type{ℤ₄}) = "ℤ₄"
+type_repr(::Type{ℤ{N}}) where {N} = "ℤ{$N}"
 type_repr(::Type{D₃}) = "D₃"
 type_repr(::Type{D₄}) = "D₄"
 type_repr(::Type{SU₂}) = "SU₂"

@@ -11,6 +11,8 @@ useful for testing.
 """
 struct PlanarTrivial <: Sector end
 
+type_repr(::Type{PlanarTrivial}) = "PlanarTrivial"
+
 Base.IteratorSize(::Type{SectorValues{PlanarTrivial}}) = HasLength()
 Base.length(::SectorValues{PlanarTrivial}) = 1
 Base.iterate(::SectorValues{PlanarTrivial}, i = 0) = i == 0 ? (PlanarTrivial(), 1) : nothing
@@ -53,6 +55,8 @@ struct FibonacciAnyon <: Sector
         return new(s === :I)
     end
 end
+
+type_repr(::Type{FibonacciAnyon}) = "FibonacciAnyon"
 
 Base.IteratorSize(::Type{SectorValues{FibonacciAnyon}}) = HasLength()
 Base.length(::SectorValues{FibonacciAnyon}) = 2
@@ -171,6 +175,8 @@ struct IsingAnyon <: Sector
         return new(s)
     end
 end
+
+type_repr(::Type{IsingAnyon}) = "IsingAnyon"
 
 const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
 
