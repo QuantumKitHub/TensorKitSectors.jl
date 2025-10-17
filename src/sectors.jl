@@ -363,7 +363,7 @@ it is a rank 4 array of size
 function Fsymbol end
 
 # properties that can be determined in terms of the F symbol
-# TODO: find mechanism for returning these numbers with custom type T<:AbstractFloat
+# TODO: find mechanism for returning these numbers with custom type T <: AbstractFloat
 """
     dim(a::Sector)
 
