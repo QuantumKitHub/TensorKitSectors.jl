@@ -83,7 +83,6 @@ type_repr(::Type{D₄}) = "D₄"
 type_repr(::Type{SU₂}) = "SU₂"
 type_repr(::Type{U₁}) = "U₁"
 type_repr(::Type{CU₁}) = "CU₁"
-type_repr(T::Type) = repr(T)
 
 const GroupTuple = Tuple{Vararg{Group}}
 

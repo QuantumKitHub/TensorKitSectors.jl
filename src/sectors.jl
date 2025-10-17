@@ -38,6 +38,14 @@ implementation of `Base.iterate(::SectorProductIterator{I}, state...)`.
 """
 abstract type Sector end
 
+"""
+    type_repr(T::Type)
+
+Return a string representation of the type `T`, which is used to modify the default
+way in which `Sector` subtypes are displayed in other objects that depend on them.
+"""
+type_repr(T::Type) = repr(T)
+
 # iterator over the values (i.e., elements of representative set of simple objects)
 # in the sector
 """
