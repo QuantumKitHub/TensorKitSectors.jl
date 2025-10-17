@@ -3,9 +3,9 @@
 
 Abstract type for representing the (isomorphism classes of) simple objects in (unitary
 and pivotal) (pre-)fusion categories, e.g. the irreducible representations of a finite or
-compact group. Subtypes `I<:Sector` as the set of labels of a `GradedSpace`.
+compact group. Subtypes `I <: Sector` as the set of labels of a `GradedSpace`.
 
-Every new `I<:Sector` should implement the following methods:
+Every new `I <: Sector` should implement the following methods:
 *   `unit(::Type{I})`: unit element of `I`. If there are multiple, implement `allunits(::Type{I})`
     instead.
 *   `dual(a::I)`: ``a̅``, conjugate or dual label of ``a``
@@ -41,7 +41,7 @@ abstract type Sector end
 # iterator over the values (i.e., elements of representative set of simple objects)
 # in the sector
 """
-    struct SectorValues{I<:Sector}
+    struct SectorValues{I <: Sector}
 
 Singleton type to represent an iterator over the possible values of type `I`, whose
 instance is obtained as `values(I)`. For a new `I::Sector`, the following should be defined
@@ -184,8 +184,8 @@ Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
 # FusionStyle: the most important aspect of Sector
 #---------------------------------------------
 """
-    ⊗(a::I, b::I...) where {I<:Sector}
-    otimes(a::I, b::I...) where {I<:Sector}
+    ⊗(a::I, b::I...) where {I <: Sector}
+    otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
 
@@ -263,7 +263,7 @@ function Base.show(io::IO, mime::MIME"text/plain", ab::SectorProductIterator)
 end
 
 """
-    Nsymbol(a::I, b::I, c::I) where {I<:Sector} -> Integer
+    Nsymbol(a::I, b::I, c::I) where {I <: Sector} -> Integer
 
 Return an `Integer` representing the number of times `c` appears in the fusion product
 `a ⊗ b`. Could be a `Bool` if `FusionStyle(I) == UniqueFusion()` or `SimpleFusion()`.
