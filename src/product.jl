@@ -1,34 +1,69 @@
 # Deligne tensor product of different sectors: ⊠
 #------------------------------------------------------------------------------#
-const SectorTuple = Tuple{Vararg{Sector}}
+const SectorTuple = Tuple{Sector, Vararg{Sector}}
+const SectorNamedTuple = NamedTuple{<:Any, <:SectorTuple}
+const AnySectorTuple = Union{SectorTuple, SectorNamedTuple}
 
 """
-    ProductSector{T<:SectorTuple}
+    ProductSector{T <: Union{SectorTuple, SectorNamedTuple}
 
-Represents the Deligne tensor product of sectors. The type parameter `T` is a tuple of the
-component sectors. The recommended way to construct a `ProductSector` is using the
+Represents the Deligne tensor product of sectors. The type parameter `T` is a (named) tuple
+of the component sectors. The recommended way to construct a `ProductSector` is using the
 [`deligneproduct`](@ref) (`⊠`) operator on the components.
+
+It is also possible to use names for the different factors in the product, either by passing
+a `NamedTuple` of `Sector`s to the `ProductSector` constructor, or by making use of the
+[`@NamedProductSector`](@ref) macro.
 """
-struct ProductSector{T <: SectorTuple} <: Sector
+struct ProductSector{T <: AnySectorTuple} <: Sector
     sectors::T
+    ProductSector{T}(x::T) where {T} = new{T}(x)
 end
 
-Base.Tuple(a::ProductSector) = a.sectors
+ProductSector(x::AnySectorTuple) = ProductSector{typeof(x)}(x)
+ProductSector(x, y, z...) = ProductSector((x, y, z...))
+ProductSector(x::Sector) = ProductSector((x,))
 
-Base.getindex(s::ProductSector, i::Int) = getindex(s.sectors, i)
-Base.length(s::ProductSector) = length(s.sectors)
-Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
+ProductSector{T}(x) where {T} = ProductSector{T}(convert(T, x))
+ProductSector{T}(x, y...) where {T} = ProductSector{T}((x, y...))
+ProductSector{T}(x::Sector) where {T} = ProductSector{T}((x,))
+
+# necessary in Julia 1.10:
+ProductSector{NamedTuple{K, V}}(x::V) where {K, V} = ProductSector{NamedTuple{K, V}}(NamedTuple{K}(x))
+ProductSector{NamedTuple{K, V}}(x::Tuple) where {K, V} = ProductSector{NamedTuple{K, V}}(NamedTuple{K}(V(x)))
+
+const TupleProductSector{T <: SectorTuple} = ProductSector{T}
+const NamedProductSector{T <: SectorTuple} = ProductSector{<:NamedTuple{<:Any, T}}
+
+TupleProductSector(s::NamedProductSector) = ProductSector(values(Tuple(s)))
+
+Base.Tuple(a::ProductSector) = Tuple(a.sectors)
+
+Base.getindex(s::ProductSector, i::Int) = getindex(Tuple(s), i)
+Base.length(s::ProductSector) = length(Tuple(s))
+Base.iterate(s::ProductSector, args...) = iterate(Tuple(s), args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
+Base.@constprop :aggressive function Base.getproperty(s::ProductSector{<:NamedTuple}, f::Symbol)
+    sectors = getfield(s, :sectors)
+    if f === :sectors
+        return sectors
+    else
+        return getproperty(sectors, f)
+    end
+end
+Base.propertynames(s::NamedProductSector) = (:sectors, propertynames(fieldtype(typeof(s), :sectors))...)
+
+_sectors(::Type{NamedTuple{K, V}}) where {K, V} = _sectors(V)
 _sectors(::Type{Tuple{}}) = ()
 Base.@pure function _sectors(::Type{T}) where {T <: SectorTuple}
     return (Base.tuple_type_head(T), _sectors(Base.tuple_type_tail(T))...)
 end
 
-function Base.IteratorSize(::Type{SectorValues{ProductSector{T}}}) where {T <: SectorTuple}
+function Base.IteratorSize(::Type{SectorValues{ProductSector{T}}}) where {T}
     return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(T))...))
 end
-function Base.size(::SectorValues{ProductSector{T}}) where {T <: SectorTuple}
+function Base.size(::SectorValues{ProductSector{T}}) where {T}
     return map(s -> length(values(s)), _sectors(T))
 end
 Base.length(P::SectorValues{<:ProductSector}) = *(size(P)...)
@@ -36,28 +71,27 @@ Base.length(P::SectorValues{<:ProductSector}) = *(size(P)...)
 function _length(iter::SectorValues{I}) where {I <: Sector}
     return Base.IteratorSize(iter) === Base.IsInfinite() ? typemax(Int) : length(iter)
 end
-function _size(::SectorValues{ProductSector{T}}) where {T <: SectorTuple}
+function _size(::SectorValues{ProductSector{T}}) where {T}
     return map(s -> _length(values(s)), _sectors(T))
 end
-function Base.getindex(P::SectorValues{ProductSector{T}}, i::Int) where {T <: SectorTuple}
+function Base.getindex(P::SectorValues{ProductSector{T}}, i::Int) where {T}
     I = manhattan_to_multidimensional_index(i, _size(P))
     return ProductSector{T}(getindex.(values.(_sectors(T)), I))
 end
-function findindex(
-        P::SectorValues{ProductSector{T}},
-        c::ProductSector{T}
-    ) where {T <: SectorTuple}
-    return to_manhattan_index(findindex.(values.(_sectors(T)), c.sectors), _size(P))
+function findindex(P::SectorValues{ProductSector{T}}, c::ProductSector{T}) where {T}
+    return to_manhattan_index(findindex.(values.(_sectors(T)), Tuple(c.sectors)), _size(P))
 end
 
-function Base.iterate(P::SectorValues{ProductSector{T}}, i = 1) where {T <: SectorTuple}
+function Base.iterate(P::SectorValues{<:ProductSector}, i = 1)
     Base.IteratorSize(P) != Base.IsInfinite() && i > length(P) && return nothing
     return getindex(P, i), i + 1
 end
 
-ProductSector{T}(args...) where {T <: SectorTuple} = ProductSector{T}(args)
 function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTuple}
     return ProductSector{T}(convert(T, t))
+end
+function Base.convert(P::Type{<:NamedProductSector{T}}, t::Tuple) where {T <: SectorTuple}
+    return P(convert(T, t))
 end
 
 function unit(::Type{T}) where {T <: ProductSector}
@@ -82,13 +116,14 @@ function Nsymbol(a::P, b::P, c::P) where {P <: ProductSector}
     return prod(map(Nsymbol, a.sectors, b.sectors, c.sectors))
 end
 
-_firstsector(x::ProductSector) = x.sectors[1]
-_tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
+_firstsector(x::ProductSector) = Base.first(Tuple(x))
+_tailsector(x::ProductSector) = ProductSector(Base.tail(Tuple(x)))
 
 function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c, d, e, f))
-    tails = map(_tailsector, (a, b, c, d, e, f))
     F₁ = Fsymbol(heads...)
+    length(a) == 1 && return F₁
+    tails = map(_tailsector, (a, b, c, d, e, f))
     F₂ = Fsymbol(tails...)
     if F₁ isa Number && F₂ isa Number
         return F₁ * F₂
@@ -110,16 +145,12 @@ function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: ProductSector}
         return _kron(F₁, F₂)
     end
 end
-function Fsymbol(
-        a::P, b::P, c::P, d::P, e::P, f::P
-    ) where {P <: ProductSector{<:Tuple{Sector}}}
-    return Fsymbol(map(_firstsector, (a, b, c, d, e, f))...)
-end
 
 function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
     R₁ = Rsymbol(heads...)
+    length(a) == 1 && return R₁
+    tails = map(_tailsector, (a, b, c))
     R₂ = Rsymbol(tails...)
     if R₁ isa Number && R₂ isa Number
         R₁ * R₂
@@ -137,14 +168,12 @@ function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(R₁, R₂)
     end
 end
-function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
-    return Rsymbol(map(_firstsector, (a, b, c))...)
-end
 
 function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
     B₁ = Bsymbol(heads...)
+    length(a) == 1 && return B₁
+    tails = map(_tailsector, (a, b, c))
     B₂ = Bsymbol(tails...)
     if B₁ isa Number && B₂ isa Number
         B₁ * B₂
@@ -162,14 +191,12 @@ function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(B₁, B₂)
     end
 end
-function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
-    return Bsymbol(map(_firstsector, (a, b, c))...)
-end
 
 function Asymbol(a::P, b::P, c::P) where {P <: ProductSector}
     heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
     A₁ = Asymbol(heads...)
+    length(a) == 1 && return A₁
+    tails = map(_tailsector, (a, b, c))
     A₂ = Asymbol(tails...)
     if A₁ isa Number && A₂ isa Number
         A₁ * A₂
@@ -187,46 +214,41 @@ function Asymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(A₁, A₂)
     end
 end
-function Asymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
-    return Asymbol(map(_firstsector, (a, b, c))...)
-end
 
-frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
-frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
+frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, Tuple(p))
+frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, Tuple(p))
 
 function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector}
-    return _kron(
-        fusiontensor(map(_firstsector, (a, b, c))...),
-        fusiontensor(map(_tailsector, (a, b, c))...)
-    )
+    heads = map(_firstsector, (a, b, c))
+    C₁ = fusiontensor(heads...)
+    length(a) == 1 && return C₁
+    tails = map(_tailsector, (a, b, c))
+    C₂ = fusiontensor(tails...)
+    return _kron(C₁, C₂)
 end
 
-function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
-    return fusiontensor(map(_firstsector, (a, b, c))...)
-end
-
-function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function FusionStyle(::Type{<:ProductSector{T}}) where {T}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
-function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function UnitStyle(::Type{<:ProductSector{T}}) where {T}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
-function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function BraidingStyle(::Type{<:ProductSector{T}}) where {T}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-function Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function Base.isreal(::Type{<:ProductSector{T}}) where {T}
     return mapreduce(isreal, &, _sectors(T))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
 
-dim(p::ProductSector) = *(dim.(p.sectors)...)
+dim(p::ProductSector) = prod(dim, p.sectors)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
-function Base.isless(p1::ProductSector{T}, p2::ProductSector{T}) where {T <: SectorTuple}
-    I1 = findindex.(values.(_sectors(T)), p1.sectors)
-    I2 = findindex.(values.(_sectors(T)), p2.sectors)
+function Base.isless(p1::ProductSector{T}, p2::ProductSector{T}) where {T}
+    I1 = findindex.(values.(_sectors(T)), Tuple(p1.sectors))
+    I2 = findindex.(values.(_sectors(T)), Tuple(p2.sectors))
     d1 = sum(I1) - length(I1)
     d2 = sum(I2) - length(I2)
     d1 < d2 && return true
@@ -236,12 +258,11 @@ end
 
 # Default construction from tensor product of sectors
 #-----------------------------------------------------
-⊠(s1, s2, s3, s4...) = ⊠(⊠(s1, s2), s3, s4...)
-const deligneproduct = ⊠
 
 """
-    ⊠(s₁::Sector, s₂::Sector)
     deligneproduct(s₁::Sector, s₂::Sector)
+    deligneproduct(S₁::Type{<:Sector}, S₂::Type{<:Sector})
+    s₁ ⊠ s₂
 
 Given two sectors `s₁` and `s₂`, which label an isomorphism class of simple objects in a
 fusion category ``C₁`` and ``C₂``, `s1 ⊠ s2` (obtained as `\\boxtimes+TAB`) labels the
@@ -250,6 +271,11 @@ isomorphism class of simple objects in the Deligne tensor product category ``C�
 The Deligne tensor product also works in the type domain and for spaces and tensors. For
 group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G₂]`.
 """
+function ⊠ end
+const deligneproduct = ⊠
+
+⊠(s1, s2, s3, s4...) = ⊠(⊠(s1, s2), s3, s4...)
+
 ⊠(s1::Sector, s2::Sector) = ProductSector((s1, s2))
 ⊠(s1::Trivial, s2::Trivial) = s1
 ⊠(s1::Sector, s2::Trivial) = s1
@@ -259,35 +285,32 @@ group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G�
 ⊠(s1::Trivial, p2::ProductSector) = p2
 ⊠(s1::Sector, p2::ProductSector) = ProductSector(tuple(s1, p2.sectors...))
 ⊠(p1::ProductSector, p2::ProductSector) = ProductSector(tuple(p1.sectors..., p2.sectors...))
-
-⊠(I1::Type{Trivial}, I2::Type{Trivial}) = Trivial
-⊠(I1::Type{Trivial}, I2::Type{<:ProductSector}) = I2
-⊠(I1::Type{Trivial}, I2::Type{<:Sector}) = I2
-
-⊠(I1::Type{<:ProductSector}, I2::Type{Trivial}) = I1
-@static if VERSION >= v"1.8"
-    Base.@assume_effects :foldable function ⊠(
-            I1::Type{<:ProductSector}, I2::Type{<:ProductSector}
-        )
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
-else
-    Base.@pure function ⊠(I1::Type{<:ProductSector}, I2::Type{<:ProductSector})
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
+function ⊠(p1::NamedProductSector, p2::NamedProductSector)
+    K = (keys(p1.sectors)..., keys(p2.sectors)...)
+    V = (values(p1.sectors)..., values(p2.sectors)...)
+    return ProductSector(NamedTuple{K}(V))
 end
-⊠(I1::Type{<:ProductSector}, I2::Type{<:Sector}) = I1 ⊠ ProductSector{Tuple{I2}}
 
-⊠(I1::Type{<:Sector}, I2::Type{Trivial}) = I1
-⊠(I1::Type{<:Sector}, I2::Type{<:ProductSector}) = ProductSector{Tuple{I1}} ⊠ I2
-⊠(I1::Type{<:Sector}, I2::Type{<:Sector}) = ProductSector{Tuple{I1, I2}}
+Base.@assume_effects :foldable function ⊠(::Type{I₁}, ::Type{I₂}) where {I₁ <: Sector, I₂ <: Sector}
+    I₁ === Trivial && return I₂
+    I₂ === Trivial && return I₁
+    I₁ <: ProductSector || return ⊠(ProductSector{Tuple{I₁}}, I₂)
+    I₂ <: ProductSector || return ⊠(I₁, ProductSector{Tuple{I₂}})
+    return _deligneproduct_impl(I₁, I₂)
+end
+Base.@assume_effects :foldable function _deligneproduct_impl(
+        ::Type{ProductSector{T₁}}, ::Type{ProductSector{T₂}}
+    ) where {T₁, T₂}
+    return ProductSector{Tuple{_sectors(T₁)..., _sectors(T₂)...}}
+end
+Base.@assume_effects :foldable function _deligneproduct_impl(
+        ::Type{ProductSector{NamedTuple{K₁, V₁}}}, ::Type{ProductSector{NamedTuple{K₂, V₂}}}
+    ) where {K₁, V₁, K₂, V₂}
+    return ProductSector{NamedTuple{(K₁..., K₂...), Tuple{_sectors(V₁)..., _sectors(V₂)...}}}
+end
 
-function Base.show(io::IO, P::ProductSector)
-    sectors = P.sectors
+function Base.show(io::IO, P::TupleProductSector)
+    sectors = Tuple(P)
     compact = get(io, :typeinfo, nothing) === typeof(P)
     sep = compact ? ", " : " ⊠ "
     print(io, "(")
@@ -298,8 +321,23 @@ function Base.show(io::IO, P::ProductSector)
     end
     return print(io, ")")
 end
+function Base.show(io::IO, P::NamedProductSector)
+    if get(io, :typeinfo, nothing) !== typeof(P)
+        print(io, type_repr(typeof(P)))
+    end
+    print(io, "(")
+    first = true
+    for sector in P.sectors
+        first || print(io, ", ")
+        ioc = IOContext(io, :typeinfo => typeof(sector))
+        show(ioc, sector)
+        first = false
+    end
+    print(io, ")")
+    return nothing
+end
 
-function type_repr(P::Type{<:ProductSector})
+function type_repr(P::Type{<:TupleProductSector})
     sectors = P.parameters[1].parameters
     if length(sectors) == 1
         s = "ProductSector{Tuple{" * type_repr(sectors[1]) * "}}"
@@ -314,6 +352,34 @@ function type_repr(P::Type{<:ProductSector})
         s *= ")"
     end
     return s
+end
+
+"""
+    @NamedProductSector{key1::Type1, key2::Type2, ...}
+    @NamedProductSector begin key1::Type1; key2::Type2; ...; end
+
+This macro gives a more convenient syntax for declaring `ProductSector` types which have
+names associated to the components. This is also used when printing `ProductSector` types
+to e.g. the REPL.
+"""
+macro NamedProductSector(ex)
+    return esc(:(ProductSector{@NamedTuple($ex)}))
+end
+function type_repr(P::Type{<:NamedProductSector})
+    names = P.parameters[1].parameters[1]
+    sectors = P.parameters[1].parameters[2].parameters
+    iob = IOBuffer()
+    print(iob, "@NamedProductSector{")
+    first = true
+    for (name, sector) in zip(names, sectors)
+        first || print(iob, ", ")
+        print(iob, name)
+        print(iob, "::")
+        print(iob, type_repr(sector))
+        first = false
+    end
+    print(iob, "}")
+    return String(take!(iob))
 end
 
 #==============================================================================
@@ -335,7 +401,7 @@ See Julia issues #29988, #29428, #22363, #28983.
 Base.show(io::IO, P::Type{<:ProductSector}) = print(io, type_repr(P))
 ==============================================================================#
 function Base.show(io::IO, P::ProductSector{T}) where {T <: Tuple{Vararg{AbstractIrrep}}}
-    sectors = P.sectors
+    sectors = Tuple(P)
     get(io, :typeinfo, nothing) === typeof(P) || print(io, type_repr(typeof(P)))
     print(io, "(")
     for i in 1:length(sectors)
