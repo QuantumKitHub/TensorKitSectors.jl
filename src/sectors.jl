@@ -24,7 +24,7 @@ and optionally
 *   `dim(a::I)`: quantum dimension of sector `a`
 *   `frobenius_schur_indicator(a::I)`: Frobenius-Schur indicator of `a` (1, 0, -1)
 *   `frobenius_schur_phase(a::I)`: Frobenius-Schur phase of `a` (±1)
-#   `sectorscalartype(::Type{I})`: scalar type of F- and R-symbols
+*   `sectorscalartype(::Type{I})`: scalar type of F- and R-symbols
 *   `Bsymbol(a::I, b::I, c::I)`: B-symbol: scalar (in case of
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
 *   `twist(a::I)` -> twist of sector `a`
