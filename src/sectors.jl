@@ -105,16 +105,16 @@ allunits(::Type{I}) where {I <: Sector} = (unit(I),)
     unit(::Sector) -> Sector
     unit(::Type{<:Sector}) -> Sector
 
-Return the unit element within this type of sector.
+Return the unit element of this type of sector, provided it is unique.
 """
 unit(a::Sector) = unit(typeof(a))
 Base.one(a::Sector) = unit(a)
 Base.one(::Type{I}) where {I <: Sector} = unit(I)
 
 """
-    isunit(::Sector) -> Bool
+    isunit(a::Sector) -> Bool
 
-Return whether the sector is a unit element.
+Return whether sector `a` is a unit element.
 """
 function isunit(a::Sector)
     return if UnitStyle(a) === SimpleUnit()
@@ -128,7 +128,8 @@ Base.isone(a::Sector) = isunit(a)
 """
     leftunit(a::Sector) -> Sector
 
-Return the left unit element within this type of sector.
+Return the left unit element corresponding to `a`;
+this is necessary for multifusion categories, where the unit may not be unique.
 See also [`rightunit`](@ref) and [`unit`](@ref).
 """
 leftunit(a::Sector) = unit(a)
@@ -136,7 +137,8 @@ leftunit(a::Sector) = unit(a)
 """
     rightunit(a::Sector) -> Sector
 
-Return the right unit element within this type of sector.
+Return the right unit element corresponding to `a`;
+this is necessary for multifusion categories, where the unit may not be unique.
 See also [`leftunit`](@ref) and [`unit`](@ref).
 """
 rightunit(a::Sector) = unit(a)
@@ -174,8 +176,8 @@ end
 """
     isreal(::Type{<:Sector}) -> Bool
 
-Return whether the topological data (Fsymbol, Rsymbol) of the sector is real or not (in
-which case it is complex).
+Return whether the topological data (Fsymbol, Rsymbol) of the sector is real or not
+(in which case it is complex).
 """
 Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
 
