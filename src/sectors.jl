@@ -295,6 +295,10 @@ struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity fre
 struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
 const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
 
+@doc (@doc FusionStyle) UniqueFusion
+@doc (@doc FusionStyle) SimpleFusion
+@doc (@doc FusionStyle) GenericFusion
+
 # combine fusion properties of tensor products of sectors
 Base.:&(f::F, ::F) where {F <: FusionStyle} = f
 Base.:&(f₁::FusionStyle, f₂::FusionStyle) = f₂ & f₁
@@ -319,6 +323,9 @@ UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
 struct SimpleUnit <: UnitStyle end
 struct GenericUnit <: UnitStyle end
+
+@doc (@doc UnitStyle) SimpleUnit
+@doc (@doc UnitStyle) GenericUnit
 
 UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
@@ -452,6 +459,7 @@ end
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
 Return the type of braiding and twist behavior of sectors of type `I`, which can be either
+*   `NoBraiding()`: no braiding structure
 *   `Bosonic()`: symmetric braiding with trivial twist (i.e. identity)
 *   `Fermionic()`: symmetric braiding with non-trivial twist (squares to identity)
 *   `Anyonic()`: general ``R^{ab}_c`` phase or matrix (depending on `SimpleFusion` or
@@ -470,6 +478,11 @@ abstract type SymmetricBraiding <: HasBraiding end # symmetric braiding => actio
 struct Bosonic <: SymmetricBraiding end # all twists are one
 struct Fermionic <: SymmetricBraiding end # twists one and minus one
 struct Anyonic <: HasBraiding end
+
+@doc (@doc BraidingStyle) NoBraiding
+@doc (@doc BraidingStyle) Bosonic
+@doc (@doc BraidingStyle) Fermionic
+@doc (@doc BraidingStyle) Anyonic
 
 Base.:&(b::B, ::B) where {B <: BraidingStyle} = b
 Base.:&(B1::BraidingStyle, B2::BraidingStyle) = B2 & B1
