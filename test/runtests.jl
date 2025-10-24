@@ -100,20 +100,13 @@ end
 end
 
 @testset "ZNIrrep edge cases" begin
-    a = Irrep[Cyclic{255}](254)
-    @test typeof(a) == ZNIrrep{255, UInt8}
-    @test charge(dual(a)) == mod(-charge(a), 255)
-    @test charge(only(a ⊗ a)) == mod(charge(a) + charge(a), 255)
-
-    b = Irrep[Cyclic{256}](255)
-    @test typeof(b) == ZNIrrep{256, UInt8}
-    @test charge(dual(b)) == mod(-charge(b), 256)
-    @test charge(only(b ⊗ b)) == mod(charge(b) + charge(b), 256)
-
-    c = Irrep[Cyclic{257}](256)
-    @test typeof(c) == ZNIrrep{257, UInt16}
-    @test charge(dual(c)) == mod(-charge(c), 257)
-    @test charge(only(c ⊗ c)) == mod(charge(c) + charge(c), 257)
+    for N in (127, 128, 129)
+        a = Irrep[Cyclic{N}](-1)
+        @test typeof(a) == ((N ≤ (typemax(UInt8) + 1) ÷ 2) ? ZNIrrep{N} : LargeZNIrrep{N})
+        @test typeof(charge(a)) == Int
+        @test charge(dual(a)) == mod(-charge(a), N)
+        @test charge(only(a ⊗ a)) == mod(charge(a) + charge(a), N)
+    end
 end
 
 include("multifusion.jl")

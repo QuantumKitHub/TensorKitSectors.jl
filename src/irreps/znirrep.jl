@@ -1,6 +1,8 @@
-# ZNIrrep: irreps of Z_N are labelled by integers mod N; do we ever want N > 64?
+# ZNIrrep: irreps of Z_N are labelled by integers mod N; stored as UInt or UInt8
+const SMALL_ZN_CUTOFF = (typemax(UInt8) + 1) ÷ 2
+
 """
-    struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
+    struct ZNIrrep{N} <: AbstractIrrep{ℤ{N}}
     ZNIrrep{N}(n::Integer)
     Irrep[ℤ{N}](n::Integer)
 
@@ -8,26 +10,52 @@ Represents irreps of the group ``ℤ_N`` for some value of `N`.
 For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced by [`ℤ₂`](@ref), [`ℤ₃`](@ref), and [`ℤ₄`](@ref).
 An arbitrary `Integer` `n` can be provided to the constructor, but only the value `mod(n, N)` is relevant.
 
-The type of the stored integer `T` can either be explicitly provided, or will automatically be determined
-to be the smallest unsigned integer type that fits all possible irreps for the given `N`.
+The type of the stored integer (`UInt8`) requires `N ≤ $SMALL_ZN_CUTOFF`.
+Larger values of `N` should use the [`LargeZNIrrep`](@ref) instead.
+The constructor `Irrep[ℤ{N}]` should be preferred, as it will automatically select the most efficient storage type for a given value of `N`.
 
 See also [`charge`](@ref) and [`modulus`](@ref) to extract the relevant data.
 
 ## Fields
-- `n::T`: the integer label of the irrep, modulo `N`.
+- `n::UInt8`: the integer label of the irrep, modulo `N`.
 """
-struct ZNIrrep{N, T <: Unsigned} <: AbstractIrrep{ℤ{N}}
-    n::T
+struct ZNIrrep{N} <: AbstractIrrep{ℤ{N}}
+    n::UInt8
     function ZNIrrep{N}(n::Integer) where {N}
-        T = _integer_type(N)
-        return new{N, T}(T(mod(n, N)))
-    end
-    function ZNIrrep{N, T}(n::Integer) where {N, T <: Unsigned}
-        N ≤ typemax(T) + 1 ||
-            throw(TypeError(:ZNIrrep, ZNIrrep{N, T}, ZNIrrep{N, _integer_type(N)}))
-        return new{N, T}(mod(n, N))
+        N ≤ SMALL_ZN_CUTOFF || throw(DomainError(N, "N exceeds the maximal value, use `LargeZNIrrep` instead"))
+        return new{N}(UInt8(mod(n, N)))
     end
 end
+
+"""
+    struct LargeZNIrrep{N} <: AbstractIrrep{ℤ{N}}
+    LargeZNIrrep{N}(n::Integer)
+    Irrep[ℤ{N}](n::Integer)
+
+Represents irreps of the group ``ℤ_N`` for some value of `N`, which is typically larger than $SMALL_ZN_CUTOFF.
+For smaller values of `N`, the [`ZNIrrep}`](@ref) sector type should be used instead.
+An arbitrary `Integer` `n` can be provided to the constructor, but only the value `mod(n, N)` is relevant.
+
+The constructor `Irrep[ℤ{N}]` should be preferred, as it will automatically select the most efficient storage type for a given value of `N`.
+
+See also [`charge`](@ref) and [`modulus`](@ref) to extract the relevant data.
+
+## Fields
+- `n::UInt`: the integer label of the irrep, modulo `N`.
+"""
+struct LargeZNIrrep{N} <: AbstractIrrep{ℤ{N}}
+    n::UInt
+    function LargeZNIrrep{N}(n::Integer) where {N}
+        N ≤ (typemax(UInt) ÷ 2) || throw(DomainError(N, "N exceeds the maximal value"))
+        return new{N}(UInt(mod(n, N)))
+    end
+
+end
+
+const AnyZNIrrep{N} = Union{ZNIrrep{N}, LargeZNIrrep{N}}
+const Z2Irrep = ZNIrrep{2}
+const Z3Irrep = ZNIrrep{3}
+const Z4Irrep = ZNIrrep{4}
 
 """
     modulus(c::ZNIrrep{N}) -> N
@@ -35,64 +63,45 @@ end
 
 The order of the cyclic group, or the modulus of the charge labels.
 """
-modulus(c::ZNIrrep) = modulus(typeof(c))
-modulus(::Type{<:ZNIrrep{N}}) where {N} = N
+modulus(c::AnyZNIrrep) = modulus(typeof(c))
+modulus(::Type{<:AnyZNIrrep{N}}) where {N} = N
 
 """
     charge(c::ZNIrrep) -> Int
 
 The charge label of the irrep `c`.
 """
-charge(c::ZNIrrep) = Int(c.n)
+charge(c::AnyZNIrrep) = Int(c.n)
 
-Base.@assume_effects :foldable function _integer_type(N::Integer)
-    N <= 0 && throw(DomainError(N, "N should be positive"))
-    for T in (UInt8, UInt16, UInt32, UInt64)
-        # T needs to fit a
-        N ≤ (typemax(T) + 1) && return T
-    end
-    throw(DomainError(N, "N is too large"))
-end
+Base.getindex(::IrrepTable, ::Type{ℤ{N}}) where {N} = N ≤ SMALL_ZN_CUTOFF ? ZNIrrep{N} : LargeZNIrrep{N}
+Base.convert(Z::Type{<:AnyZNIrrep}, n::Real) = Z(n)
 
-Base.getindex(::IrrepTable, ::Type{ℤ{N}}) where {N} = ZNIrrep{N, _integer_type(N)}
-Base.convert(Z::Type{<:ZNIrrep}, n::Real) = Z(n)
-const Z2Irrep = ZNIrrep{2, UInt8}
-const Z3Irrep = ZNIrrep{3, UInt8}
-const Z4Irrep = ZNIrrep{4, UInt8}
-
-unit(::Type{ZNIrrep{N, T}}) where {N, T} = ZNIrrep{N, T}(zero(T))
+unit(::Type{ZNIrrep{N}}) where {N} = ZNIrrep{N}(zero(UInt8))
+unit(::Type{LargeZNIrrep{N}}) where {N} = LargeZNIrrep{N}(zero(UInt))
 # be careful with `-` for unsigned integers!
-dual(c::ZNIrrep{N, T}) where {N, T} = ZNIrrep{N, T}(N - c.n)
-⊗(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = (ZNIrrep{N, T}(modular_add(c1.n, c2.n, Val(N))),)
+dual(c::AnyZNIrrep{N}) where {N} = typeof(c)(N - c.n)
+⊗(c1::I, c2::I) where {I <: AnyZNIrrep} = (I(c1.n + c2.n),)
 
-Base.IteratorSize(::Type{SectorValues{ZNIrrep{N, T}}}) where {N, T} = HasLength()
-Base.length(::SectorValues{ZNIrrep{N, T}}) where {N, T} = N
-function Base.iterate(::SectorValues{ZNIrrep{N, T}}, i = 0) where {N, T}
-    return i == N ? nothing : (ZNIrrep{N, T}(i), i + 1)
-end
-function Base.getindex(::SectorValues{ZNIrrep{N, T}}, i::Int) where {N, T}
-    return 1 <= i <= N ? ZNIrrep{N, T}(i - 1) : throw(BoundsError(values(ZNIrrep{N}), i))
-end
-findindex(::SectorValues{ZNIrrep{N, T}}, c::ZNIrrep{N, T}) where {N, T} = c.n + 1
+Base.IteratorSize(::Type{SectorValues{<:ZNIrrep}}) = HasLength()
+# for larger values it doesn't make sense to store the sectors as a tuple
+Base.IteratorSize(::Type{SectorValues{<:LargeZNIrrep}}) = SizeUnknown()
 
-Base.hash(c::ZNIrrep{N, T}, h::UInt) where {N, T} = hash(c.n, h)
-Base.isless(c1::ZNIrrep{N, T}, c2::ZNIrrep{N, T}) where {N, T} = isless(c1.n, c2.n)
+Base.length(::SectorValues{I}) where {I <: AnyZNIrrep} = modulus(I)
+Base.iterate(::SectorValues{I}, i = 0) where {I <: AnyZNIrrep} = i == modulus(I) ? nothing : (I(i), i + 1)
+function Base.getindex(::SectorValues{I}, i::Int) where {I <: AnyZNIrrep}
+    return 1 <= i <= modulus(I) ? I(i - 1) : throw(BoundsError(values(I), i))
+end
+findindex(::SectorValues{I}, c::I) where {I <: AnyZNIrrep} = charge(c) + 1
+
+Base.hash(c::AnyZNIrrep, h::UInt) = hash(c.n, h)
+Base.isless(c1::I, c2::I) where {I <: AnyZNIrrep} = isless(c1.n, c2.n)
 
 # ensure the printing uses `Int`.
-function Base.show(io::IO, c::ZNIrrep)
+function Base.show(io::IO, c::AnyZNIrrep)
     I = typeof(c)
     print_type = get(io, :typeinfo, nothing) !== I
     print_type && print(io, type_repr(I), '(')
     print(io, charge(c))
     print_type && print(io, ')')
     return nothing
-end
-
-# compute x + y mod N, requires 0 <= x < N and 0 <= y < N (unchecked!)
-function modular_add(x::T, y::T, ::Val{N}) where {T <: Unsigned, N}
-    Tmax = typemax(T) + 1
-    0 < N ≤ Tmax || throw(DomainError(N, "N is too large"))
-    N ≤ (typemax(T) + 1) ÷ 2 && return x + y
-    r, flag = Base.add_with_overflow(x, y)
-    return ifelse(flag, (Tmax - N) + r, r)
 end
