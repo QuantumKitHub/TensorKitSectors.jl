@@ -328,7 +328,7 @@ This can be either
 *   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
 *   `GenericUnit()`: the unit is semisimple.
 """
-abstract type UnitStyle end #TODO: rename
+abstract type UnitStyle end
 UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
 struct SimpleUnit <: UnitStyle end
