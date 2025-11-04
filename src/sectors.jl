@@ -128,7 +128,7 @@ function isunit(a::Sector)
     return if UnitStyle(a) === SimpleUnit()
         a == unit(a)
     else
-        leftunit(a) == a == rightunit(a)
+        a in allunits(typeof(a))
     end
 end
 Base.isone(a::Sector) = isunit(a)
