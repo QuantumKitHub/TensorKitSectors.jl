@@ -43,6 +43,8 @@ Istr = TensorKitSectors.type_repr(I)
         @test isunit(C0 ⊠ D0)
         @test length(allunits(I ⊠ I)) == 4
 
+        @test leftunit(M ⊠ Mop) == C0 ⊠ D0 == rightunit(Mop ⊠ M)
+
         @test eval(Meta.parse(sprint(show, s))) == s
         @test @constinferred(hash(s)) == hash(deepcopy(s))
         @constinferred dual(s)
