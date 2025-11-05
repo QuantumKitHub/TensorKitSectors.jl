@@ -69,6 +69,12 @@ function allunits(::Type{ProductSector{T}}) where {T}
     iterators = map(allunits, _sectors(T))
     return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
 end
+function leftunit(a::P) where {P <: ProductSector}
+    return P(map(leftunit, a.sectors))
+end
+function rightunit(a::P) where {P <: ProductSector}
+    return P(map(rightunit, a.sectors))
+end
 
 dual(p::ProductSector) = ProductSector(map(dual, p.sectors))
 function ⊗(p1::P, p2::P) where {P <: ProductSector}

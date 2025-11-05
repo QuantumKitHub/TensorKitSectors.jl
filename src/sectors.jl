@@ -128,7 +128,7 @@ function isunit(a::Sector)
     return if UnitStyle(a) === SimpleUnit()
         a == unit(a)
     else
-        leftunit(a) == a == rightunit(a)
+        a in allunits(typeof(a))
     end
 end
 Base.isone(a::Sector) = isunit(a)
@@ -328,7 +328,7 @@ This can be either
 *   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
 *   `GenericUnit()`: the unit is semisimple.
 """
-abstract type UnitStyle end #TODO: rename
+abstract type UnitStyle end
 UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
 struct SimpleUnit <: UnitStyle end
