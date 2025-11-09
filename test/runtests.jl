@@ -1,16 +1,7 @@
 using Test
 using TestExtras
-using Random
-# using TensorKit: TensorKitSectors
 using TensorKitSectors
-using TensorOperations
-using Base.Iterators: take, product
-using LinearAlgebra: LinearAlgebra
 
-const TKS = TensorKitSectors
-
-include("testsetup.jl")
-using .TestSetup
 include("newsectors.jl")
 using .NewSectors
 
