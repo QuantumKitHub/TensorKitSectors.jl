@@ -58,8 +58,8 @@ end
 
 Runs the entire TensorKitSectors test suite on sector type `I`.
 """
-function test_sectortype(I::Type)
-    return @testset "$(TKS.type_repr(I))" begin
+function test_sector(I::Type)
+    return @testset "$(type_repr(I))" begin
         for (name, fun) in tests
             code = quote
                 $fun($I)
