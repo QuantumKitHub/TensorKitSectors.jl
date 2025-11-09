@@ -46,9 +46,10 @@ const sectorlist = (
     TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep},
 )
 
-@testset "$(TensorKitSectors.type_repr(I))" for I in sectorlist
-    @include("sectors.jl")
-end
+include("testsuite.jl")
+using .SectorTestSuite
+
+foreach(SectorTestSuite.test, sectorlist)
 
 @testset "Deligne product" begin
     sectorlist′ = (Trivial, sectorlist...)
