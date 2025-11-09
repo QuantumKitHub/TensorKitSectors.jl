@@ -1,6 +1,3 @@
-using .TestSetup: smallset, randsector, hasfusiontensor
-using .SectorTestSuite: @testsuite
-using TensorKitSectors
 using TensorOperations
 using LinearAlgebra
 
@@ -55,49 +52,51 @@ end
     end
 end
 
-@testsuite "fusion tensor and F-move and R-move" I -> begin
-    if BraidingStyle(I) isa Bosonic && hasfusiontensor(I)
-        for a in smallset(I), b in smallset(I)
-            for c in ⊗(a, b)
-                X1 = permutedims(fusiontensor(a, b, c), (2, 1, 3, 4))
-                X2 = fusiontensor(b, a, c)
-                l = dim(a) * dim(b) * dim(c)
-                R = LinearAlgebra.transpose(Rsymbol(a, b, c))
-                sz = (l, convert(Int, Nsymbol(a, b, c)))
-                @test reshape(X1, sz) ≈ reshape(X2, sz) * R
-            end
-        end
-        for a in smallset(I), b in smallset(I), c in smallset(I)
-            for e in ⊗(a, b), f in ⊗(b, c)
-                for d in intersect(⊗(e, c), ⊗(a, f))
-                    X1 = fusiontensor(a, b, e)
-                    X2 = fusiontensor(e, c, d)
-                    Y1 = fusiontensor(b, c, f)
-                    Y2 = fusiontensor(a, f, d)
-                    @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
-                        conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
-                    if FusionStyle(I) isa MultiplicityFreeFusion
-                        f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
-                    else
-                        f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
-                    end
-                    @test isapprox(f1, f2; atol = 1.0e-12, rtol = 1.0e-12)
+@testsuite "fusion tensor and F-move" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I), c in smallset(I)
+        for e in ⊗(a, b), f in ⊗(b, c)
+            for d in intersect(⊗(e, c), ⊗(a, f))
+                X1 = fusiontensor(a, b, e)
+                X2 = fusiontensor(e, c, d)
+                Y1 = fusiontensor(b, c, f)
+                Y2 = fusiontensor(a, f, d)
+                @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
+                    conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
+                if FusionStyle(I) isa MultiplicityFreeFusion
+                    f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
+                else
+                    f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
                 end
+                @test isapprox(f1, f2; atol = 1.0e-12, rtol = 1.0e-12)
             end
         end
     end
 end
 
-@testsuite "Orthogonality of fusiontensors" I -> begin
-    if hasfusiontensor(I)
-        for a in smallset(I), b in smallset(I)
-            cs = vec(collect(a ⊗ b))
-            CGCs = map(c -> reshape(fusiontensor(a, b, c), :, dim(c)), cs)
-            M = map(Iterators.product(CGCs, CGCs)) do (cgc1, cgc2)
-                return LinearAlgebra.norm(cgc1' * cgc2)
-            end
-            @test isapprox(M' * M, LinearAlgebra.Diagonal(dim.(cs)); atol = 1.0e-12)
+@testsuite "fusion tensor and F-move and R-move" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            X1 = permutedims(fusiontensor(a, b, c), (2, 1, 3, 4))
+            X2 = fusiontensor(b, a, c)
+            l = dim(a) * dim(b) * dim(c)
+            R = LinearAlgebra.transpose(Rsymbol(a, b, c))
+            sz = (l, convert(Int, Nsymbol(a, b, c)))
+            @test reshape(X1, sz) ≈ reshape(X2, sz) * R
         end
+    end
+end
+
+@testsuite "Orthogonality of fusiontensors" I -> begin
+    hasfusiontensor(I) || return nothing
+    for a in smallset(I), b in smallset(I)
+        cs = vec(collect(a ⊗ b))
+        CGCs = map(c -> reshape(fusiontensor(a, b, c), :, dim(c)), cs)
+        M = map(Iterators.product(CGCs, CGCs)) do (cgc1, cgc2)
+            return LinearAlgebra.norm(cgc1' * cgc2)
+        end
+        @test isapprox(M' * M, LinearAlgebra.Diagonal(dim.(cs)); atol = 1.0e-12)
     end
 end
 
@@ -135,9 +134,8 @@ end
 end
 
 @testsuite "Hexagon equation" I -> begin
-    if BraidingStyle(I) isa HasBraiding
-        for a in smallset(I), b in smallset(I), c in smallset(I)
-            @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
-        end
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I), c in smallset(I)
+        @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
