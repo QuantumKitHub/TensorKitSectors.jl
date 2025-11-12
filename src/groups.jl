@@ -38,6 +38,14 @@ group.
 """
 abstract type Dihedral{N} <: Group end
 
+"""
+    abstract type Alternating{N} <: Group
+
+Type to represent the alternating group of order `N!/2`, which is the group
+of even permutations on `N` elements. 
+"""
+abstract type Alternating{N} <: Group end
+
 
 """
     abstract type U₁ <: AbelianGroup
