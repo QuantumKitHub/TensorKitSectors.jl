@@ -12,15 +12,13 @@ Represents irreps of the alternating group ``A_N``.
 This can take the value 
 """
 struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
-    n::UInt8
-    ANIrrep{N}(data::UInt8) where {N} = new{N}(n)
-end
-
-function ANIrrep{N}(j::Integer, isodd::Bool = false) where {N}
-    @assert 0 < N < 5 "ANIrrep is only provided for 0 < N < 5"
-    0 <= j <= _npartitions(N) ||
-        throw(DomainError(j, "ANIrrep only has irreps 0 <= j <= (N ÷ 2)"))
-    return ANIrrep{N}(j)
+    n::Int
+    function ANIrrep{N}(n::Int) where {N}
+        @assert 0 < N < 5 "ANIrrep is only provided for 0 < N < 5"
+        0 <= n <= _npartitions(N) - 1 ||
+        throw(DomainError(n, "ANIrrep only has irreps " * lazy"0 <= n <= $(_npartitions(N) - 1)"))
+        return new{N}(n)
+    end
 end
 
 _npartitions(N::Int) = (N == 3) ? 3 : (N == 4) ? 4 : 1
@@ -36,16 +34,16 @@ function Base.getproperty(a::ANIrrep{N}, sym::Symbol) where {N}
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
-sectorscalartype(::Type{ANIrrep{N}}) where {N} = Float64
+sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
 Base.isreal(::Type{ANIrrep{N}}) where {N} = true
 
 unit(::Type{ANIrrep{N}}) where {N} = ANIrrep{N}(0)
 function dual(a::ANIrrep{N}) where {N}
     N < 3 && return a
     if N == 3
-        return a.n == 2 ? ANIrrep{3}(1) : a
+        return ANIrrep{3}((3 - a.n) % 3)
     else # N = 4
-        return a.n == 3 ? ANIrrep{4}(3) : (a.n == 2 ? ANIrrep{4}(1) : a)
+        return a.n == 3 ? ANIrrep{4}(3) : ANIrrep{4}((3 - a.n) % 3)
     end
 end
 
@@ -95,75 +93,72 @@ function Base.length(x::ANIrrepProdIterator{N}) where {N}
     N < 4 && return 1 # abelian
     a, b = x.a, x.b
     if a == b
-        return a == 3 ? 4 : 1
+        return a == 3 ? 5 : 1 # 3 x 3 = 1 + 1' + 1'' + 2*3
     else
         return 1
     end
 end
-# continue here
+
+# TODO: any way to shorten this?
 function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
-    if state == 1
-        # A_i x A_j = A_{xor(i,j)}
-        if iszero(b.j) # then also iszero(a.j)
-            cj = 0
-            cisodd = xor(a.isodd, b.isodd)
-            return ANIrrep{N}(cj, cisodd), 5
-        end
-
-        if iszero(a.j)
-            cj = b.j
-
-            # A_i x B_j = B_{xor(i,j)}
-            if 2 * cj == N
-                cisodd = xor(a.isodd, b.isodd)
-                return ANIrrep{N}(cj, cisodd), 5
-            end
-
-            # A_i x rho_j = rho_j
-            return b, 5
-        end
-
-        if a.j == b.j # != 0
-            # B_i x B_j = A_{xor(i,j)}
-            if 2 * b.j == N
-                return ANIrrep{N}(0, xor(a.isodd, b.isodd)), 5
-            end
-
-            # rho_i x rho_i = A_1 + A_2 + rho_2i
-            return ANIrrep{N}(0, false), 2
-        end
-
-        # rho_i x B_j = rho_{j-i}
-        if 2 * b.j == N
-            return ANIrrep{N}(b.j - a.j, false), 5
-        end
-
-        # rho_i x rho_j = rho_{i-j} + rho_{i+j}
-        return ANIrrep{N}(b.j - a.j, false), 3
-    elseif state == 2
-        return ANIrrep{N}(0, true), 3
-    elseif state == 3
-        cj = a.j + b.j
-        if 2 * cj == N
-            return ANIrrep{N}(cj, false), 4
-        end
-        if cj > (N >> 1)
-            cj = N - cj
-        end
-        return ANIrrep{N}(cj, false), 5
-    elseif state == 4
-        return ANIrrep{N}(N >> 1, true), 5
+    if N < 4
+        return state > 1 ? nothing : (ANIrrep{N}((a.n + b.n) % _npartitions(N)), state + 1)
     else
-        return nothing
+        u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
+        if state == 1
+            # rules with the trivial irrep
+            a.n == 0 && return (b, 2)
+            b.n == 0 && return (a, 2)
+            # 1' rules
+            if a.n + b.n == 3 # (1, 2) or (2, 1)
+                return (u, 2)
+            elseif a.n == b.n != 3 # (1,1) or (2,2)
+                return (A4Irrep((2 * a.n) % 3), 2)
+            elseif (a.n in (1, 2) && b.n == 3) || (a.n == 3 && b.n in (1, 2))
+                # all 1D × 3 = 3
+                return (three, 2)
+            else # 3 x 3
+                return (u, 2) # first in sequence
+            end
+        elseif state == 2 && a.n == 3 && b.n == 3
+            return (u′, 3)
+        elseif state == 3 && a.n == 3 && b.n == 3
+            return (u′′, 4)
+        elseif state == 4 && a.n == 3 && b.n == 3
+            return (three, 5)
+        elseif state == 5 && a.n == 3 && b.n == 3
+            return (three, 6)
+        else
+            return nothing
+        end
     end
 end
 
 # Topological data
 # ----------------
-dim(a::ANIrrep{N}) where {N} = ifelse((a.j == 0) | (2 * a.j == N), 1, 2)
+function dim(a::ANIrrep{N}) where {N}
+    N < 4 && return 1
+    return a.n == 3 ? 3 : 1
+end
 
 function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
+    N < 4 && return (c.n == (a.n + b.n) % _npartitions(N)) ? 1 : 0
+    # N = 4
+    u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
+    if a == three
+        if b == three # 3 x 3
+            return (c == u || c == u′ || c == u′′) ? 1 : 3
+        else # 3 x 1D
+            return c == three ? 1 : 0
+        end
+    else
+        if b == three # 1D x 3
+            return c == three ? 1 : 0
+        else # 1D x 1D
+            return c.n == (a.n + b.n) % 3 ? 1 : 0
+        end
+    end
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
