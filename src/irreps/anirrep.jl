@@ -172,20 +172,15 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
         return zero_array
 
-    # tensoring with units gives 1
-    (isunit(a) || isunit(b) || isunit(c)) && return one(T)
-
     # fallback through fusiontensor
     A = fusiontensor(a, b, e)
-    A = reshape(A, size(A, 1), size(A, 2), size(A, 3))
     B = fusiontensor(e, c, d)
-    B1 = reshape(view(B, :, :, 1), size(B, 1), size(B, 2))
     C = fusiontensor(b, c, f)
-    C = reshape(C, size(C, 1), size(C, 2), size(C, 3))
     D = fusiontensor(a, f, d)
-    D1 = reshape(view(D, :, :, 1), size(D, 1), size(D, 2))
+    F_array = zero_array
+    @tensor F_array[κ, λ, μ, ν] = conj(D[a f d ν]) * conj(C[b c f μ]) * A[a b e κ] * B[e c d λ] / dim(d)
 
-    return @tensor conj(D1[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B1[3 4]
+    return F_array
 end
 
 function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
@@ -203,11 +198,8 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     ω = cis(2π/3)
 
     if a.n == b.n == 3 # 3 ⊗ 3
-        prefactor(n) = ω^(n) / sqrt(3)
         if c.n != 3 # singlets
-            for i in 1:3
-                C[i, i, 1] = prefactor(c.n)
-            end
+            C = _fusiontensor_3x3_to_1(c.n)
         # if c.n == 0
         #     for i in 1:3
         #         C[i,i,1] = 1/sqrt(3)
@@ -221,30 +213,96 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
         #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
         #     end
         else
-            for i in 1:2 # symmetric and antisymmetric triplet
-                C[1, 2, 3, i] = 1/sqrt(2)
-                C[2, 3, 1, i] = 1/sqrt(2)
-                C[3, 1, 2, i] = 1/sqrt(2)
+            C = _fusiontensor_3x3_to_3()
+            # im = (2, 3, 1) # cyclic pairs
+            # jm = (3, 1, 2)
+            # delta(i, j) = i == j
+            # for m in 1:3
+            #     i_m, j_m = im[m], jm[m]
+            #     for i in 1:3, j in 1:3
+            #         C[m, i, j, 1] = 1/sqrt(2) * (delta(i, i_m) * delta(j, j_m) - delta(i, j_m) * delta(j, i_m))
 
-                C[1, 3, 2, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
-                C[2, 1, 3, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
-                C[3, 2, 1, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
-            end
+            #         C[m, i, j, 2] = 1/sqrt(6) * (delta(i, i_m) * delta(j, j_m) + delta(i, j_m) * delta(j, i_m) - 2 * delta(i, m) * delta(j, m))
+            #     end
+            # end
         end
     
     else
         if a.n != 3 && b.n != 3 # 1d x 1d
             C[1,1,1] = one(T)
-        elseif a.n != 3 && b.n == 3 # 1d x 3
-            for i in 1:3
-                C[1,i,i] = one(T)
-            end
-        else # 3 x 1d
-            for i in 1:3
-                C[i,1,i] = one(T)
-            end
+        elseif a.n == 3 && b.n != 3 # 3 x 1d
+            C = _fusiontensor_3x1_to_3(b.n)
+        else # 1d x 3
+            C = reshape(_fusiontensor_3x1_to_3(a.n), 1, 3, 3, 1)
         end
     end
 
+    return C
+end
+
+# TODO: for some reason the analytic expression doesn't match these results, which is from CategoryData
+function _fusiontensor_3x3_to_3()
+    S = zeros(ComplexF64, 3, 3, 3, 2)
+    s2 = 1 / sqrt(2.0)
+    s6 = 1 / sqrt(6.0)
+    r23 = sqrt(2.0/3.0)
+
+    im  = (2, 1, 1)
+    jm = (3, 2, 3)
+
+    # μ = 1 : antisymmetric off-diagonal entries
+    S[im[1], jm[1], 1, 1] =  s2
+    S[jm[1], im[1], 1, 1] = -s2
+    S[im[2], jm[2], 2, 1] =  s2
+    S[jm[2], im[2], 2, 1] = -s2
+    S[im[3], jm[3], 3, 1] =  -s2
+    S[jm[3], im[3], 3, 1] = s2
+
+    # μ = 2 : diagonal negative + symmetric off-diagonals
+    S[1, 1, 1, 2] = -r23
+    S[im[1], jm[1], 1, 2] += s6
+    S[jm[1], im[1], 1, 2] += s6
+
+    S[3, 3, 2, 2] = -r23
+    S[im[2], jm[2], 2, 2] += s6
+    S[jm[2], im[2], 2, 2] += s6
+
+    S[2, 2, 3, 2] = -r23
+    S[im[3], jm[3], 3, 2] += s6
+    S[jm[3], im[3], 3, 2] += s6
+
+    return S
+end
+
+function _fusiontensor_3x3_to_1(n::Int)
+    C = zeros(ComplexF64, 3, 3, 1, 1)
+    sqrt3 = sqrt(3.0)
+    ijs = Vector{Tuple{Int,Int}}(undef, 3)
+    if n == 0
+        ijs[1] = (1, 1)
+        ijs[2] = (2, 3)
+        ijs[3] = (3, 2)
+    elseif n == 1
+        ijs[1] = (1, 2)
+        ijs[2] = (2, 1)
+        ijs[3] = (3, 3)
+    elseif n == 2
+        ijs[1] = (1, 3)
+        ijs[2] = (2, 2)
+        ijs[3] = (3, 1)
+    end
+    for i in 1:3
+        C[ijs[i][1], ijs[i][2], 1, 1] = 1 / sqrt3
+    end
+    return C
+end
+
+function _fusiontensor_3x1_to_3(n::Int)
+    C = zeros(ComplexF64, 3, 1, 3, 1)
+    ijs = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
+    _ijs = ijs[n + 1]
+    for i in 1:3
+        C[_ijs[i], 1, i, 1] = 1.0
+    end
     return C
 end
