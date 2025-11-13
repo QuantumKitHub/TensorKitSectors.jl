@@ -21,6 +21,7 @@ export triangle_equation, pentagon_equation, hexagon_equation
 export Trivial
 export Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, LargeZNIrrep, U1Irrep
 export D3Irrep, D4Irrep, DNIrrep, CU1Irrep
+export ANIrrep, A2Irrep, A3Irrep, A4Irrep
 export SU2Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, TimeReversed
@@ -35,6 +36,7 @@ export charge, modulus
 # ---------------
 export ⊠, ⊗, ×
 export Cyclic, ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, Dihedral, D₃, D₄, CU₁
+export Alternating, A₂, A₃, A₄
 export fℤ₂, fU₁, fSU₂
 
 # public

@@ -66,5 +66,6 @@ end
 include("znirrep.jl")
 include("u1irrep.jl")
 include("dnirrep.jl")
+include("anirrep.jl")
 include("cu1irrep.jl")
 include("su2irrep.jl")
