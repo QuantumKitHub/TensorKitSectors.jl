@@ -34,7 +34,7 @@ function Base.getproperty(a::ANIrrep{N}, sym::Symbol) where {N}
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
-sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
+sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : ComplexF64
 Base.isreal(::Type{ANIrrep{N}}) where {N} = true
 
 unit(::Type{ANIrrep{N}}) where {N} = ANIrrep{N}(0)
@@ -148,7 +148,7 @@ function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
     u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
     if a == three
         if b == three # 3 x 3
-            return (c == u || c == u′ || c == u′′) ? 1 : 3
+            return (c == u || c == u′ || c == u′′) ? 1 : 2
         else # 3 x 1D
             return c == three ? 1 : 0
         end
@@ -163,7 +163,14 @@ end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     T = sectorscalartype(I)
-    (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
+    Nabe = Nsymbol(a, b, e)
+    Necd = Nsymbol(e, c, d)
+    Nbcf = Nsymbol(b, c, f)
+    Nafd = Nsymbol(a, f, d)
+
+    zero_array = zeros(sectorscalartype(I), Nabe, Necd, Nbcf, Nafd)
+    Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
+        return zero_array
 
     # tensoring with units gives 1
     (isunit(a) || isunit(b) || isunit(c)) && return one(T)
@@ -186,123 +193,57 @@ function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !((2 * a.j) == (2 * b.j) == N), -R, R)
 end
 
-# Fusion tensors for Rep(A4)
-# dims: 1 => 1, 1p => 1, 1pp => 1, 3 => 3
-# Tensors have shape (dim_out, dim_inA, dim_inB)
-#
-# Conventions:
-# - Triplet basis components ordered (1,2,3).
-# - omega = exp(2pi*im/3).
-# - Normalization: singlets 1/sqrt(3), symmetric/antisymmetric triplet components 1/sqrt(2).
-
-const ω = cis(2π/3)   # e^{2π i / 3}
-
-# 3 ⊗ 3 -> 1  (scalar)
-T_3x3_to_1 = zeros(ComplexF64, 1, 3, 3)
-for i in 1:3
-    T_3x3_to_1[1,i,i] = 1/sqrt(3)
-end
-
-# 3 ⊗ 3 -> 1' 
-T_3x3_to_1p = zeros(ComplexF64, 1, 3, 3)
-T_3x3_to_1p[1,1,1] = 1/sqrt(3)
-T_3x3_to_1p[1,2,2] = ω/sqrt(3)
-T_3x3_to_1p[1,3,3] = ω^2/sqrt(3)
-
-# 3 ⊗ 3 -> 1'' 
-T_3x3_to_1pp = zeros(ComplexF64, 1, 3, 3)
-T_3x3_to_1pp[1,1,1] = 1/sqrt(3)
-T_3x3_to_1pp[1,2,2] = ω^2/sqrt(3)
-T_3x3_to_1pp[1,3,3] = ω/sqrt(3)
-
-# 3 ⊗ 3 -> 3_Symmetric  (symmetric triplet)
-T_3x3_to_3S = zeros(ComplexF64, 3, 3, 3)
-# components: (a2 b3 + a3 b2, a3 b1 + a1 b3, a1 b2 + a2 b1)
-T_3x3_to_3S[1,2,3] = 1/sqrt(2); T_3x3_to_3S[1,3,2] = 1/sqrt(2)
-T_3x3_to_3S[2,3,1] = 1/sqrt(2); T_3x3_to_3S[2,1,3] = 1/sqrt(2)
-T_3x3_to_3S[3,1,2] = 1/sqrt(2); T_3x3_to_3S[3,2,1] = 1/sqrt(2)
-
-# 3 ⊗ 3 -> 3_Antisymmetric  (antisymmetric triplet)
-T_3x3_to_3A = zeros(ComplexF64, 3, 3, 3)
-# components: (a2 b3 - a3 b2, a3 b1 - a1 b3, a1 b2 - a2 b1)
-T_3x3_to_3A[1,2,3] =  1/sqrt(2); T_3x3_to_3A[1,3,2] = -1/sqrt(2)
-T_3x3_to_3A[2,3,1] =  1/sqrt(2); T_3x3_to_3A[2,1,3] = -1/sqrt(2)
-T_3x3_to_3A[3,1,2] =  1/sqrt(2); T_3x3_to_3A[3,2,1] = -1/sqrt(2)
-
-# 1 × anything and anything × 1  (trivial fusion: scalar multiplies vector)
-# Represented as identity maps: out_dim = inB_dim (or inA_dim)
-# 1 ⊗ 3 -> 3
-T_1x3_to_3 = zeros(ComplexF64, 3, 1, 3)
-for i in 1:3
-    T_1x3_to_3[i,1,i] = 1.0
-end
-# 3 ⊗ 1 -> 3
-T_3x1_to_3 = zeros(ComplexF64, 3, 3, 1)
-for i in 1:3
-    T_3x1_to_3[i,i,1] = 1.0
-end
-
-# 1' ⊗ 3 -> 3  and 3 ⊗ 1' -> 3  (scalar multiplication map)
-# (the representation matrix of 1' enters in the action; the fusion tensor itself is the trivial identification)
-T_1p_x_3_to_3 = zeros(ComplexF64, 3, 1, 3)
-for i in 1:3
-    T_1p_x_3_to_3[i,1,i] = 1.0
-end
-T_3_x_1p_to_3 = zeros(ComplexF64, 3, 3, 1)
-for i in 1:3
-    T_3_x_1p_to_3[i,i,1] = 1.0
-end
-
-# 1' ⊗ 1' -> 1'' ; 1' ⊗ 1'' -> 1 ; 1'' ⊗ 1'' -> 1'
-T_1p_x_1p_to_1pp = zeros(ComplexF64, 1, 1, 1); T_1p_x_1p_to_1pp[1,1,1] = 1.0
-T_1p_x_1pp_to_1    = zeros(ComplexF64, 1, 1, 1); T_1p_x_1pp_to_1[1,1,1] = 1.0
-T_1pp_x_1pp_to_1p  = zeros(ComplexF64, 1, 1, 1); T_1pp_x_1pp_to_1p[1,1,1] = 1.0
-
 function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     T = sectorscalartype(I)
-    C = zeros(T, dim(a), dim(b), dim(c), 1)
-    Nsymbol(a, b, c) || return C
+    Nabc = Nsymbol(a, b, c)
+    C = zeros(T, dim(a), dim(b), dim(c), Nabc)
+    Nabc == 0 && return C
+    N < 4 && return ones(T, 1, 1, 1, 1) # all fusion channels trivial
 
-    if c.j == 0
-        if a.j == b.j == 0 || (2 * a.j == 2 * b.j == N)
-            C[1, 1, 1] = 1
-        else # a.j == b.j
-            # 0\pm = 1/sqrt(2) (v_i^+ \otimes w_j^- \pm v_i^- \otimes w_j^+)
-            C[1, 2, 1] = T(sqrt(2) / 2)
-            C[2, 1, 1] = c.isodd ? -C[1, 2, 1] : C[1, 2, 1]
-        end
-    elseif 2 * c.j == N
-        if (a.j == (N >> 1)) | (b.j == (N >> 1))
-            C[1, 1, 1] = 1
+    ω = cis(2π/3)
+
+    if a.n == b.n == 3 # 3 ⊗ 3
+        prefactor(n) = ω^(n) / sqrt(3)
+        if c.n != 3 # singlets
+            for i in 1:3
+                C[i, i, 1] = prefactor(c.n)
+            end
+        # if c.n == 0
+        #     for i in 1:3
+        #         C[i,i,1] = 1/sqrt(3)
+        #     end
+        # elseif c.n == 1
+        #     for i in 1:3
+        #         C[i,i,1] = ω^(i-1)/sqrt(3)
+        #     end
+        # elseif c.n == 2
+        #     for i in 1:3
+        #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
+        #     end
         else
-            C[1, 1, 1] = T(sqrt(2) / 2)
-            C[2, 2, 1] = c.isodd ? -C[1, 1, 1] : C[1, 1, 1]
+            for i in 1:2 # symmetric and antisymmetric triplet
+                C[1, 2, 3, i] = 1/sqrt(2)
+                C[2, 3, 1, i] = 1/sqrt(2)
+                C[3, 1, 2, i] = 1/sqrt(2)
+
+                C[1, 3, 2, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
+                C[2, 1, 3, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
+                C[3, 2, 1, i] = (i == 1 ? 1/sqrt(2) : -1/sqrt(2))
+            end
         end
-    elseif a.j == 0
-        C[1, 1, 1] = 1
-        C[1, 2, 2] = a.isodd ? -1 : 1
-    elseif b.j == 0
-        C[1, 1, 1] = 1
-        C[2, 1, 2] = b.isodd ? -1 : 1
-    elseif 2 * a.j == N
-        C[1, 1, 2] = 1
-        C[1, 2, 1] = a.isodd ? -1 : 1
-    elseif 2 * b.j == N
-        C[1, 1, 2] = 1
-        C[2, 1, 1] = b.isodd ? -1 : 1
-        # from here on everything is 2D --------------------
-    elseif c.j == a.j + b.j
-        C[1, 1, 1] = 1
-        C[2, 2, 2] = 1
-    elseif c.j == N - (a.j + b.j)
-        C[1, 1, 2] = 1
-        C[2, 2, 1] = 1
-    elseif c.j == a.j - b.j
-        C[1, 2, 1] = 1
-        C[2, 1, 2] = 1
-    elseif c.j == b.j - a.j
-        C[1, 2, 2] = 1
-        C[2, 1, 1] = 1
+    
+    else
+        if a.n != 3 && b.n != 3 # 1d x 1d
+            C[1,1,1] = one(T)
+        elseif a.n != 3 && b.n == 3 # 1d x 3
+            for i in 1:3
+                C[1,i,i] = one(T)
+            end
+        else # 3 x 1d
+            for i in 1:3
+                C[i,1,i] = one(T)
+            end
+        end
     end
 
     return C
