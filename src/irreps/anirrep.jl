@@ -127,8 +127,6 @@ function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
             return (u′′, 4)
         elseif state == 4 && a.n == 3 && b.n == 3
             return (three, 5)
-        elseif state == 5 && a.n == 3 && b.n == 3
-            return (three, 6)
         else
             return nothing
         end
