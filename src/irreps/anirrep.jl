@@ -34,7 +34,7 @@ function Base.getproperty(a::ANIrrep{N}, sym::Symbol) where {N}
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
-sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : ComplexF64
+sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
 Base.isreal(::Type{ANIrrep{N}}) where {N} = true
 
 unit(::Type{ANIrrep{N}}) where {N} = ANIrrep{N}(0)
@@ -168,21 +168,21 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     Nbcf = Nsymbol(b, c, f)
     Nafd = Nsymbol(a, f, d)
 
-    zero_array = zeros(sectorscalartype(I), Nabe, Necd, Nbcf, Nafd)
     Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
-        return zero_array
+        return zeros(sectorscalartype(I), Nabe, Necd, Nbcf, Nafd)
 
     # fallback through fusiontensor
     A = fusiontensor(a, b, e)
-    B = fusiontensor(e, c, d)
+    B = fusiontensor(e, c, d)[:, :, 1, :]
     C = fusiontensor(b, c, f)
-    D = fusiontensor(a, f, d)
-    F_array = zero_array
-    @tensor F_array[κ, λ, μ, ν] = conj(D[a f d ν]) * conj(C[b c f μ]) * A[a b e κ] * B[e c d λ] / dim(d)
+    D = fusiontensor(a, f, d)[:, :, 1, :]
+    @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
+        A[1, 2, 3, -1] * B[3, 4, -2]
 
-    return F_array
+    return F
 end
 
+# TODO: fix this to use analytic expression
 function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     R = convert(sectorscalartype(I), Nsymbol(a, b, c))
     return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !((2 * a.j) == (2 * b.j) == N), -R, R)
