@@ -52,8 +52,6 @@ Base.convert(::Type{ANIrrep{N}}, n::Integer) where {N} = ANIrrep{N}(n)
 
 Base.getindex(::IrrepTable, ::Type{Alternating{N}}) where {N} = ANIrrep{N}
 
-const A2Irrep = ANIrrep{2} # trivial
-const A3Irrep = ANIrrep{3} # Z3
 const A4Irrep = ANIrrep{4}
 
 function Base.show(io::IO, a::ANIrrep)
