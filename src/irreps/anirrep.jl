@@ -60,7 +60,7 @@ function Base.show(io::IO, a::ANIrrep)
     if get(io, :typeinfo, nothing) !== typeof(a)
         print(io, type_repr(typeof(a)))
     end
-    print(io, "(", a.n, ")")
+    print(io, a.n)
     return nothing
 end
 
