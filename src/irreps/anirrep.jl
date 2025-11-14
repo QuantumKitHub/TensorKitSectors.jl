@@ -182,10 +182,10 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     return F
 end
 
-# TODO: fix this to use analytic expression
+# bosonic
 function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     R = convert(sectorscalartype(I), Nsymbol(a, b, c))
-    return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !((2 * a.j) == (2 * b.j) == N), -R, R)
+    return R
 end
 
 function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
