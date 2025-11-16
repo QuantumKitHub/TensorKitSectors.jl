@@ -83,7 +83,7 @@ function Base.length(x::ANIrrepProdIterator{N}) where {N}
     N < 4 && return 1 # abelian
     a, b = x.a, x.b
     if a == b
-        return a == 3 ? 5 : 1 # 3 x 3 = 1 + 1' + 1'' + 2*3
+        return a.n == 3 ? 5 : 1 # 3 x 3 = 1 + 1' + 1'' + 2*3
     else
         return 1
     end
