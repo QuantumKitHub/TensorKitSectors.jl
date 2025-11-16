@@ -54,14 +54,6 @@ Base.getindex(::IrrepTable, ::Type{Alternating{N}}) where {N} = ANIrrep{N}
 
 const A4Irrep = ANIrrep{4}
 
-function Base.show(io::IO, a::ANIrrep)
-    if get(io, :typeinfo, nothing) !== typeof(a)
-        print(io, type_repr(typeof(a)))
-    end
-    print(io, a.n)
-    return nothing
-end
-
 # Sector iterator
 # ---------------
 Base.isless(a::ANIrrep{N}, b::ANIrrep{N}) where {N} = isless(a.n, b.n)
