@@ -230,7 +230,7 @@ end
 
 # TODO: for some reason the analytic expression doesn't match these results, which is from CategoryData
 function _fusiontensor_3x3_to_3()
-    S = zeros(ComplexF64, 3, 3, 3, 2)
+    S = zeros(Float64, 3, 3, 3, 2)
     s2 = 1 / sqrt(2.0)
     s6 = 1 / sqrt(6.0)
     r23 = sqrt(2.0/3.0)
@@ -263,7 +263,7 @@ function _fusiontensor_3x3_to_3()
 end
 
 function _fusiontensor_3x3_to_1(n::Int)
-    C = zeros(ComplexF64, 3, 3, 1, 1)
+    C = zeros(Float64, 3, 3, 1, 1)
     sqrt3 = sqrt(3.0)
     ijs = Vector{Tuple{Int,Int}}(undef, 3)
     if n == 0
@@ -286,7 +286,7 @@ function _fusiontensor_3x3_to_1(n::Int)
 end
 
 function _fusiontensor_3x1_to_3(n::Int)
-    C = zeros(ComplexF64, 3, 1, 3, 1)
+    C = zeros(Float64, 3, 1, 3, 1)
     ijs = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
     _ijs = ijs[n + 1]
     for i in 1:3
