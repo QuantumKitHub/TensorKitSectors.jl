@@ -15,14 +15,14 @@ struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
     n::Int
     function ANIrrep{N}(n::Int) where {N}
         0 <= n <= _npartitions(N) - 1 ||
-        throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
+            throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
         return new{N}(n)
     end
 end
 
 function _npartitions(N::Int)
     0 < N < 5|| throw(ArgumentError("ANIrrep only implemented for 0 < N < 5"))
-    (N == 3) ? 3 : (N == 4) ? 4 : 1
+    return (N == 3) ? 3 : (N == 4) ? 4 : 1
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
@@ -127,7 +127,7 @@ function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
     N < 4 && return (c.n == (a.n + b.n) % _npartitions(N)) ? 1 : 0
     # N = 4
     u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
-    if a == three
+    return if a == three
         if b == three # 3 x 3
             return (c == u || c == u′ || c == u′′) ? 1 : 2
         else # 3 x 1D
@@ -187,23 +187,23 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     Nabc == 0 && return C
     N < 4 && return ones(T, 1, 1, 1, 1) # all fusion channels trivial
 
-    ω = cis(2π/3)
+    ω = cis(2π / 3)
 
     if a.n == b.n == 3 # 3 ⊗ 3
         if c.n != 3 # singlets
             C = A4Irrep_fusiontensor_3x3_to_1(c.n)
-        # if c.n == 0
-        #     for i in 1:3
-        #         C[i,i,1] = 1/sqrt(3)
-        #     end
-        # elseif c.n == 1
-        #     for i in 1:3
-        #         C[i,i,1] = ω^(i-1)/sqrt(3)
-        #     end
-        # elseif c.n == 2
-        #     for i in 1:3
-        #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
-        #     end
+            # if c.n == 0
+            #     for i in 1:3
+            #         C[i,i,1] = 1/sqrt(3)
+            #     end
+            # elseif c.n == 1
+            #     for i in 1:3
+            #         C[i,i,1] = ω^(i-1)/sqrt(3)
+            #     end
+            # elseif c.n == 2
+            #     for i in 1:3
+            #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
+            #     end
         else
             C = A4Irrep_fusiontensor_3x3_to_3()
             # im = (2, 3, 1) # cyclic pairs
@@ -218,10 +218,10 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
             #     end
             # end
         end
-    
+
     else
         if a.n != 3 && b.n != 3 # 1d x 1d
-            C[1,1,1] = one(T)
+            C[1, 1, 1] = one(T)
         elseif a.n == 3 && b.n != 3 # 3 x 1d
             C = A4Irrep_fusiontensor_3x1_to_3(b.n)
         else # 1d x 3
@@ -237,17 +237,17 @@ function A4Irrep_fusiontensor_3x3_to_3()
     S = zeros(Float64, 3, 3, 3, 2)
     s2 = 1 / sqrt(2.0)
     s6 = 1 / sqrt(6.0)
-    r23 = sqrt(2.0/3.0)
+    r23 = sqrt(2.0 / 3.0)
 
-    im  = (2, 1, 1)
+    im = (2, 1, 1)
     jm = (3, 2, 3)
 
     # μ = 1 : antisymmetric off-diagonal entries
-    S[im[1], jm[1], 1, 1] =  s2
+    S[im[1], jm[1], 1, 1] = s2
     S[jm[1], im[1], 1, 1] = -s2
-    S[im[2], jm[2], 2, 1] =  s2
+    S[im[2], jm[2], 2, 1] = s2
     S[jm[2], im[2], 2, 1] = -s2
-    S[im[3], jm[3], 3, 1] =  -s2
+    S[im[3], jm[3], 3, 1] = -s2
     S[jm[3], im[3], 3, 1] = s2
 
     # μ = 2 : diagonal negative + symmetric off-diagonals
@@ -269,7 +269,7 @@ end
 function A4Irrep_fusiontensor_3x3_to_1(n::Int)
     C = zeros(Float64, 3, 3, 1, 1)
     sqrt3 = sqrt(3.0)
-    ijs = Vector{Tuple{Int,Int}}(undef, 3)
+    ijs = Vector{Tuple{Int, Int}}(undef, 3)
     if n == 0
         ijs[1] = (1, 1)
         ijs[2] = (2, 3)
