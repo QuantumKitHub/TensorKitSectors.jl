@@ -16,22 +16,12 @@ struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
     function ANIrrep{N}(n::Int) where {N}
         @assert 0 < N < 5 "ANIrrep is only provided for 0 < N < 5"
         0 <= n <= _npartitions(N) - 1 ||
-        throw(DomainError(n, "ANIrrep only has irreps " * lazy"0 <= n <= $(_npartitions(N) - 1)"))
+        throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
         return new{N}(n)
     end
 end
 
 _npartitions(N::Int) = (N == 3) ? 3 : (N == 4) ? 4 : 1
-
-Base.propertynames(x::ANIrrep) = (:n,)
-
-function Base.getproperty(a::ANIrrep{N}, sym::Symbol) where {N}
-    if sym === :n
-        return getfield(a, :n)
-    else
-        error("Unknown property $sym")
-    end
-end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
 sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
@@ -65,8 +55,7 @@ function Base.iterate(v::SectorValues{ANIrrep{N}}, i = 1) where {N}
 end
 
 @inline function Base.getindex(v::SectorValues{ANIrrep{N}}, i::Int) where {N}
-    L = length(v)
-    @boundscheck 1 <= i <= L || throw(BoundsError(v, i))
+    @boundscheck 1 <= i <= length(v) || throw(BoundsError(v, i))
     return ANIrrep{N}(i - 1)
 end
 
