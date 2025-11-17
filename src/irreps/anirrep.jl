@@ -172,7 +172,15 @@ end
 
 # bosonic
 function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
-    R = convert(sectorscalartype(I), Nsymbol(a, b, c))
+    Nabc = Nsymbol(a, b, c)
+    N < 4 && return Nabc
+    R = zeros(sectorscalartype(I), Nabc, Nabc)
+    if a == b == c == ANIrrep{4}(3)
+        R[1, 1] = -1
+        R[2, 2] = 1
+    else
+        R[1, 1] = 1
+    end
     return R
 end
 
