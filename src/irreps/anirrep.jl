@@ -191,7 +191,7 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
 
     if a.n == b.n == 3 # 3 ⊗ 3
         if c.n != 3 # singlets
-            C = _fusiontensor_3x3_to_1(c.n)
+            C = A4Irrep_fusiontensor_3x3_to_1(c.n)
         # if c.n == 0
         #     for i in 1:3
         #         C[i,i,1] = 1/sqrt(3)
@@ -205,7 +205,7 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
         #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
         #     end
         else
-            C = _fusiontensor_3x3_to_3()
+            C = A4Irrep_fusiontensor_3x3_to_3()
             # im = (2, 3, 1) # cyclic pairs
             # jm = (3, 1, 2)
             # delta(i, j) = i == j
@@ -223,9 +223,9 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
         if a.n != 3 && b.n != 3 # 1d x 1d
             C[1,1,1] = one(T)
         elseif a.n == 3 && b.n != 3 # 3 x 1d
-            C = _fusiontensor_3x1_to_3(b.n)
+            C = A4Irrep_fusiontensor_3x1_to_3(b.n)
         else # 1d x 3
-            C = reshape(_fusiontensor_3x1_to_3(a.n), 1, 3, 3, 1)
+            C = reshape(A4Irrep_fusiontensor_3x1_to_3(a.n), 1, 3, 3, 1)
         end
     end
 
@@ -233,7 +233,7 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
 end
 
 # TODO: for some reason the analytic expression doesn't match these results, which is from CategoryData
-function _fusiontensor_3x3_to_3()
+function A4Irrep_fusiontensor_3x3_to_3()
     S = zeros(Float64, 3, 3, 3, 2)
     s2 = 1 / sqrt(2.0)
     s6 = 1 / sqrt(6.0)
@@ -266,7 +266,7 @@ function _fusiontensor_3x3_to_3()
     return S
 end
 
-function _fusiontensor_3x3_to_1(n::Int)
+function A4Irrep_fusiontensor_3x3_to_1(n::Int)
     C = zeros(Float64, 3, 3, 1, 1)
     sqrt3 = sqrt(3.0)
     ijs = Vector{Tuple{Int,Int}}(undef, 3)
@@ -289,7 +289,7 @@ function _fusiontensor_3x3_to_1(n::Int)
     return C
 end
 
-function _fusiontensor_3x1_to_3(n::Int)
+function A4Irrep_fusiontensor_3x1_to_3(n::Int)
     C = zeros(Float64, 3, 1, 3, 1)
     ijs = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
     _ijs = ijs[n + 1]
