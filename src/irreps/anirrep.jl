@@ -3,25 +3,27 @@
     ANIrrep{N}(n::Integer)
     Irrep[Alternating{N}](n::Integer)
 
-Represents irreps of the alternating group ``A_N``.
+Represents irreps of the alternating group ``A_N``. Currently, only ``N < 5`` is implemented.
 
 ## Fields
 
 - `n::Int`: the label of the irrep.
 
-This can take the value 
+There are as many irreps as there are partitions of `N`.
 """
 struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
     n::Int
     function ANIrrep{N}(n::Int) where {N}
-        @assert 0 < N < 5 "ANIrrep is only provided for 0 < N < 5"
         0 <= n <= _npartitions(N) - 1 ||
         throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
         return new{N}(n)
     end
 end
 
-_npartitions(N::Int) = (N == 3) ? 3 : (N == 4) ? 4 : 1
+function _npartitions(N::Int)
+    0 < N < 5|| throw(ArgumentError("ANIrrep only implemented for 0 < N < 5"))
+    (N == 3) ? 3 : (N == 4) ? 4 : 1
+end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
 sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
@@ -32,7 +34,7 @@ function dual(a::ANIrrep{N}) where {N}
     N < 3 && return a
     if N == 3
         return ANIrrep{3}((3 - a.n) % 3)
-    else # N = 4
+    elseif N == 4
         return a.n == 3 ? ANIrrep{4}(3) : ANIrrep{4}((3 - a.n) % 3)
     end
 end
@@ -83,7 +85,7 @@ function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if N < 4
         return state > 1 ? nothing : (ANIrrep{N}((a.n + b.n) % _npartitions(N)), state + 1)
-    else
+    elseif N == 4
         u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
         if state == 1
             # rules with the trivial irrep
@@ -109,6 +111,8 @@ function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
         else
             return nothing
         end
+    else
+        throw(ArgumentError("ANIrrep product iterator only implemented for N < 5"))
     end
 end
 
@@ -145,10 +149,12 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     Nbcf = Nsymbol(b, c, f)
     Nafd = Nsymbol(a, f, d)
 
+    N < 4 && return T(Nabe * Necd * Nbcf * Nafd)
+
     Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
         return zeros(sectorscalartype(I), Nabe, Necd, Nbcf, Nafd)
 
-    # fallback through fusiontensor
+    # fallback through fusiontensor for A4Irrep
     A = fusiontensor(a, b, e)
     B = fusiontensor(e, c, d)[:, :, 1, :]
     C = fusiontensor(b, c, f)
