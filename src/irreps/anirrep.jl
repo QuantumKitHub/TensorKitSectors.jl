@@ -170,6 +170,7 @@ function Rsymbol(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     Nabc = Nsymbol(a, b, c)
     N < 4 && return Nabc
     R = zeros(sectorscalartype(I), Nabc, Nabc)
+    Nabc == 0 && return R
     if a == b == c == ANIrrep{4}(3)
         R[1, 1] = -1
         R[2, 2] = 1
