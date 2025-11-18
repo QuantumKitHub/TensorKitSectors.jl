@@ -417,7 +417,7 @@ context of line bending.
 """
 function frobenius_schur_indicator(a::Sector)
     ν = frobenius_schur_phase(a)
-    return a == conj(a) ? zero(ν) : ν
+    return a == conj(a) ? ν : zero(ν)
 end
 
 # Not necessary

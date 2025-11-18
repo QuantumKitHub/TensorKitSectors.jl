@@ -92,6 +92,26 @@ end
     @test size(Rsymbol(a, b, c)) == (0, 0)
 end
 
+@testset "Frobenius-Schur" begin
+    @test frobenius_schur_phase(SU2Irrep(0)) == 1.0
+    @test frobenius_schur_phase(SU2Irrep(1 // 2)) == -1.0
+    @test frobenius_schur_phase(Z2Irrep(0)) == 1.0
+    @test frobenius_schur_phase(Z2Irrep(1)) == 1.0
+    @test frobenius_schur_phase(Z3Irrep(0)) == 1.0
+    @test frobenius_schur_phase(Z3Irrep(1)) == 1.0
+    @test frobenius_schur_phase(U1Irrep(0)) == 1.0
+    @test frobenius_schur_phase(U1Irrep(1)) == 1.0
+
+    @test frobenius_schur_indicator(SU2Irrep(0)) == 1.0
+    @test frobenius_schur_indicator(SU2Irrep(1 // 2)) == -1.0
+    @test frobenius_schur_indicator(Z2Irrep(0)) == 1.0
+    @test frobenius_schur_indicator(Z2Irrep(1)) == 1.0
+    @test frobenius_schur_indicator(Z3Irrep(0)) == 1.0
+    @test frobenius_schur_indicator(Z3Irrep(1)) == 0.0
+    @test frobenius_schur_indicator(U1Irrep(0)) == 1.0
+    @test frobenius_schur_indicator(U1Irrep(1)) == 0.0
+end
+
 @testset "SectorProduct printing" begin
     a = SU2Irrep(1)
     @test repr(a ⊗ a) == "Irrep[SU₂](1) ⊗ Irrep[SU₂](1)"
