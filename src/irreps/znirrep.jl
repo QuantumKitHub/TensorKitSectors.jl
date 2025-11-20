@@ -7,7 +7,7 @@ const SMALL_ZN_CUTOFF = (typemax(UInt8) + 1) ÷ 2
     Irrep[ℤ{N}](n::Integer)
 
 Represents irreps of the group ``ℤ_N`` for some value of `N`.
-For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced by [`ℤ₂`](@ref), [`ℤ₃`](@ref), and [`ℤ₄`](@ref).
+For `N` equals `2`, `3` or `4`, `ℤ{N}` can be replaced by `ℤ₂`, `ℤ₃`, and `ℤ₄`.
 An arbitrary `Integer` `n` can be provided to the constructor, but only the value `mod(n, N)` is relevant.
 
 The type of the stored integer (`UInt8`) requires `N ≤ $SMALL_ZN_CUTOFF`.
@@ -33,7 +33,7 @@ end
     Irrep[ℤ{N}](n::Integer)
 
 Represents irreps of the group ``ℤ_N`` for some value of `N`, which is typically larger than $SMALL_ZN_CUTOFF.
-For smaller values of `N`, the [`ZNIrrep}`](@ref) sector type should be used instead.
+For smaller values of `N`, the [`ZNIrrep`](@ref) sector type should be used instead.
 An arbitrary `Integer` `n` can be provided to the constructor, but only the value `mod(n, N)` is relevant.
 
 The constructor `Irrep[ℤ{N}]` should be preferred, as it will automatically select the most efficient storage type for a given value of `N`.

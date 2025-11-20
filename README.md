@@ -2,9 +2,15 @@
 
 A Julia package for working with objects in fusion categories.
 
-| **Build Status** | **PkgEval** | **Coverage** | **Quality assurance** |
-|:----------------:|:------------:|:------------:|:---------------------:|
-| [![CI][ci-img]][ci-url] | [![PkgEval][pkgeval-img]][pkgeval-url] | [![Codecov][codecov-img]][codecov-url] | [![Aqua QA][aqua-img]][aqua-url] |
+| **Documentation** | **Build Status** | **PkgEval** | **Coverage** | **Quality assurance** |
+|:-----------------:|:----------------:|:-----------:|:------------:|:---------------------:|
+| [![][docs-stable-img]][docs-stable-url] [![][docs-dev-img]][docs-dev-url] | [![CI][ci-img]][ci-url] | [![PkgEval][pkgeval-img]][pkgeval-url] | [![Codecov][codecov-img]][codecov-url] | [![Aqua QA][aqua-img]][aqua-url] |
+
+[docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
+[docs-stable-url]: https://QuantumKitHub.github.io/TensorKitSectors.jl/stable
+
+[docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
+[docs-dev-url]: https://QuantumKitHub.github.io/TensorKitSectors.jl/latest
 
 [ci-img]: https://github.com/QuantumKitHub/TensorKitSectors.jl/actions/workflows/CI.yml/badge.svg
 [ci-url]: https://github.com/QuantumKitHub/TensorKitSectors.jl/actions/workflows/CI.yml
