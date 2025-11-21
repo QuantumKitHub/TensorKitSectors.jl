@@ -1,16 +1,7 @@
 using Test
 using TestExtras
-using Random
-# using TensorKit: TensorKitSectors
 using TensorKitSectors
-using TensorOperations
-using Base.Iterators: take, product
-using LinearAlgebra: LinearAlgebra
 
-const TKS = TensorKitSectors
-
-include("testsetup.jl")
-using .TestSetup
 include("newsectors.jl")
 using .NewSectors
 
@@ -46,9 +37,10 @@ const sectorlist = (
     TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep},
 )
 
-@testset "$(TensorKitSectors.type_repr(I))" for I in sectorlist
-    @include("sectors.jl")
-end
+include("testsuite.jl")
+using .SectorTestSuite
+
+foreach(SectorTestSuite.test_sector, sectorlist)
 
 @testset "Deligne product" begin
     sectorlist′ = (Trivial, sectorlist...)
