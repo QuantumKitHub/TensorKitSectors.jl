@@ -38,6 +38,14 @@ group.
 """
 abstract type Dihedral{N} <: Group end
 
+"""
+    abstract type Alternating{N} <: Group
+
+Type to represent the alternating group of order `N!/2`, which is the group
+of even permutations on `N` elements. 
+"""
+abstract type Alternating{N} <: Group end
+
 
 """
     abstract type U₁ <: AbelianGroup
@@ -72,6 +80,7 @@ const ℤ₃ = ℤ{3}
 const ℤ₄ = ℤ{4}
 const D₃ = Dihedral{3}
 const D₄ = Dihedral{4}
+const A₄ = Alternating{4}
 const SU₂ = SU{2}
 
 type_repr(::Type{ℤ₂}) = "ℤ₂"
@@ -80,6 +89,7 @@ type_repr(::Type{ℤ₄}) = "ℤ₄"
 type_repr(::Type{ℤ{N}}) where {N} = "ℤ{$N}"
 type_repr(::Type{D₃}) = "D₃"
 type_repr(::Type{D₄}) = "D₄"
+type_repr(::Type{A₄}) = "A₄"
 type_repr(::Type{SU₂}) = "SU₂"
 type_repr(::Type{U₁}) = "U₁"
 type_repr(::Type{CU₁}) = "CU₁"

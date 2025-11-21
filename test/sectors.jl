@@ -84,11 +84,20 @@ if hasfusiontensor(I)
     @testset "Orthogonality of fusiontensors" begin
         for a in smallset(I), b in smallset(I)
             cs = vec(collect(a ⊗ b))
-            CGCs = map(c -> reshape(fusiontensor(a, b, c), :, dim(c)), cs)
-            M = map(Iterators.product(CGCs, CGCs)) do (cgc1, cgc2)
-                return LinearAlgebra.norm(cgc1' * cgc2)
+
+            for c in cs, c′ in cs
+                cgc1 = fusiontensor(a, b, c)
+                cgc2 = fusiontensor(a, b, c′)
+                for μ in 1:Nsymbol(a, b, c), ν in 1:Nsymbol(a, b, c′)
+                    overlap = reshape(cgc1[:, :, :, μ], :, dim(c))' *
+                        reshape(cgc2[:, :, :, ν], :, dim(c′))
+                    if μ == ν && c == c′
+                        @test isapprox(overlap, LinearAlgebra.I; atol = 1.0e-12)
+                    else
+                        @test isapprox(LinearAlgebra.norm(overlap), 0; atol = 1.0e-12)
+                    end
+                end
             end
-            @test isapprox(M' * M, LinearAlgebra.Diagonal(dim.(cs)); atol = 1.0e-12)
         end
     end
 end
