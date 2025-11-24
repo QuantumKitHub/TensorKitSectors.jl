@@ -10,7 +10,7 @@ A Julia package for working with objects in fusion categories.
 [docs-stable-url]: https://QuantumKitHub.github.io/TensorKitSectors.jl/stable
 
 [docs-dev-img]: https://img.shields.io/badge/docs-dev-blue.svg
-[docs-dev-url]: https://QuantumKitHub.github.io/TensorKitSectors.jl/latest
+[docs-dev-url]: https://QuantumKitHub.github.io/TensorKitSectors.jl/dev
 
 [ci-img]: https://github.com/QuantumKitHub/TensorKitSectors.jl/actions/workflows/CI.yml/badge.svg
 [ci-url]: https://github.com/QuantumKitHub/TensorKitSectors.jl/actions/workflows/CI.yml
