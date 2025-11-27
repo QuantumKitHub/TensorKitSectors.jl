@@ -32,6 +32,7 @@ function _n_self_conjugate_partitions(N::Int) # split in A_N
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
+sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int : Float64
 Base.isreal(::Type{ANIrrep{N}}) where {N} = true
 
 unit(::Type{ANIrrep{N}}) where {N} = ANIrrep{N}(0)
