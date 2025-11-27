@@ -15,7 +15,7 @@ struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
     n::Int
     function ANIrrep{N}(n::Int) where {N}
         0 <= n <= _nirreps(N) - 1 ||
-            throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
+            throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_nirreps(N) - 1)"))
         return new{N}(n)
     end
 end
@@ -57,7 +57,7 @@ const A4Irrep = ANIrrep{4}
 # ---------------
 Base.isless(a::ANIrrep{N}, b::ANIrrep{N}) where {N} = isless(a.n, b.n)
 Base.IteratorSize(::Type{SectorValues{ANIrrep{N}}}) where {N} = Base.HasLength()
-Base.length(::SectorValues{ANIrrep{N}}) where {N} = _npartitions(N)
+Base.length(::SectorValues{ANIrrep{N}}) where {N} = _nirreps(N)
 
 function Base.iterate(v::SectorValues{ANIrrep{N}}, i = 1) where {N}
     return i > length(v) ? nothing : (v[i], i + 1)
@@ -92,7 +92,7 @@ end
 function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if N < 4
-        return state > 1 ? nothing : (ANIrrep{N}((a.n + b.n) % _npartitions(N)), state + 1)
+        return state > 1 ? nothing : (ANIrrep{N}((a.n + b.n) % _nirreps(N)), state + 1)
     elseif N == 4
         u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
         if state == 1
@@ -132,7 +132,7 @@ function dim(a::ANIrrep{N}) where {N}
 end
 
 function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
-    N < 4 && return (c.n == (a.n + b.n) % _npartitions(N)) ? 1 : 0
+    N < 4 && return (c.n == (a.n + b.n) % _nirreps(N)) ? 1 : 0
     # N = 4
     u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
     return if a == three
