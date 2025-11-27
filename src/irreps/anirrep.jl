@@ -14,15 +14,21 @@ There are as many irreps as there are partitions of `N`.
 struct ANIrrep{N} <: AbstractIrrep{Alternating{N}}
     n::Int
     function ANIrrep{N}(n::Int) where {N}
-        0 <= n <= _npartitions(N) - 1 ||
+        0 <= n <= _nirreps(N) - 1 ||
             throw(DomainError(n, lazy"ANIrrep only has irreps 0 <= n <= $(_npartitions(N) - 1)"))
         return new{N}(n)
     end
 end
 
-function _npartitions(N::Int)
+function _nirreps(N::Int)
     0 < N < 5|| throw(ArgumentError("ANIrrep only implemented for 0 < N < 5"))
-    return (N == 3) ? 3 : (N == 4) ? 4 : 1
+    return 2 * _n_self_conjugate_partitions(N) + _n_non_self_conjugate_partitions(N)
+end
+function _n_non_self_conjugate_partitions(N::Int)
+    return N == 4 ? 2 : 1
+end
+function _n_self_conjugate_partitions(N::Int) # split in A_N
+    return N > 2 ? 1 : 0
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
