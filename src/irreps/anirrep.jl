@@ -26,7 +26,6 @@ function _npartitions(N::Int)
 end
 
 FusionStyle(::Type{ANIrrep{N}}) where {N} = N < 4 ? UniqueFusion() : GenericFusion()
-sectorscalartype(::Type{ANIrrep{N}}) where {N} = N < 4 ? Int64 : Float64
 Base.isreal(::Type{ANIrrep{N}}) where {N} = true
 
 unit(::Type{ANIrrep{N}}) where {N} = ANIrrep{N}(0)
@@ -36,6 +35,8 @@ function dual(a::ANIrrep{N}) where {N}
         return ANIrrep{3}((3 - a.n) % 3)
     elseif N == 4
         return a.n == 3 ? ANIrrep{4}(3) : ANIrrep{4}((3 - a.n) % 3)
+    else
+        throw(ArgumentError("ANIrrep only implemented for 0 < N < 5"))
     end
 end
 
@@ -71,6 +72,8 @@ const ANIrrepProdIterator{N} = SectorProductIterator{ANIrrep{N}}
 
 Base.IteratorSize(::Type{ANIrrepProdIterator{N}}) where {N} = Base.HasLength()
 function Base.length(x::ANIrrepProdIterator{N}) where {N}
+    N < 5 || throw(ArgumentError("ANIrrep only implemented for 0 < N < 5"))
+
     N < 4 && return 1 # abelian
     a, b = x.a, x.b
     if a == b
@@ -128,7 +131,7 @@ function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
     u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
     return if a == three
         if b == three # 3 x 3
-            return (c == u || c == u′ || c == u′′) ? 1 : 2
+            return 1 + (dim(c) == 3)
         else # 3 x 1D
             return c == three ? 1 : 0
         end
