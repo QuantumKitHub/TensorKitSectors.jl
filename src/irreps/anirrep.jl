@@ -80,7 +80,6 @@ function Base.length(x::ANIrrepProdIterator{N}) where {N}
     end
 end
 
-# TODO: any way to shorten this?
 function Base.iterate(p::ANIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if N < 4
@@ -192,33 +191,9 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
     if a.n == b.n == 3 # 3 ⊗ 3
         if c.n != 3 # singlets
             C = A4Irrep_fusiontensor_3x3_to_1(c.n)
-            # if c.n == 0
-            #     for i in 1:3
-            #         C[i,i,1] = 1/sqrt(3)
-            #     end
-            # elseif c.n == 1
-            #     for i in 1:3
-            #         C[i,i,1] = ω^(i-1)/sqrt(3)
-            #     end
-            # elseif c.n == 2
-            #     for i in 1:3
-            #         C[i,i,1] = ω^(2*(i-1))/sqrt(3)
-            #     end
         else
             C = A4Irrep_fusiontensor_3x3_to_3()
-            # im = (2, 3, 1) # cyclic pairs
-            # jm = (3, 1, 2)
-            # delta(i, j) = i == j
-            # for m in 1:3
-            #     i_m, j_m = im[m], jm[m]
-            #     for i in 1:3, j in 1:3
-            #         C[m, i, j, 1] = 1/sqrt(2) * (delta(i, i_m) * delta(j, j_m) - delta(i, j_m) * delta(j, i_m))
-
-            #         C[m, i, j, 2] = 1/sqrt(6) * (delta(i, i_m) * delta(j, j_m) + delta(i, j_m) * delta(j, i_m) - 2 * delta(i, m) * delta(j, m))
-            #     end
-            # end
         end
-
     else
         if a.n != 3 && b.n != 3 # 1d x 1d
             C[1, 1, 1] = one(T)
@@ -228,11 +203,10 @@ function fusiontensor(a::I, b::I, c::I) where {N, I <: ANIrrep{N}}
             C = reshape(A4Irrep_fusiontensor_3x1_to_3(a.n), 1, 3, 3, 1)
         end
     end
-
     return C
 end
 
-# TODO: for some reason the analytic expression doesn't match these results, which is from CategoryData
+# TODO: check if there's an analytic expression to generate these tensors which satisfy the pentagon equation
 function A4Irrep_fusiontensor_3x3_to_3()
     S = zeros(Float64, 3, 3, 3, 2)
     s2 = 1 / sqrt(2.0)
@@ -242,59 +216,35 @@ function A4Irrep_fusiontensor_3x3_to_3()
     im = (2, 1, 1)
     jm = (3, 2, 3)
 
-    # μ = 1 : antisymmetric off-diagonal entries
-    S[im[1], jm[1], 1, 1] = s2
-    S[jm[1], im[1], 1, 1] = -s2
-    S[im[2], jm[2], 2, 1] = s2
-    S[jm[2], im[2], 2, 1] = -s2
-    S[im[3], jm[3], 3, 1] = -s2
-    S[jm[3], im[3], 3, 1] = s2
-
-    # μ = 2 : diagonal negative + symmetric off-diagonals
+    for i in 1:3
+        S[im[i], jm[i], i, 1] = (i == 3) ? -s2 : s2
+        S[jm[i], im[i], i, 1] = (i == 3) ? s2 : -s2
+        S[im[i], jm[i], i, 2] += s6
+        S[jm[i], im[i], i, 2] += s6
+    end
     S[1, 1, 1, 2] = -r23
-    S[im[1], jm[1], 1, 2] += s6
-    S[jm[1], im[1], 1, 2] += s6
-
     S[3, 3, 2, 2] = -r23
-    S[im[2], jm[2], 2, 2] += s6
-    S[jm[2], im[2], 2, 2] += s6
-
     S[2, 2, 3, 2] = -r23
-    S[im[3], jm[3], 3, 2] += s6
-    S[jm[3], im[3], 3, 2] += s6
-
     return S
 end
 
 function A4Irrep_fusiontensor_3x3_to_1(n::Int)
     C = zeros(Float64, 3, 3, 1, 1)
     sqrt3 = sqrt(3.0)
-    ijs = Vector{Tuple{Int, Int}}(undef, 3)
-    if n == 0
-        ijs[1] = (1, 1)
-        ijs[2] = (2, 3)
-        ijs[3] = (3, 2)
-    elseif n == 1
-        ijs[1] = (1, 2)
-        ijs[2] = (2, 1)
-        ijs[3] = (3, 3)
-    elseif n == 2
-        ijs[1] = (1, 3)
-        ijs[2] = (2, 2)
-        ijs[3] = (3, 1)
-    end
+    i1s = [1, 2, 3]
+    i2s = circshift(reverse(i1s), n + 1)
+    is = [i1s i2s]
     for i in 1:3
-        C[ijs[i][1], ijs[i][2], 1, 1] = 1 / sqrt3
+        C[is[i, 1], is[i, 2], 1, 1] = 1 / sqrt3
     end
     return C
 end
 
 function A4Irrep_fusiontensor_3x1_to_3(n::Int)
     C = zeros(Float64, 3, 1, 3, 1)
-    ijs = [(1, 2, 3), (3, 1, 2), (2, 3, 1)]
-    _ijs = ijs[n + 1]
+    is = circshift([1, 2, 3], n)
     for i in 1:3
-        C[_ijs[i], 1, i, 1] = 1.0
+        C[is[i], 1, i, 1] = 1.0
     end
     return C
 end
