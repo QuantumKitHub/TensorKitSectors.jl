@@ -133,18 +133,17 @@ function dim(a::ANIrrep{N}) where {N}
 end
 
 function Nsymbol(a::ANIrrep{N}, b::ANIrrep{N}, c::ANIrrep{N}) where {N}
-    N < 4 && return (c.n == (a.n + b.n) % _nirreps(N)) ? 1 : 0
+    N < 4 && return Int(c.n == (a.n + b.n) % _nirreps(N))
     # N = 4
-    u, u′, u′′, three = ANIrrep{4}(0), ANIrrep{4}(1), ANIrrep{4}(2), ANIrrep{4}(3)
-    return if a == three
-        if b == three # 3 x 3
+    return if a.n == 3
+        if b.n == 3 # 3 x 3
             return 1 + (dim(c) == 3)
         else # 3 x 1D
-            return c == three ? 1 : 0
+            return c.n == 3 ? 1 : 0
         end
     else
-        if b == three # 1D x 3
-            return c == three ? 1 : 0
+        if b.n == 3 # 1D x 3
+            return c.n == 3 ? 1 : 0
         else # 1D x 1D
             return c.n == (a.n + b.n) % 3 ? 1 : 0
         end
@@ -161,7 +160,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: ANIrrep{N}}
     N < 4 && return T(Nabe * Necd * Nbcf * Nafd)
 
     Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
-        return zeros(sectorscalartype(I), Nabe, Necd, Nbcf, Nafd)
+        return zeros(T, Nabe, Necd, Nbcf, Nafd)
 
     # fallback through fusiontensor for A4Irrep
     A = fusiontensor(a, b, e)
