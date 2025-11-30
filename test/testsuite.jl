@@ -48,7 +48,7 @@ macro testsuite(name, ex)
     fn = Symbol("test_$(safe_name)")
     return quote
         $(esc(fn))(I) = $(esc(ex))(I)
-        @assert !haskey(tests, $name)
+        @assert !haskey(tests, $name) "duplicate testsuite name: $name"
         tests[$name] = $fn
     end
 end
@@ -67,64 +67,6 @@ function test_sector(I::Type)
             @eval @testset $name $code
         end
     end
-end
-
-"""
-    @testinferred [AllowedTypes] ex
-
-Like `Test.@inferred`, but registers failures through a test, rather than an error.
-"""
-macro testinferred(ex)
-    return _inferred(ex, __module__)
-end
-macro testinferred(ex, allow)
-    return _inferred(ex, __module__, allow)
-end
-
-# Implementation copied from Test._inferred:
-function _inferred(ex, mod, allow = :(Union{}))
-    if Meta.isexpr(ex, :ref)
-        ex = Expr(:call, :getindex, ex.args...)
-    end
-    Meta.isexpr(ex, :call)|| error("@testinferred requires a call expression")
-    farg = ex.args[1]
-    if isa(farg, Symbol) && farg !== :.. && first(string(farg)) == '.'
-        farg = Symbol(string(farg)[2:end])
-        ex = Expr(
-            :call, GlobalRef(Test, :_materialize_broadcasted),
-            farg, ex.args[2:end]...
-        )
-    end
-    result = let ex = ex
-        quote
-            let allow = $(esc(allow))
-                allow isa Type || throw(ArgumentError("@inferred requires a type as second argument"))
-                $(
-                    if any(@nospecialize(a) -> (Meta.isexpr(a, :kw) || Meta.isexpr(a, :parameters)), ex.args)
-                        # Has keywords
-                        # Create the call expression with escaped user expressions
-                        call_expr = :($(esc(ex.args[1]))(args...; kwargs...))
-                        quote
-                            args, kwargs, result = $(esc(Expr(:call, _args_and_call, ex.args[2:end]..., ex.args[1])))
-                            # wrap in dummy hygienic-scope to work around scoping issues with `call_expr` already having `esc` on the necessary parts
-                            inftype = $(Expr(:var"hygienic-scope", Base.gen_call_with_extracted_types(mod, Base.infer_return_type, call_expr; is_source_reflection = false), Test))
-                        end
-                    else
-                        # No keywords
-                        quote
-                            args = ($([esc(ex.args[i]) for i in 2:length(ex.args)]...),)
-                            result = $(esc(ex.args[1]))(args...)
-                            inftype = Base.infer_return_type($(esc(ex.args[1])), Base.typesof(args...))
-                        end
-                    end
-                )
-                rettype = result isa Type ? Type{result} : typeof(result)
-                @test rettype <: allow || rettype == Base.typesplit(inftype, allow)
-                result
-            end
-        end
-    end
-    return Base.remove_linenums!(result)
 end
 
 smallset(::Type{I}) where {I <: Sector} = take(values(I), 5)
