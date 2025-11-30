@@ -40,7 +40,11 @@ const sectorlist = (
 include("testsuite.jl")
 using .SectorTestSuite
 
-foreach(SectorTestSuite.test_sector, sectorlist)
+@testset "Sector test suite" verbose = true begin
+    for sectortype in sectorlist
+        @time SectorTestSuite.test_sector(sectortype)
+    end
+end
 
 @testset "Deligne product" begin
     sectorlist′ = (Trivial, sectorlist...)
