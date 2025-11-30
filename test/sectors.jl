@@ -52,6 +52,15 @@ end
     end
 end
 
+@testsuite "fusion and dimensions" I -> begin
+    for a in smallset(I), b in smallset(I)
+        da = dim(a)
+        db = dim(b)
+        dc = sum(c -> dim(c) * Nsymbol(a, b, c), a ⊗ b)
+        @test da * db ≈ dc # needs to be ≈ because of anyons
+    end
+end
+
 @testsuite "fusion tensor and F-move" I -> begin
     (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
