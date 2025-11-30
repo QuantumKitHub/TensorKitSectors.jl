@@ -62,7 +62,7 @@ end
 end
 
 @testsuite "Fusion tensor and F-move" I -> begin
-    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
         for e in ⊗(a, b), f in ⊗(b, c)
             for d in intersect(⊗(e, c), ⊗(a, f))
@@ -83,7 +83,7 @@ end
     end
 end
 
-@testsuite "Fusion tensor and F-move and R-move" I -> begin
+@testsuite "Fusion tensor and R-move" I -> begin
     (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
     for a in smallset(I), b in smallset(I)
         for c in ⊗(a, b)

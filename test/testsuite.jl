@@ -14,7 +14,7 @@ testsuite_path = joinpath(
 )
 include(testsuite_path)
 
-SectorTestSuite.test_sectortype(MySectorType)
+SectorTestSuite.test_sector(MySectorType)
 ```
 
 Additionally, this test suite exports the following convenience testing utilities:
