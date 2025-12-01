@@ -1,16 +1,7 @@
 using Test
 using TestExtras
-using Random
-# using TensorKit: TensorKitSectors
 using TensorKitSectors
-using TensorOperations
-using Base.Iterators: take, product
-using LinearAlgebra: LinearAlgebra
 
-const TKS = TensorKitSectors
-
-include("testsetup.jl")
-using .TestSetup
 include("newsectors.jl")
 using .NewSectors
 
@@ -47,8 +38,13 @@ const sectorlist = (
     TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep},
 )
 
-@testset "$(TensorKitSectors.type_repr(I))" for I in sectorlist
-    @include("sectors.jl")
+include("testsuite.jl")
+using .SectorTestSuite
+
+@testset "Sector test suite" verbose = true begin
+    for sectortype in sectorlist
+        @time SectorTestSuite.test_sector(sectortype)
+    end
 end
 
 @testset "Deligne product" begin
@@ -57,17 +53,17 @@ end
         a = first(smallset(I1))
         b = first(smallset(I2))
 
-        @constinferred a ⊠ b
-        @constinferred a ⊠ b ⊠ a
-        @constinferred a ⊠ b ⊠ a ⊠ b
-        @constinferred I1 ⊠ I2
+        @testinferred a ⊠ b
+        @testinferred a ⊠ b ⊠ a
+        @testinferred a ⊠ b ⊠ a ⊠ b
+        @testinferred I1 ⊠ I2
         @test typeof(a ⊠ b) == I1 ⊠ I2
 
-        @test @constinferred(length(allunits(I1 ⊠ I2))) == 1
-        @test @constinferred(unit(I1 ⊠ I2)) == leftunit(a ⊠ b) == rightunit(a ⊠ b)
+        @test @testinferred(length(allunits(I1 ⊠ I2))) == 1
+        @test @testinferred(unit(I1 ⊠ I2)) == leftunit(a ⊠ b) == rightunit(a ⊠ b)
     end
-    @test @constinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
-    @test @constinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3
+    @test @testinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
+    @test @testinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3
 end
 
 @testset "Issue that came up in #11" begin
