@@ -32,7 +32,7 @@ const sectorlist = (
     Z3Element{1} ⊠ SU2Irrep,
     FibonacciAnyon ⊠ Z4Element{3},
     TimeReversed{Z2Irrep},
-    TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep}, TimeReversed{ANIrrep{4}},
+    TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep}, TimeReversed{A4Irrep},
     TimeReversed{U1Irrep}, TimeReversed{CU1Irrep}, TimeReversed{SU2Irrep},
     TimeReversed{FibonacciAnyon}, TimeReversed{IsingAnyon},
     TimeReversed{FermionParity},
