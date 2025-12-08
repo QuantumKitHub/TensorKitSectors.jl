@@ -349,14 +349,14 @@ Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
 
 Base.:&(::GenericUnit, ::SimpleUnit) = GenericUnit()
 
-"""
+@doc """
     fusiontensor(a::I, b::I, c::I) where {I <: Sector} -> AbstractArray{T, 4}
 
-Return the fusion tensor for the fusion `a ⊗ b -> c`. The dimensions of the returned array are `(dim(a), dim(b), dim(c), Nsymbol(a, b, c))`.
-The components of the fusion tensor are simply the Clebsch-Gordan coefficients, 
-describing the unitary basis change from the tensor product of irreps `a` and `b` to the coupled irrep `c`.
-"""
-function fusiontensor end
+Return the fusion tensor for the fusion `a ⊗ b -> c`. The dimensions of the returned array
+are `(dim(a), dim(b), dim(c), Nsymbol(a, b, c))`. The components of the fusion tensor are
+simply the Clebsch-Gordan coefficients, describing the unitary basis change from the tensor
+product of irreps `a` and `b` to the coupled irrep `c`.
+""" fusiontensor(::I, ::I, ::I) where {I <: Sector}
 
 """
     Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
