@@ -140,12 +140,13 @@ function fusiontensor(a::I, b::I, c::I) where {I <: A4Irrep}
     return C
 end
 
-# TODO: check if there's an analytic expression to generate these tensors which satisfy the pentagon equation
+# choice of basis: https://journals.aps.org/rmp/pdf/10.1103/RevModPhys.82.2701
+# triplet is a real representation -> can make all representation matrices real
+# μ = 1 is the antisymmetric channel, μ = 2 is the symmetric channel
 function A4Irrep_fusiontensor_3x3_to_3()
     S = zeros(Float64, 3, 3, 3, 2)
     s2 = 1 / sqrt(2.0)
     s6 = 1 / sqrt(6.0)
-    r23 = sqrt(2.0 / 3.0)
 
     im = (2, 1, 1)
     jm = (3, 2, 3)
@@ -156,9 +157,9 @@ function A4Irrep_fusiontensor_3x3_to_3()
         S[im[i], jm[i], i, 2] += s6
         S[jm[i], im[i], i, 2] += s6
     end
-    S[1, 1, 1, 2] = -r23
-    S[3, 3, 2, 2] = -r23
-    S[2, 2, 3, 2] = -r23
+    S[1, 1, 1, 2] = -2 * s6
+    S[3, 3, 2, 2] = -2 * s6
+    S[2, 2, 3, 2] = -2 * s6
     return S
 end
 
