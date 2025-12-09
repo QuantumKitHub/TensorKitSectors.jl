@@ -114,6 +114,8 @@ function Rsymbol(a::I, b::I, c::I) where {I <: A4Irrep}
     return R
 end
 
+# choice of basis: https://journals.aps.org/rmp/pdf/10.1103/RevModPhys.82.2701
+# triplet is a real representation -> can make all representation matrices real
 function fusiontensor(a::I, b::I, c::I) where {I <: A4Irrep}
     T = sectorscalartype(I)
     Nabc = Nsymbol(a, b, c)
@@ -124,62 +126,39 @@ function fusiontensor(a::I, b::I, c::I) where {I <: A4Irrep}
 
     if a.n == b.n == 3 # 3 ⊗ 3
         if c.n != 3 # singlets
-            C = A4Irrep_fusiontensor_3x3_to_1(c.n)
-        else
-            C = A4Irrep_fusiontensor_3x3_to_3()
+            invsqrt3 = 1 / sqrt(3.0)
+            for i in 1:3
+                j = 4 - mod1(i - c.n - 1, 3)
+                C[i, j, 1, 1] = invsqrt3
+            end
+        else # triplet: eq 38 in above reference
+            s2 = 1 / sqrt(2.0)
+            s6 = 1 / sqrt(6.0)
+
+            # antisymmetric channel
+            C[:, :, 1, 1] .= [0 0 0; 0 0 s2; 0 -s2 0]
+            C[:, :, 2, 1] .= [0 s2 0; -s2 0 0; 0 0 0]
+            C[:, :, 3, 1] .= [0 0 -s2; 0 0 0; s2 0 0]
+
+            # symmetric channel
+            C[:, :, 1, 2] .= [-2 * s6 0 0; 0 0 s6; 0 s6 0]
+            C[:, :, 2, 2] .= [0 s6 0; s6 0 0; 0 0 -2 * s6]
+            C[:, :, 3, 2] .= [0 0 s6; 0 -2 * s6 0; s6 0 0]
         end
     else
         if a.n != 3 && b.n != 3 # 1d x 1d
             C[1, 1, 1] = one(T)
         elseif a.n == 3 && b.n != 3 # 3 x 1d
-            C = A4Irrep_fusiontensor_3x1_to_3(b.n)
-        else # 1d x 3
-            C = reshape(A4Irrep_fusiontensor_3x1_to_3(a.n), 1, 3, 3, 1)
+            for i in 1:3
+                j = mod1(i - b.n, 3)
+                C[j, 1, i, 1] = one(T)
+            end
+        else # 1d x 3: reshape of 3 x 1d
+            for i in 1:3
+                j = mod1(i - a.n, 3)
+                C[1, j, i, 1] = one(T)
+            end
         end
-    end
-    return C
-end
-
-# choice of basis: https://journals.aps.org/rmp/pdf/10.1103/RevModPhys.82.2701
-# triplet is a real representation -> can make all representation matrices real
-# μ = 1 is the antisymmetric channel, μ = 2 is the symmetric channel
-function A4Irrep_fusiontensor_3x3_to_3()
-    S = zeros(Float64, 3, 3, 3, 2)
-    s2 = 1 / sqrt(2.0)
-    s6 = 1 / sqrt(6.0)
-
-    im = (2, 1, 1)
-    jm = (3, 2, 3)
-
-    for i in 1:3
-        S[im[i], jm[i], i, 1] = (i == 3) ? -s2 : s2
-        S[jm[i], im[i], i, 1] = (i == 3) ? s2 : -s2
-        S[im[i], jm[i], i, 2] += s6
-        S[jm[i], im[i], i, 2] += s6
-    end
-    S[1, 1, 1, 2] = -2 * s6
-    S[3, 3, 2, 2] = -2 * s6
-    S[2, 2, 3, 2] = -2 * s6
-    return S
-end
-
-function A4Irrep_fusiontensor_3x3_to_1(n)
-    C = zeros(Float64, 3, 3, 1, 1)
-    sqrt3 = sqrt(3.0)
-    i1s = [1, 2, 3]
-    i2s = circshift(reverse(i1s), n + 1)
-    is = [i1s i2s]
-    for i in 1:3
-        C[is[i, 1], is[i, 2], 1, 1] = 1 / sqrt3
-    end
-    return C
-end
-
-function A4Irrep_fusiontensor_3x1_to_3(n)
-    C = zeros(Float64, 3, 1, 3, 1)
-    is = circshift([1, 2, 3], n)
-    for i in 1:3
-        C[is[i], 1, i, 1] = 1.0
     end
     return C
 end
