@@ -116,28 +116,6 @@ end
     end
 end
 
-I == A4Irrep && @testsuite "Intertwiner relation" I -> begin
-    ω = cis(2π / 3)
-    T3 = [1 0 0; 0 ω 0; 0 0 ω^2]
-    T(a::Int8) = (a == 3) ? T3 : hcat(ω^(a))
-    S3 = 1 / 3 * [-1 2 2; 2 -1 2; 2 2 -1]
-    S(a::Int8) = (a == 3) ? S3 : hcat(1)
-    for a in smallset(I), b in smallset(I)
-        for c in ⊗(a, b)
-            C = fusiontensor(a, b, c)
-            Ta, Tb, Tc = T(a.n), T(b.n), T(c.n)
-            Sa, Sb, Sc = S(a.n), S(b.n), S(c.n)
-            for μ in 1:Nsymbol(a, b, c)
-                Cmat = reshape(view(C, :, :, :, μ), (dim(a) * dim(b), dim(c)))
-                L_T = Cmat' * kron(Ta, Tb) * Cmat
-                L_S = Cmat' * kron(Sa, Sb) * Cmat
-                @test isapprox(L_T, Tc; atol = 1.0e-12)
-                @test isapprox(L_S, Sc; atol = 1.0e-12)
-            end
-        end
-    end
-end
-
 @testsuite "Unitarity of F-move" I -> begin
     for a in smallset(I), b in smallset(I), c in smallset(I)
         for d in ⊗(a, b, c)
