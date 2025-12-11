@@ -9,20 +9,21 @@ const sectorlist = (
     Trivial, PlanarTrivial,
     Z2Irrep, Z3Irrep, Z4Irrep, Irrep[ℤ{200}], U1Irrep,
     DNIrrep{3}, DNIrrep{4}, DNIrrep{5}, CU1Irrep,
-    SU2Irrep, NewSU2Irrep,
+    A4Irrep, SU2Irrep, NewSU2Irrep,
     FibonacciAnyon, IsingAnyon, FermionParity,
     FermionParity ⊠ FermionParity,
     Z3Irrep ⊠ Z4Irrep, FermionParity ⊠ U1Irrep ⊠ SU2Irrep,
     FermionParity ⊠ SU2Irrep ⊠ SU2Irrep, NewSU2Irrep ⊠ NewSU2Irrep,
     NewSU2Irrep ⊠ SU2Irrep, FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep,
     FibonacciAnyon ⊠ FibonacciAnyon ⊠ Z2Irrep,
+    A4Irrep ⊠ Z2Irrep, A4Irrep ⊠ SU2Irrep,
     Z2Element{0}, Z2Element{1},
     Z3Element{0}, Z3Element{1}, Z3Element{2},
     Z4Element{0}, Z4Element{1}, Z4Element{2},
     Z3Element{1} ⊠ SU2Irrep,
     FibonacciAnyon ⊠ Z4Element{3},
     TimeReversed{Z2Irrep},
-    TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep},
+    TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep}, TimeReversed{A4Irrep},
     TimeReversed{U1Irrep}, TimeReversed{CU1Irrep}, TimeReversed{SU2Irrep},
     TimeReversed{FibonacciAnyon}, TimeReversed{IsingAnyon},
     TimeReversed{FermionParity},
@@ -43,6 +44,28 @@ using .SectorTestSuite
 @testset "Sector test suite" verbose = true begin
     for sectortype in sectorlist
         @time SectorTestSuite.test_sector(sectortype)
+    end
+end
+
+@testset "Intertwiner relation for A4Irrep" begin
+    ω = cis(2π / 3)
+    T3 = [1 0 0; 0 ω 0; 0 0 ω^2]
+    T(a::Int8) = (a == 3) ? T3 : hcat(ω^(a))
+    S3 = 1 / 3 * [-1 2 2; 2 -1 2; 2 2 -1]
+    S(a::Int8) = (a == 3) ? S3 : hcat(1)
+    for a in smallset(A4Irrep), b in smallset(A4Irrep)
+        for c in ⊗(a, b)
+            C = fusiontensor(a, b, c)
+            Ta, Tb, Tc = T(a.n), T(b.n), T(c.n)
+            Sa, Sb, Sc = S(a.n), S(b.n), S(c.n)
+            for μ in 1:Nsymbol(a, b, c)
+                Cmat = reshape(view(C, :, :, :, μ), (dim(a) * dim(b), dim(c)))
+                L_T = Cmat' * kron(Ta, Tb) * Cmat
+                L_S = Cmat' * kron(Sa, Sb) * Cmat
+                @test isapprox(L_T, Tc; atol = 1.0e-12)
+                @test isapprox(L_S, Sc; atol = 1.0e-12)
+            end
+        end
     end
 end
 
