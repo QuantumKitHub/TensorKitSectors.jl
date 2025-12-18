@@ -198,6 +198,7 @@ dual(s::IsingAnyon) = s
 dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0
 
 FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
+FusionDataStyle(::Type{IsingAnyon}) = NonTrivialFusionData()
 BraidingStyle(::Type{IsingAnyon}) = Anyonic()
 Base.isreal(::Type{IsingAnyon}) = false
 

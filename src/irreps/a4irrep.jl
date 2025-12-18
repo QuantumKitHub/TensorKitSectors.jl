@@ -18,6 +18,7 @@ struct A4Irrep <: AbstractIrrep{A₄}
 end
 
 FusionStyle(::Type{A4Irrep}) = GenericFusion()
+FusionDataStyle(::Type{A4Irrep}) = NonTrivialFusionData()
 sectorscalartype(::Type{A4Irrep}) = Float64
 
 unit(::Type{A4Irrep}) = A4Irrep(0)

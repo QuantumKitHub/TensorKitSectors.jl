@@ -215,6 +215,9 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
+function FusionDataStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(FusionDataStyle, &, _sectors(T))
+end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end

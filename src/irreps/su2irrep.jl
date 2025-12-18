@@ -43,6 +43,7 @@ findindex(::SectorValues{SU2Irrep}, s::SU2Irrep) = twice(s.j) + 1
 dim(s::SU2Irrep) = twice(s.j) + 1
 
 FusionStyle(::Type{SU2Irrep}) = SimpleFusion()
+FusionDataStyle(::Type{SU2Irrep}) = NonTrivialFusionData()
 sectorscalartype(::Type{SU2Irrep}) = Float64
 Base.isreal(::Type{SU2Irrep}) = true
 

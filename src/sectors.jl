@@ -317,6 +317,35 @@ Base.:&(::SimpleFusion, ::UniqueFusion) = SimpleFusion()
 Base.:&(::GenericFusion, ::UniqueFusion) = GenericFusion()
 Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
+# trait to differentiate between trivial and non-trivial F-symbols
+"""
+    abstract type FusionDataStyle
+    FusionDataStyle(::Sector)
+    FusionDataStyle(I::Type{<:Sector})
+
+Trait to describe the fusion behavior of sectors of type `I`, which can be either
+*   `TrivialFusionData()`: All F-symbols are trivial (equal to `0` or `1`);
+*   `NonTrivialFusionData()`: Some F-symbols are non-trivial;
+
+
+This is most important for sectors with `FusionStyle(I) == UniqueFusion()`, where
+`NonTrivialFusionData()` requires a proper evaluation of the F-symbols when manipulating
+fusion trees, while `TrivialFusionData()` allows to skip all F-symbol evaluations.
+"""
+abstract type FusionDataStyle end
+FusionDataStyle(a::Sector) = FusionDataStyle(typeof(a))
+
+struct TrivialFusionData <: FusionDataStyle end
+struct NonTrivialFusionData <: FusionDataStyle end
+
+# combine fusion data properties of tensor products of sectors
+Base.:&(f::F, ::F) where {F <: FusionDataStyle} = f
+Base.:&(f₁::FusionDataStyle, f₂::FusionDataStyle) = f₂ & f₁
+
+Base.:&(::TrivialFusionData, ::TrivialFusionData) = TrivialFusionData()
+Base.:&(::TrivialFusionData, ::NonTrivialFusionData) = NonTrivialFusionData()
+Base.:&(::NonTrivialFusionData, ::NonTrivialFusionData) = NonTrivialFusionData()
+
 # similar, but for multifusion categories
 """
     abstract type UnitStyle

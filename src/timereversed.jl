@@ -18,6 +18,7 @@ struct TimeReversed{I <: Sector} <: Sector
     end
 end
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
+FusionDataStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionDataStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
 function Nsymbol(
         a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}

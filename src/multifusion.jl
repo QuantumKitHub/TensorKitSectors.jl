@@ -56,6 +56,7 @@ function Base.convert(::Type{IsingAnyon}, a::IsingBimodule) # identify RepZ2 ⊕
 end
 
 FusionStyle(::Type{IsingBimodule}) = SimpleFusion() # no multiplicities
+FusionDataStyle(::Type{IsingBimodule}) = NonTrivialFusionData()
 BraidingStyle(::Type{IsingBimodule}) = NoBraiding() # because of module categories
 
 function Nsymbol(a::IsingBimodule, b::IsingBimodule, c::IsingBimodule)
