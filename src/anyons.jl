@@ -27,6 +27,7 @@ unit(::Type{PlanarTrivial}) = PlanarTrivial()
 dual(::PlanarTrivial) = PlanarTrivial()
 
 FusionStyle(::Type{PlanarTrivial}) = UniqueFusion()
+FusionDataStyle(::Type{PlanarTrivial}) = TrivialFusionData()
 BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
 Base.isreal(::Type{PlanarTrivial}) = true
 
@@ -82,6 +83,7 @@ const _goldenratio = Float64(MathConstants.golden)
 dim(a::FibonacciAnyon) = isunit(a) ? one(_goldenratio) : _goldenratio
 
 FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
+FusionDataStyle(::Type{FibonacciAnyon}) = NonTrivialFusionData()
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
 Base.isreal(::Type{FibonacciAnyon}) = false
 
