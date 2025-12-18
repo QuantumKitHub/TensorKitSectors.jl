@@ -35,6 +35,7 @@ dual(f::FermionParity) = f
 dim(f::FermionParity) = 1
 
 FusionStyle(::Type{FermionParity}) = UniqueFusion()
+FusionDataStyle(::Type{FermionParity}) = TrivialFusionData()
 BraidingStyle(::Type{FermionParity}) = Fermionic()
 Base.isreal(::Type{FermionParity}) = true
 

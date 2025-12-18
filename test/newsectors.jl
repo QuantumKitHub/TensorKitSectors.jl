@@ -12,7 +12,7 @@ using HalfIntegers
 using WignerSymbols
 using TensorKitSectors
 
-import TensorKitSectors: FusionStyle, BraidingStyle, Nsymbol, Fsymbol, Rsymbol, dim,
+import TensorKitSectors: FusionStyle, BraidingStyle, FusionDataStyle, Nsymbol, Fsymbol, Rsymbol, dim,
     fusiontensor, ⊗, unit, dual
 
 struct NewSU2Irrep <: Sector
@@ -35,6 +35,7 @@ Base.IteratorSize(::Type{SectorValues{NewSU2Irrep}}) = Base.IsInfinite()
 Base.iterate(::SectorValues{NewSU2Irrep}, i = 0) = (NewSU2Irrep(half(i)), i + 1)
 
 FusionStyle(::Type{NewSU2Irrep}) = GenericFusion()
+FusionDataStyle(::Type{NewSU2Irrep}) = NonTrivialFusionData()
 BraidingStyle(::Type{NewSU2Irrep}) = Bosonic()
 Base.isreal(::Type{NewSU2Irrep}) = true
 

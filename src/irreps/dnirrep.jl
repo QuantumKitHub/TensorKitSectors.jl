@@ -44,6 +44,7 @@ function Base.getproperty(a::DNIrrep{N}, sym::Symbol) where {N}
 end
 
 FusionStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? UniqueFusion() : SimpleFusion()
+FusionDataStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? TrivialFusionData() : NonTrivialFusionData()
 sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
 Base.isreal(::Type{DNIrrep{N}}) where {N} = true
 

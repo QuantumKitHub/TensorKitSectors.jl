@@ -30,6 +30,7 @@ the cocycle will be assumed to be trivial, i.e. equal to `1`.
 """
 abstract type AbstractGroupElement{G <: Group} <: Sector end
 FusionStyle(::Type{<:AbstractGroupElement}) = UniqueFusion()
+FusionDataStyle(::Type{<:AbstractGroupElement}) = NonTrivialFusionData()
 BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
 
 cocycle(a::I, b::I, c::I) where {I <: AbstractGroupElement} = 1
@@ -149,6 +150,7 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # Experimental
+FusionDataStyle(::Type{ZNElement{N, p}}) where {N, p} = p == 0 ? TrivialFusionData() : NonTrivialFusionData()
 BraidingStyle(::Type{ZNElement{N, 0}}) where {N} = Bosonic()
 Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
 

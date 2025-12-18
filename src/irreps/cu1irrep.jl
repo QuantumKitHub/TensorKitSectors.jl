@@ -107,6 +107,7 @@ end
 dim(c::CU1Irrep) = ifelse(c.j == zero(HalfInt), 1, 2)
 
 FusionStyle(::Type{CU1Irrep}) = SimpleFusion()
+FusionDataStyle(::Type{CU1Irrep}) = NonTrivialFusionData()
 sectorscalartype(::Type{CU1Irrep}) = Float64
 Base.isreal(::Type{CU1Irrep}) = true
 

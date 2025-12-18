@@ -30,6 +30,7 @@ Base.isless(::Trivial, ::Trivial) = false
 ⊗(::Trivial, ::Trivial) = (Trivial(),)
 Nsymbol(::Trivial, ::Trivial, ::Trivial) = true
 FusionStyle(::Type{Trivial}) = UniqueFusion()
+FusionDataStyle(::Type{Trivial}) = TrivialFusionData()
 Fsymbol(::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial) = 1
 fusiontensor(::Trivial, ::Trivial, ::Trivial) = fill(1, (1, 1, 1, 1))
 

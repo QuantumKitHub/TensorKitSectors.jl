@@ -8,6 +8,7 @@ Istr = TensorKitSectors.type_repr(I)
         prodsec = I ⊠ Z2Irrep
         @test UnitStyle(prodsec) isa GenericUnit
         @test FusionStyle(prodsec) isa SimpleFusion
+        @test FusionDataStyle(prodsec) isa NonTrivialFusionData
         @test_throws DomainError unit(prodsec)
         @test length(allunits(prodsec)) == 2
     end

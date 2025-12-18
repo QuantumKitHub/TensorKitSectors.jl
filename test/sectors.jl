@@ -30,6 +30,9 @@ using LinearAlgebra
             @test eltype(F) <: @testinferred sectorscalartype(I)
         end
     end
+    if FusionStyle(I) != UniqueFusion()
+        @test FusionDataStyle(I) === NonTrivialFusionData()
+    end
     @testinferred(s[1] ⊗ s[2])
     @testinferred(⊗(s..., s...))
 end
