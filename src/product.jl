@@ -221,8 +221,8 @@ end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-function Base.isreal(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(isreal, &, _sectors(T))
+function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(sectorscalartype, promote_type, _sectors(T))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)

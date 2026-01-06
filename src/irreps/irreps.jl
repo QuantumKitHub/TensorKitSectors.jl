@@ -48,7 +48,7 @@ end
 
 const AbelianIrrep{G} = AbstractIrrep{G} where {G <: AbelianGroup}
 FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
-Base.isreal(::Type{<:AbelianIrrep}) = true
+sectorscalartype(::Type{<:AbelianIrrep}) = Int
 
 Nsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = c == first(a ⊗ b)
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbelianIrrep}

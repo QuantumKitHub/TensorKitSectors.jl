@@ -45,7 +45,6 @@ end
 
 FusionStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? UniqueFusion() : SimpleFusion()
 sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
-Base.isreal(::Type{DNIrrep{N}}) where {N} = true
 
 unit(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
 dual(a::DNIrrep) = a

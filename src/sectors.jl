@@ -17,9 +17,11 @@ Every new `I <: Sector` should implement the following methods:
     `GenericFusion()`
 *   `BraidingStyle(::Type{I})`: `Bosonic()`, `Fermionic()`, `Anyonic()`, ...
 *   `Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I)`: F-symbol: scalar (in case of
-    `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
+    `UniqueFusion`/`SimpleFusion`) or rank-4 array (in case of `GenericFusion`)
 *   `Rsymbol(a::I, b::I, c::I)`: R-symbol: scalar (in case of
     `UniqueFusion`/`SimpleFusion`) or matrix (in case of `GenericFusion`)
+*   `isless(a::I, b::I)`: defines a canonical ordering of sectors
+*   `hash(a::I)`: hash function for sectors
 and optionally
 *   `dim(a::I)`: quantum dimension of sector `a`
 *   `frobenius_schur_indicator(a::I)`: Frobenius-Schur indicator of `a` (1, 0, -1)
@@ -162,7 +164,7 @@ Base.conj(a::Sector) = dual(a)
 """
     sectorscalartype(I::Type{<:Sector}) -> Type
 
-Return the scalar type of the topological data (Fsymbol, Rsymbol) of the sector `I`.
+Return the scalar type of the topological data ([`Fsymbol`](@ref) and [`Rsymbol`](@ref)) of the sector `I`.
 """
 function sectorscalartype(::Type{I}) where {I <: Sector}
     if BraidingStyle(I) === NoBraiding()
