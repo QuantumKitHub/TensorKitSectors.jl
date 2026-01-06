@@ -22,9 +22,8 @@ findindex(::SectorValues{Trivial}, c::Trivial) = 1
 # basic properties
 unit(::Type{Trivial}) = Trivial()
 dual(::Trivial) = Trivial()
-
-Base.isreal(::Type{Trivial}) = true
 Base.isless(::Trivial, ::Trivial) = false
+sectorscalartype(::Type{Trivial}) = Int
 
 # fusion rules
 ⊗(::Trivial, ::Trivial) = (Trivial(),)

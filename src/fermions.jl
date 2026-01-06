@@ -36,7 +36,7 @@ dim(f::FermionParity) = 1
 
 FusionStyle(::Type{FermionParity}) = UniqueFusion()
 BraidingStyle(::Type{FermionParity}) = Fermionic()
-Base.isreal(::Type{FermionParity}) = true
+sectorscalartype(::Type{FermionParity}) = Int
 
 ⊗(a::FermionParity, b::FermionParity) = (FermionParity(a.isodd ⊻ b.isodd),)
 

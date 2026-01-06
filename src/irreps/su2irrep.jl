@@ -44,7 +44,6 @@ dim(s::SU2Irrep) = twice(s.j) + 1
 
 FusionStyle(::Type{SU2Irrep}) = SimpleFusion()
 sectorscalartype(::Type{SU2Irrep}) = Float64
-Base.isreal(::Type{SU2Irrep}) = true
 
 Nsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep) = WignerSymbols.δ(sa.j, sb.j, sc.j)
 
