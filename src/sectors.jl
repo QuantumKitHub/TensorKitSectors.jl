@@ -432,6 +432,20 @@ function frobenius_schur_indicator(a::Sector)
 end
 
 # Not necessary
+"""
+    Asymbol(a::I, b::I, c::I) where {I <: Sector}
+
+Return the value of ``A^{ab}_c`` which appears in transforming a splitting vertex
+into a fusion vertex using the transformation
+```
+a -<-μ-<- c                                                    b -<-ν-<- dual(a)
+     ∨       -> √(dim(c) / dim(b)) * Asymbol(a, b, c)[μ, ν]         ∧
+     b                                                              c
+```
+If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the A-symbol is a
+number. Otherwise it is a square matrix with row and column size
+`Nsymbol(a, b, c) == Nsymbol(dual(a), c, b)`.
+"""
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
@@ -562,6 +576,15 @@ end
 # Pentagon and Hexagon equations
 #-------------------------------------------------------------------------------
 # Consistency equations for F- and R-symbols
+"""
+    pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I <: Sector} -> Bool
+
+Check whether the pentagon equation holds for fusing the sectors `a`, `b`, `c` and `d`
+to each of their sectors along the two different fusion paths.
+
+If `kwargs` are provided, they are forwarded to `isapprox` when comparing the two sides
+of the pentagon equation.
+"""
 function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I <: Sector}
     for f in ⊗(a, b), h in ⊗(c, d)
         for g in ⊗(f, c), i in ⊗(b, h)
@@ -600,6 +623,15 @@ function pentagon_equation(a::I, b::I, c::I, d::I; kwargs...) where {I <: Sector
     return true
 end
 
+"""
+    hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector} -> Bool
+
+Check whether the hexagon equation holds for braiding the sector `a` around the fusion
+product of `b` and `c` along the two different paths.
+
+If `kwargs` are provided, they are forwarded to `isapprox` when comparing the two sides
+of the hexagon equation.
+"""
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
