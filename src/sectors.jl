@@ -626,34 +626,45 @@ end
 """
     hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector} -> Bool
 
-Check whether the hexagon equation holds for braiding the sector `a` around the fusion
-product of `b` and `c` along the two different paths.
+Check whether the hexagon equations hold for braiding the sector `a` around the fusion
+product of `b` and `c` along the two different paths. There are two hexagon equations,
+one for braiding `a` over `b ⊗ c` and one for braiding `a` under `b ⊗ c`.
 
 If `kwargs` are provided, they are forwarded to `isapprox` when comparing the two sides
-of the hexagon equation.
+of the hexagon equations.
 """
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
-        throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
+        throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
             if FusionStyle(I) isa MultiplicityFreeFusion
-                p1 = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
-                p2 = zero(p1)
+                p1_o = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
+                p2_o = zero(p1_o)
+                p1_u = conj(Rsymbol(c, a, e)) * Fsymbol(a, c, b, d, e, f) * conj(Rsymbol(c, b, f))
+                p2_u = zero(p1_u)
                 for g in ⊗(a, b)
-                    p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(c, g, d) *
+                    p2_o += Fsymbol(c, a, b, d, e, g) * Rsymbol(c, g, d) *
+                        Fsymbol(a, b, c, d, g, f)
+                    p2_u += conj(Fsymbol(c, a, b, d, e, g)) * conj(Rsymbol(c, g, d)) *
                         Fsymbol(a, b, c, d, g, f)
                 end
             else
-                @tensor p1[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
+                @tensor p1_o[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
                     Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(c, b, f)[γ, μ]
-                p2 = zero(p1)
+                p2_o = zero(p1_o)
+                @tensor p1_u[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
+                    conj(Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν]) * Rsymbol(c, b, f)[γ, μ]
+                p2_u = zero(p1_u)
                 for g in ⊗(a, b)
-                    @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
+                    @tensor p2_o[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
                         Rsymbol(c, g, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
+                    @tensor p2_u[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
+                        conj(Rsymbol(c, g, d)[σ, ψ]) * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
                 end
             end
-            isapprox(p1, p2; kwargs...) || return false
+            isapprox(p1_o, p2_o; kwargs...) || return false
+            isapprox(p1_u, p2_u; kwargs...) || return false
         end
     end
     return true
