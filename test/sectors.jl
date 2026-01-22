@@ -185,7 +185,7 @@ end
             end
         end
     end
-end 
+end
 
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
@@ -199,12 +199,12 @@ end
                         FRF += Fsymbol(a, b, d, e, c, g) * Rsymbol(b, d, g) * conj(Fsymbol(a, d, b, e, f, g))
                     end
                 else
-                    @tensor RFR[ν, μ, λ, σ] := Rsymbol(c, d, e)[ν, ρ] * 
-                    conj(Fsymbol(d, a, b, e, f, c)[κ, λ, μ, ρ]) * conj(Rsymbol(d, a, f)[σ, κ])
+                    @tensor RFR[ν, μ, λ, σ] := Rsymbol(c, d, e)[ν, ρ] *
+                        conj(Fsymbol(d, a, b, e, f, c)[κ, λ, μ, ρ]) * conj(Rsymbol(d, a, f)[σ, κ])
                     FRF = zero(RFR)
                     for g in ⊗(d, b)
-                        @tensor FRF[ν, μ, β, α] += Fsymbol(a, b, d, e, c, g)[μ, ν, κ, λ] * 
-                        Rsymbol(b, d, g)[κ, θ] * conj(Fsymbol(a, d, b, e, f, g)[α, β, θ, λ])
+                        @tensor FRF[ν, μ, β, α] += Fsymbol(a, b, d, e, c, g)[μ, ν, κ, λ] *
+                            Rsymbol(b, d, g)[κ, θ] * conj(Fsymbol(a, d, b, e, f, g)[α, β, θ, λ])
                     end
                 end
                 @test isapprox(RFR, FRF; atol = 1.0e-12, rtol = 1.0e-12)
