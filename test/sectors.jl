@@ -155,3 +155,36 @@ end
         @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
+
+@testsuite "Ribbon condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            R1 = Rsymbol(a, b, c)
+            R2 = Rsymbol(b, a, c)
+            θa, θb, θc = twist.((a, b, c))
+            factor = R1 * θa * θb * R2
+            if FusionStyle(I) isa GenericFusion
+                @test isapprox(θc * LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            else
+                @test isapprox(θc, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
+    end
+end
+
+@testsuite "Braiding self-duality condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I)
+        if a == dual(a)
+            factor = twist(a) * frobenius_schur_phase(a) * Rsymbol(a, a, unit(a))
+            if FusionStyle(I) isa GenericFusion
+                @test isapprox(LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            else
+                @test isapprox(one(eltype(factor)), factor; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
+    end
+end 
+
+#TODO: artin braid condition check?
