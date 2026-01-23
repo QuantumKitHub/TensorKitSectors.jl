@@ -149,6 +149,7 @@ end
     end
 end
 
+# https://ncatlab.org/nlab/files/DelaneyModularTensorCategories.pdf#page=9
 @testsuite "Hexagon equation" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
@@ -156,6 +157,7 @@ end
     end
 end
 
+# https://quantumkithub.github.io/TensorKit.jl/stable/appendix/categories/#Braidings-and-twists
 @testsuite "Ribbon condition" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I)
@@ -187,6 +189,7 @@ end
     end
 end
 
+# https://quantumkithub.github.io/TensorKit.jl/stable/man/sectors/#Manipulations-on-a-fusion-tree
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), d in smallset(I)
