@@ -653,8 +653,8 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                 @tensor p1_o[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
                     Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(c, b, f)[γ, μ]
                 p2_o = zero(p1_o)
-                @tensor p1_u[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
-                    conj(Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν]) * Rsymbol(c, b, f)[γ, μ]
+                @tensor p1_u[α, β, μ, ν] := conj(Rsymbol(c, a, e)[α, λ]) *
+                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * conj(Rsymbol(c, b, f)[γ, μ])
                 p2_u = zero(p1_u)
                 for g in ⊗(a, b)
                     @tensor p2_o[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
