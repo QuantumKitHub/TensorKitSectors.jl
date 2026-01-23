@@ -220,9 +220,12 @@ Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
     otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
+Each sector `c` should appear at most once in this iteration, even if the multipicity ``N_c^{ab} > 1``.
+The actual multiplicities are accessed separately through [`Nsymbol`](@ref).
 
-Note that every element `c` should appear at most once, fusion degeneracies (if
-`FusionStyle(I) == GenericFusion()`) should be accessed via `Nsymbol(a, b, c)`.
+The return type is typically [`SectorProductIterator{I}`](@ref) which provides a type-stable iterable that supports pretty-printing, but could also be any custom iterable.
+
+See also [`FusionStyle`](@ref) for the trait associated to the fusion behavior of a given sector type.
 """
 function ⊗ end
 const otimes = ⊗
@@ -297,8 +300,11 @@ end
 """
     Nsymbol(a::I, b::I, c::I) where {I <: Sector} -> Integer
 
-Return an `Integer` representing the number of times `c` appears in the fusion product
-`a ⊗ b`. Could be a `Bool` if `FusionStyle(I) == UniqueFusion()` or `SimpleFusion()`.
+The fusion multiplicity ``N_c^{ab}``, indicating how many times sector `c` appears in the fusion product `a ⊗ b`.
+
+The return type depends on the [`FusionStyle]`(@ref), where [`UniqueFusion`](@ref) and [`SimpleFusion`](@ref) return `Bool` values, while [`GenericFusion`] returns `Int`.
+
+See also [`⊗`](@ref) to obtain the set of sectors `c` that appear in `a ⊗ b`.
 """
 function Nsymbol end
 
@@ -309,16 +315,12 @@ function Nsymbol end
     FusionStyle(I::Type{<:Sector})
 
 Trait to describe the fusion behavior of sectors of type `I`, which can be either
-*   `UniqueFusion()`: single fusion output when fusing two sectors;
-*   `SimpleFusion()`: multiple outputs, but every output occurs at most one,
-    also known as multiplicity-free (e.g. irreps of ``SU(2)``);
-*   `GenericFusion()`: multiple outputs that can occur more than once (e.g. irreps
-    of ``SU(3)``).
+*   `UniqueFusion()`: each fusion `a ⊗ b` has exactly one output `c`.
+*   `SimpleFusion()`: fusing `a ⊗ b` can lead to multiple values `c`, but each appears at most once.
+*   `GenericFusion()`: fusing `a ⊗ b` can lead to multiple values `c` that could appear multiple times.
 
-There is an abstract supertype `MultipleFusion` of which both `SimpleFusion` and
-`GenericFusion` are subtypes. Furthermore, there is a type alias `MultiplicityFreeFusion`
-for those fusion types which do not require muliplicity labels, i.e.
-`MultiplicityFreeFusion = Union{UniqueFusion,SimpleFusion}`.
+There is an abstract supertype `MultipleFusion` of which both `SimpleFusion` and `GenericFusion` are subtypes.
+ Furthermore, there is a type alias `MultiplicityFreeFusion` for those fusion types which do not require muliplicity labels, i.e. `MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}`.
 """
 abstract type FusionStyle end
 FusionStyle(a::Sector) = FusionStyle(typeof(a))
