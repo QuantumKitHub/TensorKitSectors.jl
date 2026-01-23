@@ -636,33 +636,46 @@ of the hexagon equations.
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
+    symmetricbraiding = BraidingStyle(I) isa SymmetricBraiding # bosonic/fermionic underbraiding = overbraiding
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
             R1, R2 = Rsymbol(c, a, e), Rsymbol(c, b, f)
             F1 = Fsymbol(a, c, b, d, e, f)
             if FusionStyle(I) isa MultiplicityFreeFusion
                 p1_o = R1 * F1 * R2
-                p1_u = conj(R1) * F1 * conj(R2)
-                p2_o, p2_u = zero(p1_o), zero(p1_u)
+                p2_o = zero(p1_o)
+                if !symmetricbraiding
+                    p1_u = conj(R1) * F1 * conj(R2)
+                    p2_u = zero(p1_u)
+                end
                 for g in ⊗(a, b)
                     R3 = Rsymbol(c, g, d)
                     F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
                     p2_o += F2 * R3 * F3
-                    p2_u += F2 * conj(R3) * F3
+                    if !symmetricbraiding
+                        p2_u += F2 * conj(R3) * F3
+                    end
                 end
             else
                 @tensor p1_o[α, β, μ, ν] := R1[α, λ] * F1[λ, β, γ, ν] * R2[γ, μ]
-                @tensor p1_u[α, β, μ, ν] := conj(R1[α, λ]) * F1[λ, β, γ, ν] * conj(R2[γ, μ])
-                p2_u, p2_o = zero(p1_u), zero(p1_o)
+                p2_o = zero(p1_o)
+                if !symmetricbraiding
+                    @tensor p1_u[α, β, μ, ν] := conj(R1[α, λ]) * F1[λ, β, γ, ν] * conj(R2[γ, μ])
+                    p2_u = zero(p1_u)
+                end
                 for g in ⊗(a, b)
                     R3 = Rsymbol(c, g, d)
                     F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
                     @tensor p2_o[α, β, μ, ν] += F2[α, β, δ, σ] * R3[σ, ψ] * F3[δ, ψ, μ, ν]
-                    @tensor p2_u[α, β, μ, ν] += F2[α, β, δ, σ] * conj(R3[σ, ψ]) * F3[δ, ψ, μ, ν]
+                    if !symmetricbraiding
+                        @tensor p2_u[α, β, μ, ν] += F2[α, β, δ, σ] * conj(R3[σ, ψ]) * F3[δ, ψ, μ, ν]
+                    end
                 end
             end
             isapprox(p1_o, p2_o; kwargs...) || return false
-            isapprox(p1_u, p2_u; kwargs...) || return false
+            if !symmetricbraiding
+                isapprox(p1_u, p2_u; kwargs...) || return false
+            end
         end
     end
     return true
