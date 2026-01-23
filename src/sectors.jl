@@ -637,6 +637,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
     symmetricbraiding = BraidingStyle(I) isa SymmetricBraiding # bosonic/fermionic underbraiding = overbraiding
+    local p2_u
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
             R1, R2 = Rsymbol(c, a, e), Rsymbol(c, b, f)
