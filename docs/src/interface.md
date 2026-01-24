@@ -153,7 +153,84 @@ rightunit
 
 For regular fusion categories the unit object is unique, such that `unit`, `leftunit` and `rightunit` all coincide.
 
-### Topological Data
+### Associativity
+
+The associativity of the fusion tensor product is encoded in the F-symbols, which relate different ways of fusing three sectors.
+Formally, the F-symbol ``F^{abc}_d`` with intermediate sectors ``e`` and ``f`` is a linear transformation between the two different parenthesizations:
+```math
+[F^{abc}_d]^f_e : (a ⊗ b → e) ⊗ c → d \quad \longrightarrow \quad a ⊗ (b ⊗ c → f) → d
+```
+The basis states ``|(a ⊗ b → e) ⊗ c → d\rangle`` are linearly transformed into ``|a ⊗ (b ⊗ c → f) → d\rangle``.
+For sectors with `UniqueFusion` or `SimpleFusion`, the F-symbol is a scalar (complex number).
+For `GenericFusion`, it is a rank-4 tensor with indices corresponding to the multiplicity labels of each fusion vertex.
+
+The F-symbols must satisfy the **pentagon equation** for every choice of sectors:
+```math
+\sum_n F^{bcd}_{gn} F^{abn}_{fe} = \sum_m F^{abc}_{em} F^{amc}_{fg} F^{bcd}_{gf}
+```
+This ensures that all ways of reassociating four tensor factors ``(((a ⊗ b) ⊗ c) ⊗ d)`` to ``(a ⊗ (b ⊗ (c ⊗ d)))`` give the same result, regardless of the sequence of reassociations.
+
+```@docs; canonical = false
+Fsymbol
+```
+
+**Examples:**
+TODO: fix these examples
+```julia
+# Trivial category: all F-symbols are 1
+Fsymbol(::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial, ::Trivial) = 1
+
+# U₁ irreps: all F-symbols are 1 (canonical gauge choice)
+Fsymbol(a::U1Irrep, b::U1Irrep, c::U1Irrep, d::U1Irrep, e::U1Irrep, f::U1Irrep) = 1
+
+# SU₂ irreps: computed from 6j-symbols
+Fsymbol(a::SU2Irrep, b::SU2Irrep, c::SU2Irrep, d::SU2Irrep, e::SU2Irrep, f::SU2Irrep) = ...
+```
+
+### Braiding
+
+Sectors can have a braiding structure that describes the effect of exchanging two tensor factors.
+The braiding is encoded in the R-symbol ``R^{ab}_c``, which is a linear transformation between the fusion channels ``a ⊗ b → c`` and ``b ⊗ a → c``.
+For sectors with `UniqueFusion` or `SimpleFusion`, the R-symbol is a complex phase.
+For `GenericFusion`, it is a square matrix relating the multiplicity spaces of the two fusion orders.
+
+The R-symbols must satisfy the **hexagon equations** together with the F-symbols:
+```math
+\sum_g R^{ab}_g F^{abx}_{cg} R^{ax}_c = \sum_{f,h} F^{bax}_{cf} R^{af}_h F^{axb}_{ch}
+```
+and the analogous equation with ``a`` and ``b`` swapped.
+These ensure that the braiding is compatible with the associativity encoded by F-symbols.
+
+The type of braiding behavior is declared by the `BraidingStyle` trait, which categorizes sectors into four classes:
+- `NoBraiding()` for planar categories where braiding is undefined
+- `Bosonic()` for symmetric braiding with trivial twist (all R-symbols square to identity, all twists equal +1)
+- `Fermionic()` for symmetric braiding with fermion parity (twists can be ±1)
+- `Anyonic()` for general braiding with arbitrary phases or non-symmetric exchange
+
+```@docs; canonical = false
+Rsymbol
+BraidingStyle
+```
+
+**Examples:**
+TODO: fix these examples
+```julia
+# Trivial category: bosonic braiding, all R-symbols are 1
+BraidingStyle(::Type{Trivial}) = Bosonic()
+Rsymbol(::Trivial, ::Trivial, ::Trivial) = 1
+
+# Fermion parity: fermionic braiding
+BraidingStyle(::Type{FermionParity}) = Fermionic()
+Rsymbol(a::FermionParity, b::FermionParity, c::FermionParity) = 
+    iseven(a) || iseven(b) ? 1 : -1
+
+# Fibonacci anyons: anyonic braiding
+BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
+Rsymbol(::FibonacciAnyon, ::FibonacciAnyon, ::FibonacciAnyon) = exp(4π*im/5)
+
+# Planar trivial: no braiding
+BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
+```
 
 ### Utility Methods
 
