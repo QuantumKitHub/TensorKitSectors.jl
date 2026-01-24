@@ -113,6 +113,46 @@ end
 FusionStyle(::Type{SU2Irrep}) = SimpleFusion()
 ```
 
+### Identity and Duality
+
+Every fusion category has distinguished objects: the unit (identity) and duals (conjugates).
+The unit ``\mathbb{1}`` acts as the identity under fusion:
+```math
+\mathbb{1} ⊗ a ≅ a ≅ a ⊗ \mathbb{1}
+```
+The dual of a sector ``a`` is the unique sector ``\bar{a}`` such that their fusion contains the unit:
+```math
+N^{a\bar{a}}_{\mathbb{1}} = 1 \quad \text{and} \quad N^{\bar{a}a}_{\mathbb{1}} = 1
+```
+
+```@docs; canonical = false
+unit
+dual
+```
+
+**Example: U₁**
+```julia
+unit(::Type{U1Irrep}) = U1Irrep(0)         # charge 0 is the unit
+dual(c::U1Irrep) = U1Irrep(-charge(c))    # opposite charge
+```
+
+**Example: SU₂**
+```julia
+unit(::Type{SU2Irrep}) = SU2Irrep(0)      # spin 0 is the unit
+dual(s::SU2Irrep) = s                      # self-dual
+```
+
+**Multifusion categories** can have multiple units and may distinguish between left and right units.
+For such cases, additional methods are available:
+
+```@docs; canonical = false
+allunits
+leftunit
+rightunit
+```
+
+For regular fusion categories the unit object is unique, such that `unit`, `leftunit` and `rightunit` all coincide.
+
 ### Topological Data
 
 ### Utility Methods
