@@ -234,6 +234,25 @@ BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
 
 ### Utility Methods
 
+Sectors must support a deterministic ordering and hashing so they can be used as dictionary keys, sorted collections, and canonical fusion outputs.
+The ordering should be a strict total order that is consistent with enumerating the sector values, and the hash must be stable with respect to equality.
+To achieve this, we must have
+
+- `Base.isless(::Sector, ::Sector)` — Define an order on the sectors.
+- `Base.hash(::Sector, h::UInt)` — Associate a hash value with a sector.
+
+**Example: U₁**
+```julia
+# U₁: order by absolute charge, then prefer positive over negative to comply with `values(U1Irrep)`
+function Base.isless(c1::U1Irrep, c2::U1Irrep)
+    q1, q2 = charge(c1), charge(c2)
+    return abs(q1) < abs(q2) || (abs(q1) == abs(q2) && q1 > q2 > 0)
+end
+
+# Hash consistent with equality
+Base.hash(c::U1Irrep, h::UInt) = hash(c.charge, h)
+```
+
 ## Optional Methods
 
 ## Traits and Styles
