@@ -421,7 +421,27 @@ function dim(a::Sector)
         abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
+
+"""
+    sqrtdim(a::Sector)
+
+Return the square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `sqrt(1)` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `sqrt(dim(a))`.
+"""
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
+
+"""
+    invsqrtdim(a::Sector)
+
+Return the inverse square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `inv(sqrt(1))` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `inv(sqrt(dim(a)))`.
+"""
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
 
 """
