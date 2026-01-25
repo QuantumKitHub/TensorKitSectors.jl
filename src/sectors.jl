@@ -583,31 +583,77 @@ end
     BraidingStyle(::Sector) -> ::BraidingStyle
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
-Return the type of braiding and twist behavior of sectors of type `I`, which can be either
-*   `NoBraiding()`: no braiding structure
-*   `Bosonic()`: symmetric braiding with trivial twist (i.e. identity)
-*   `Fermionic()`: symmetric braiding with non-trivial twist (squares to identity)
-*   `Anyonic()`: general ``R^{ab}_c`` phase or matrix (depending on `SimpleFusion` or
-    `GenericFusion` fusion) and arbitrary twists
+Trait to describe the braiding behavior of sectors of type `I`, which can be either
+* [`NoBraiding`](@ref): no braiding structure defined.
+* [`Bosonic`](@ref): symmetric braiding structure with a trivial twist.
+* [`Fermionic`](@ref): symmetric braiding structure with a non-trivial twist that squares to identity.
+* [`Anyonic`](@ref): general braiding structure and arbitrary twists.
 
-Note that `Bosonic` and `Fermionic` are subtypes of `SymmetricBraiding`, which means that
-braids are in fact equivalent to crossings (i.e. braiding twice is an identity:
-`isone(Rsymbol(b,a,c)*Rsymbol(a,b,c)) == true`) and permutations are uniquely defined.
+There is an abstract supertype [`HasBraiding`](@ref) that includes all styles that define [`Rsymbol`](@ref) (everything but `NoBraiding`).
+Furthermore, the abstract supertype [`SymmetricBraiding`](@ref) denotes the cases where braidings are equivalent to crossings, i.e. braiding twice is an identity operation.
+This includes the `Bosonic` and `Fermionic` styles, for which we can uniquely define permutations.
 """
 abstract type BraidingStyle end
 BraidingStyle(a::Sector) = BraidingStyle(typeof(a))
 
-abstract type HasBraiding <: BraidingStyle end
-struct NoBraiding <: BraidingStyle end
-abstract type SymmetricBraiding <: HasBraiding end # symmetric braiding => actions of permutation group are well defined
-struct Bosonic <: SymmetricBraiding end # all twists are one
-struct Fermionic <: SymmetricBraiding end # twists one and minus one
-struct Anyonic <: HasBraiding end
+"""
+    abstract type HasBraiding <: BraidingStyle
 
-@doc (@doc BraidingStyle) NoBraiding
-@doc (@doc BraidingStyle) Bosonic
-@doc (@doc BraidingStyle) Fermionic
-@doc (@doc BraidingStyle) Anyonic
+Supertype for all braiding styles where an [`Rsymbol`](@ref) is defined.
+This includes all current `BraidingStyle`s except `NoBraiding`.
+"""
+abstract type HasBraiding <: BraidingStyle end
+
+"""
+    struct NoBraiding <: BraidingStyle
+
+Braiding style for categories without a braiding structure.
+Except for braiding with the unit sector, only planar diagrams are meaningful; [`Rsymbol`](@ref) is undefined.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct NoBraiding <: BraidingStyle end
+
+"""
+    abstract type SymmetricBraiding <: HasBraiding
+
+Supertype for braiding styles with symmetric braiding, where braiding twice is the identity operation.
+Subtypes include [`Bosonic`](@ref) (trivial twist) and [`Fermionic`](@ref) (nontrivial twist ±1).
+Supports permutation group statistics.
+
+See also [`BraidingStyle`](@ref).
+"""
+abstract type SymmetricBraiding <: HasBraiding end
+
+"""
+    struct Bosonic <: SymmetricBraiding
+
+Braiding style with symmetric braiding and trivial twist.
+This is characterized by ``R^{ab}_c R^{ba}_c = 1`` and ``\\theta_a = 1`` for all sectors.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Bosonic <: SymmetricBraiding end
+
+"""
+    struct Fermionic <: SymmetricBraiding
+
+Braiding style with symmetric braiding and nontrivial (symmetric) twist.
+This is characterized by ``R^{ab}_c R^{ba}_c = 1`` and ``\\theta_a = \\pm 1`` for all sectors.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Fermionic <: SymmetricBraiding end
+
+"""
+    struct Anyonic <: HasBraiding
+
+Braiding style with general (non-symmetric) braiding and arbitrary twists.
+Characterized by nontrivial braid group representations where ``R^{ab}_c R^{ba}_c ≠ 1`` in general.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Anyonic <: HasBraiding end
 
 Base.:&(b::B, ::B) where {B <: BraidingStyle} = b
 Base.:&(B1::BraidingStyle, B2::BraidingStyle) = B2 & B1
