@@ -373,6 +373,35 @@ MultiplicityFreeFusion
 
 ### BraidingStyle
 
+The `BraidingStyle` describes how sectors behave under exchange (braiding) operations.
+In other words, this trait defines the behavior of [`Rsymbol`](@ref) and [`twist`](@ref).
+Different braiding styles not only enable different optimizations, but also dictate the allowed operations.
+For example, symmetric braiding allows for permutation group statistics, while anyonic systems require full braid group representations.
+
+```@docs; canonical = false
+BraidingStyle
+NoBraiding
+Bosonic
+Fermionic
+Anyonic
+```
+
+It is also possible to combine braiding styles through the `&` operator, which returns the style with the least assumptions.
+For example:
+
+```julia
+Bosonic() & Fermionic() # Fermionic()
+Fermionic() & Anyonic() # Anyonic()
+Bosonic() & NoBraiding() # NoBraiding()
+```
+
+Finally, some predefined combinations that appear often have dedicated names:
+
+```@docs; canonical = false
+HasBraiding
+SymmetricBraiding
+```
+
 ### UnitStyle
 
 ## Implementation Guidelines
