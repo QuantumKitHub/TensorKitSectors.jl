@@ -340,7 +340,36 @@ fusiontensor
 
 ## Traits and Styles
 
+Traits define compile-time properties of sector types that affect how operations are specialized and optimized.
+
 ### FusionStyle
+
+The `FusionStyle` trait is arguably the most important characteristic of a sector, determining how many sectors appear when fusing two sectors, and how many times a unique output can appear.
+Various optimizations become available whenever we are not dealing with the `GenericFusion` case.
+Firstly, since the shape (size of the arrays) of the topological data is determined by combinations of the [`Nsymbol`](@ref), we can avoid allocating arrays and use scalar quantities for `UniqueFusion` and `SimpleFusion`.
+Furthermore, in the `UniqueFusion` case, there is only a single channel for `a ⊗ b ⊗ c ⊗ ...`, paving the way for various optimizations when dealing with fusion trees.
+
+```@docs; canonical = false
+FusionStyle
+UniqueFusion
+SimpleFusion
+GenericFusion
+```
+
+It is additionally possible to combine fusion styles through the `&` operator, which returns the style with the least assumptions.
+For example:
+
+```julia
+UniqueFusion() & SimpleFusion() # SimpleFusion()
+GenericFusion() & UniqueFusion() # GenericFusion()
+```
+
+Finally, some predefined combinations that appear often have dedicated names:
+
+```@docs; canonical = false
+MultipleFusion
+MultiplicityFreeFusion
+```
 
 ### BraidingStyle
 
