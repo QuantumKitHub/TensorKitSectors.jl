@@ -315,25 +315,63 @@ function Nsymbol end
     FusionStyle(I::Type{<:Sector})
 
 Trait to describe the fusion behavior of sectors of type `I`, which can be either
-*   `UniqueFusion()`: each fusion `a ⊗ b` has exactly one output `c`.
-*   `SimpleFusion()`: fusing `a ⊗ b` can lead to multiple values `c`, but each appears at most once.
-*   `GenericFusion()`: fusing `a ⊗ b` can lead to multiple values `c` that could appear multiple times.
+* [`UniqueFusion`](@ref): each fusion `a ⊗ b` has exactly one output `c`.
+* [`SimpleFusion`](@ref): fusing `a ⊗ b` can lead to multiple values `c`, but each appears at most once.
+* [`GenericFusion`](@ref): fusing `a ⊗ b` can lead to multiple values `c` that could appear multiple times.
 
-There is an abstract supertype `MultipleFusion` of which both `SimpleFusion` and `GenericFusion` are subtypes.
- Furthermore, there is a type alias `MultiplicityFreeFusion` for those fusion types which do not require muliplicity labels, i.e. `MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}`.
+There is an abstract supertype [`MultipleFusion`](@ref) of which both `SimpleFusion` and `GenericFusion` are subtypes.
+Furthermore, there is a type alias [`MultiplicityFreeFusion`](@ref) for those fusion types which do not require muliplicity labels.
 """
 abstract type FusionStyle end
 FusionStyle(a::Sector) = FusionStyle(typeof(a))
 
-struct UniqueFusion <: FusionStyle end # unique fusion output when fusing two sectors
-abstract type MultipleFusion <: FusionStyle end
-struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity free
-struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
-const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
+"""
+    struct UniqueFusion <: FusionStyle
 
-@doc (@doc FusionStyle) UniqueFusion
-@doc (@doc FusionStyle) SimpleFusion
-@doc (@doc FusionStyle) GenericFusion
+Fusion style where every product `a ⊗ b` has exactly one output `c`.
+As a result, ``N_c^{ab} ≤ 1`` and no multiplicity labels are needed.
+
+See also [`FusionStyle`](@ref).
+"""
+struct UniqueFusion <: FusionStyle end
+
+"""
+    abstract type MultipleFusion <: FusionStyle
+
+Fusion styles that allow more than one fusion output for `a ⊗ b`.
+
+See also [`SimpleFusion`](@ref), [`GenericFusion`](@ref) and [`FusionStyle`](@ref).
+"""
+abstract type MultipleFusion <: FusionStyle end
+
+"""
+    struct SimpleFusion <: MultipleFusion
+
+Fusion style where multiple outputs `c` can appear in `a ⊗ b`, but each appears at most once.
+As a result, ``N_c^{ab} ≤ 1`` and no multiplicity labels are needed.
+
+See also [`FusionStyle`](@ref).
+"""
+struct SimpleFusion <: MultipleFusion end
+
+"""
+    struct GenericFusion <: MultipleFusion
+
+Fusion style with potentially multiple outputs `c` and nontrivial multiplicities.
+Here ``N_c^{ab}`` can exceed 1, and multiplicity labels are required.
+
+See also [`FusionStyle`](@ref).
+"""
+struct GenericFusion <: MultipleFusion end
+
+"""
+    const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
+
+Convenience alias for fusion styles that can assume `Nsymbol(a, b, c)::Bool`, and therefore never require multiplicity labels.
+
+See also [`UniqueFusion`](@ref), [`SimpleFusion`](@ref) and [`FusionStyle`](@ref).
+"""
+const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
 
 # combine fusion properties of tensor products of sectors
 Base.:&(f::F, ::F) where {F <: FusionStyle} = f
@@ -484,7 +522,6 @@ function frobenius_schur_indicator(a::Sector)
     return a == conj(a) ? ν : zero(ν)
 end
 
-# Not necessary
 """
     Asymbol(a::I, b::I, c::I) where {I <: Sector}
 
@@ -542,7 +579,7 @@ end
 # trait to describe type to denote how the elementary spaces in a tensor product space
 # interact under permutations or actions of the braid group
 """
-    abstract type BradingStyle
+    abstract type BraidingStyle
     BraidingStyle(::Sector) -> ::BraidingStyle
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
