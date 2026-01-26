@@ -404,6 +404,16 @@ SymmetricBraiding
 
 ### UnitStyle
 
+The `UnitStyle` describes whether the fusion category has a simple or semisimple unit object.
+In other words, this trait determines when we can define a unique value for [`unit`](@ref), or multiple units exist and we have to resort to [`leftunit`](@ref) and [`rightunit`](@ref).
+By default, this is derived from `length(allunits(I))`.
+
+```@docs; canonical = false
+UnitStyle
+SimpleUnit
+GenericUnit
+```
+
 ## Implementation Guidelines
 
 ### Helper Type: SectorProductIterator

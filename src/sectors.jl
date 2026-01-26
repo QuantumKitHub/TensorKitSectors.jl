@@ -389,17 +389,31 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
 Trait to describe the semisimplicity of the unit sector of type `I`.
 This can be either
-*   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
-*   `GenericUnit()`: the unit is semisimple.
+* [`SimpleUnit`](@ref): the unit is simple (e.g. fusion categories).
+* [`GenericUnit`](@ref): the unit is semisimple (e.g. multifusion categories).
 """
 abstract type UnitStyle end
 UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
-struct SimpleUnit <: UnitStyle end
-struct GenericUnit <: UnitStyle end
+"""
+    struct SimpleUnit <: UnitStyle
 
-@doc (@doc UnitStyle) SimpleUnit
-@doc (@doc UnitStyle) GenericUnit
+Unit style for fusion categories with a unique unit (identity) object.
+The unit satisfies ``\\mathbb{1} ⊗ a ≅ a ≅ a ⊗ \\mathbb{1}`` for all sectors.
+
+See also [`UnitStyle`](@ref).
+"""
+struct SimpleUnit <: UnitStyle end
+
+"""
+    struct GenericUnit <: UnitStyle
+
+Unit style for multifusion categories with multiple unit objects (semisimple unit).
+Requires implementation of `allunits(::Type{I})`, `leftunit(a)`, and `rightunit(a)`.
+
+See also [`UnitStyle`](@ref).
+"""
+struct GenericUnit <: UnitStyle end
 
 UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
@@ -407,7 +421,7 @@ UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit
     throw(DomainError(I, "Sector has multiple units, use `allunits` instead of `unit`"))
 end
 
-# combine fusion properties of tensor products of multifusion sectors
+# combine unitstyle properties of tensor products of multifusion sectors
 Base.:&(f::F, ::F) where {F <: UnitStyle} = f
 Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
 
