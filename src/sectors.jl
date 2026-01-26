@@ -646,7 +646,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                 p1_o = R1 * F1 * R2
                 p2_o = zero(p1_o)
                 if !symmetricbraiding
-                    p1_u = conj(R1) * F1 * conj(R2)
+                    p1_u = conj(Rsymbol(a, c, e)) * F1 * conj(Rsymbol(b, c, f))
                     p2_u = zero(p1_u)
                 end
                 for g in ⊗(a, b)
@@ -654,14 +654,14 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                     F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
                     p2_o += F2 * R3 * F3
                     if !symmetricbraiding
-                        p2_u += F2 * conj(R3) * F3
+                        p2_u += F2 * conj(Rsymbol(g, c, d)) * F3
                     end
                 end
             else
                 @tensor p1_o[α, β, μ, ν] := R1[α, λ] * F1[λ, β, γ, ν] * R2[γ, μ]
                 p2_o = zero(p1_o)
                 if !symmetricbraiding
-                    @tensor p1_u[α, β, μ, ν] := conj(R1[α, λ]) * F1[λ, β, γ, ν] * conj(R2[γ, μ])
+                    @tensor p1_u[α, β, μ, ν] := conj(Rsymbol(a, c, e)[α, λ]) * F1[λ, β, γ, ν] * conj(Rsymbol(b, c, f)[γ, μ])
                     p2_u = zero(p1_u)
                 end
                 for g in ⊗(a, b)
@@ -669,7 +669,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                     F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
                     @tensor p2_o[α, β, μ, ν] += F2[α, β, δ, σ] * R3[σ, ψ] * F3[δ, ψ, μ, ν]
                     if !symmetricbraiding
-                        @tensor p2_u[α, β, μ, ν] += F2[α, β, δ, σ] * conj(R3[σ, ψ]) * F3[δ, ψ, μ, ν]
+                        @tensor p2_u[α, β, μ, ν] += F2[α, β, δ, σ] * conj(Rsymbol(g, c, d)[σ, ψ]) * F3[δ, ψ, μ, ν]
                     end
                 end
             end
