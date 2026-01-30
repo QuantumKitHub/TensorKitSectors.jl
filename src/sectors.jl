@@ -162,22 +162,44 @@ Return the dual label of `a`, i.e. the unique label `ā = dual(a)` such that
 Base.conj(a::Sector) = dual(a)
 
 """
-    sectorscalartype(I::Type{<:Sector}) -> Type
+    sectorscalartype(I::Type{<:Sector}) -> Type{<:Number}
 
-Return the scalar type of the topological data ([`Fsymbol`](@ref) and [`Rsymbol`](@ref)) of the sector `I`.
+Return the scalar type of the topological data of the sector `I`.
+In particular, this is a combination of the scalar type of both the [`Fsymbol`](@ref) and [`Rsymbol`](@ref),
+and determines the scalar type of the [`fusiontensor`](@ref) whenever it is defined.
+
+See also [`fusionscalartype`](@ref) and [`braidingscalartype`](@ref).
 """
 function sectorscalartype(::Type{I}) where {I <: Sector}
     if BraidingStyle(I) === NoBraiding()
-        return _Fscalartype(I)
+        return fusionscalartype(I)
     else
-        return Base.promote_op(*, _Fscalartype(I), _Rscalartype(I))
+        return Base.promote_op(*, fusionscalartype(I), braidingscalartype(I))
     end
 end
-function _Fscalartype(::Type{I}) where {I <: Sector}
+
+"""
+    fusionscalartype(I::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the topological data associated to fusion of the sector `I`.
+In particular, this is the scalar type of [`Fsymbol`](@ref).
+
+See also [`braidingscalartype`](@ref) and [`sectorscalartype`](@ref).
+"""
+function fusionscalartype(::Type{I}) where {I <: Sector}
     Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
     return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
 end
-function _Rscalartype(::Type{I}) where {I <: Sector}
+
+"""
+    braidingscalartype(I::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the topological data associated to braiding of the sector `I`.
+In particular, this is the scalar type of [`Rsymbol`](@ref).
+
+See also [`fusionscalartype`](@ref) and [`sectorscalartype`](@ref).
+"""
+function braidingscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
     Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
     return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
