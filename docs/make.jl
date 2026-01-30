@@ -19,7 +19,13 @@ makedocs(;
     ),
     pages = [
         "Home" => "index.md",
-        "Sector Interface" => "interface.md",
+        "Sector Interface" => [
+            "Overview" => "interface/overview.md",
+            "Required Methods" => "interface/required.md",
+            "Optional Methods" => "interface/optional.md",
+            "Traits and Styles" => "interface/traits.md",
+            "Implementation Guidelines" => "interface/guidelines.md",
+        ],
         "Sector Types" => [
             "Overview" => "sectors.md",
             "Abelian Groups" => [
