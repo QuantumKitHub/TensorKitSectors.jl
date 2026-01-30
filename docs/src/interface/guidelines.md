@@ -32,8 +32,10 @@ SU2Irrep(1) ⊗ SU2Irrep(1)
 
 ## Shape of Topological Data
 
-The dimensionality of [`Fsymbol`](@ref) and [`Rsymbol`](@ref) (and other derived data) can be expressed in terms of the [`Nsymbol`](@ref).
-Therefore, depending on the [`FusionStyle`](@ref), we can avoid the allocation of arrays and simply return scalars.
+The size of [`Fsymbol`](@ref) and [`Rsymbol`](@ref) data depends on the fusion multiplicities ([`Nsymbol`](@ref)).
+For multiplicity‑free sectors scalars are sufficient; for generic fusion we need arrays.
+Therefore, we distinguish the behavior through the [`FusionStyle`](@ref).
+
 
 ### [`MultiplicityFreeFusion`](@ref)
 
@@ -41,7 +43,7 @@ Therefore, depending on the [`FusionStyle`](@ref), we can avoid the allocation o
 - `Fsymbol(a, b, c, d, e, f)`: Returns a scalar of type `sectorscalartype(I)`.
 - `Rsymbol(a, b, c)`: Returns a scalar of type `sectorscalartype(I)`.
 
-Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond to valid fusion channels, the result is ``0``.
+Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond to valid fusion channels, the result is ``0```.
 
 In other words, we have:
 
@@ -59,4 +61,4 @@ N^{ab}_c = 0 \implies R_{ab}^c = 0
 - `Fsymbol(a, b, c, d, e, f)`: Returns a ``N^{ab}_e \times N^{ec}_d \times N^{af}_d \times N^{bc}_f`` array of `sectorscalartype(I)` elements.
 - `Rsymbol(a, b, c)`: Returns a ``N^{ab}_c \times N^{ba}_c`` array of `sectorscalartype(I)` elements.
 
-Here invalid fusion channels will automatically lead to empty arrays.
+Here invalid fusion channels will necessarily lead to empty arrays.

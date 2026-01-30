@@ -9,8 +9,9 @@ These methods are grouped by functionality to help understand their purpose.
 
 ## Defining the Set of Sectors
 
-A sector type `I <: Sector` represents the set of all simple objects in a fusion category — equivalently, all irreducible representations of a group.
-The first requirement is defining this set by making it **enumerable** through the iterator interface.
+A sector type `I <: Sector` represents the set of all labels that can be used to grade a vector space.
+This corresponds to all irreducible representations of a group, or all simple objects in a fusion category.
+The first requirement is making this set **enumerable** through the iterator interface.
 
 The set of all sector values is obtained via `values(I)`, which returns a `SectorValues{I}()` singleton type by default.
 This `SectorValues{I}()` must be iterable, enabling enumeration of all sectors of type `I`.
@@ -55,11 +56,13 @@ Base.IteratorSize(::Type{SectorValues{U1Irrep}}) = IsInfinite()
 ## Fusion Structure
 
 The fusion structure describes how sectors combine when taking tensor products.
-Mathematically, this is the tensor product decomposition of irreps or simple objects:
+In code, `a ⊗ b` returns the allowed output labels, and `Nsymbol(a, b, c)` tells you whether (or how many times) `c` appears.
+
+The formal decomposition is:
 ```math
 a ⊗ b = \bigoplus_c N^{ab}_c \, c
 ```
-where ``N^{ab}_c`` is the fusion multiplicity indicating how many times sector ``c`` appears in the fusion of ``a`` and ``b``.
+where ``N^{ab}_c`` is the fusion multiplicity.
 
 The fusion structure is defined through three related methods:
 
@@ -93,12 +96,14 @@ FusionStyle(::Type{SU2Irrep}) = SimpleFusion()
 
 ## Identity and Duality
 
-Every fusion category has distinguished objects: the unit (identity) and duals (conjugates).
+Every sector type has a unit (identity) label and a notion of dual (conjugate).
+`unit` returns the identity label, and `dual` returns the label that fuses with `a` to give the unit.
+
 The unit ``\mathbb{1}`` acts as the identity under fusion:
 ```math
 \mathbb{1} ⊗ a ≅ a ≅ a ⊗ \mathbb{1}
 ```
-The dual of a sector ``a`` is the unique sector ``\bar{a}`` such that their fusion contains the unit:
+The dual of a sector ``a`` is the unique sector ``\bar{a}`` such that:
 ```math
 N^{a\bar{a}}_{\mathbb{1}} = 1 \quad \text{and} \quad N^{\bar{a}a}_{\mathbb{1}} = 1
 ```
@@ -133,13 +138,20 @@ For regular fusion categories the unit object is unique, such that `unit`, `left
 
 ## Associativity
 
-The associativity of the fusion tensor product is encoded in the F-symbols, which relate different ways of fusing three sectors.
+The associativity of the fusion tensor product tells us how to relate the basis states ``|(a ⊗ b → e) ⊗ c → d\rangle`` to the states ``|a ⊗ (b ⊗ c → f) → d\rangle``.
+This is encoded in the F-symbols, which give the coefficients to transform the different ways of fusing three sectors into eachother.
+
+```@docs; canonical = false
+Fsymbol
+```
+
 Formally, the F-symbol ``F^{abc}_d`` with intermediate sectors ``e`` and ``f`` is a linear transformation between the two different parenthesizations:
+
 ```math
 [F^{abc}_d]^f_e : (a ⊗ b → e) ⊗ c → d \quad \longrightarrow \quad a ⊗ (b ⊗ c → f) → d
 ```
-The basis states ``|(a ⊗ b → e) ⊗ c → d\rangle`` are linearly transformed into ``|a ⊗ (b ⊗ c → f) → d\rangle``.
-For sectors with `UniqueFusion` or `SimpleFusion`, the F-symbol is a scalar (complex number).
+
+For sectors with `UniqueFusion` or `SimpleFusion`, the F-symbol is a scalar `<:Number`.
 For `GenericFusion`, it is a rank-4 tensor with indices corresponding to the multiplicity labels of each fusion vertex.
 
 The F-symbols must satisfy the **pentagon equation** for every choice of sectors:
@@ -147,10 +159,6 @@ The F-symbols must satisfy the **pentagon equation** for every choice of sectors
 \sum_n F^{bcd}_{gn} F^{abn}_{fe} = \sum_m F^{abc}_{em} F^{amc}_{fg} F^{bcd}_{gf}
 ```
 This ensures that all ways of reassociating four tensor factors ``(((a ⊗ b) ⊗ c) ⊗ d)`` to ``(a ⊗ (b ⊗ (c ⊗ d)))`` give the same result, regardless of the sequence of reassociations.
-
-```@docs; canonical = false
-Fsymbol
-```
 
 **Examples:**
 TODO: fix these examples
@@ -179,7 +187,7 @@ The R-symbols must satisfy the **hexagon equations** together with the F-symbols
 and the analogous equation with ``a`` and ``b`` swapped.
 These ensure that the braiding is compatible with the associativity encoded by F-symbols.
 
-The type of braiding behavior is declared by the `BraidingStyle` trait, which categorizes sectors into four classes:
+The `BraidingStyle` trait categorizes behavior into four classes:
 - `NoBraiding()` for planar categories where braiding is undefined
 - `Bosonic()` for symmetric braiding with trivial twist (all R-symbols square to identity, all twists equal +1)
 - `Fermionic()` for symmetric braiding with fermion parity (twists can be ±1)
@@ -213,7 +221,7 @@ BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
 ## Utility Methods
 
 Sectors must support a deterministic ordering and hashing so they can be used as dictionary keys, sorted collections, and canonical fusion outputs.
-The ordering should be a strict total order that is consistent with enumerating the sector values, and the hash must be stable with respect to equality.
+Keep the order consistent with `values(I)`, i.e. the enumeration of objects happens in a sorted fashion.
 To achieve this, we must have
 
 - `Base.isless(::Sector, ::Sector)` — Define an order on the sectors.

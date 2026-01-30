@@ -8,14 +8,12 @@ end
 
 # Traits and Styles
 
-Traits define compile-time properties of sector types that affect how operations are specialized and optimized.
+Traits define compile-time properties that can be assumed about a sector type.
+They control behavior and enable optimizations.
 
 ## FusionStyle
 
-The `FusionStyle` trait is arguably the most important characteristic of a sector, determining how many sectors appear when fusing two sectors, and how many times a unique output can appear.
-Various optimizations become available whenever we are not dealing with the `GenericFusion` case.
-Firstly, since the shape (size of the arrays) of the topological data is determined by combinations of the [`Nsymbol`](@ref), we can avoid allocating arrays and use scalar quantities for `UniqueFusion` and `SimpleFusion`.
-Furthermore, in the `UniqueFusion` case, there is only a single channel for `a ⊗ b ⊗ c ⊗ ...`, paving the way for various optimizations when dealing with fusion trees.
+The `FusionStyle` trait indicates how many outputs to expect when fusing two sectors.
 
 ```@docs; canonical = false
 FusionStyle
@@ -23,6 +21,10 @@ UniqueFusion
 SimpleFusion
 GenericFusion
 ```
+
+This enables various optimizations for different cases.
+Firstly, since the shape (size of the arrays) of the topological data is determined by combinations of the [`Nsymbol`](@ref), for `UniqueFusion` and `SimpleFusion` we can use scalar quantities instead of arrays.
+Secondly, in the `UniqueFusion` case, there is only a single channel for ``a \otimes b \otimes c \otimes \ldots``, avoiding the need to iterate through all options.
 
 It is additionally possible to combine fusion styles through the `&` operator, which returns the style with the least assumptions.
 For example:
@@ -44,10 +46,8 @@ MultiplicityFreeFusion
 
 ## BraidingStyle
 
-The `BraidingStyle` describes how sectors behave under exchange (braiding) operations.
-In other words, this trait defines the behavior of [`Rsymbol`](@ref) and [`twist`](@ref).
-Different braiding styles not only enable different optimizations, but also dictate the allowed operations.
-For example, symmetric braiding allows for permutation group statistics, while anyonic systems require full braid group representations.
+The `BraidingStyle` describes whether and how exchange of sectors is defined.
+It determines how TensorKit interprets [`Rsymbol`](@ref) and [`twist`](@ref).
 
 ```@docs; canonical = false
 BraidingStyle
@@ -56,6 +56,8 @@ Bosonic
 Fermionic
 Anyonic
 ```
+
+Additionally, this dictates whether or not permutations are sufficient to specify generic exchanges, or if a full braid group representation is needed.
 
 It is also possible to combine braiding styles through the `&` operator, which returns the style with the least assumptions.
 For example:
@@ -80,12 +82,14 @@ SymmetricBraiding
 
 ## UnitStyle
 
-The `UnitStyle` describes whether the fusion category has a simple or semisimple unit object.
-In other words, this trait determines when we can define a unique value for [`unit`](@ref), or multiple units exist and we have to resort to [`leftunit`](@ref) and [`rightunit`](@ref).
-By default, this is derived from `length(allunits(I))`.
+The `UnitStyle` tells whether there is a single identity label or multiple units.
+By default, it is derived from `length(allunits(I))`.
 
 ```@docs; canonical = false
 UnitStyle
 SimpleUnit
 GenericUnit
 ```
+
+Whenever the style is `SimpleUnit`, a unique value of [`unit`](@ref) can be defined and there is no distinction between [`leftunit`](@ref) and [`rightunit`](@ref).
+For `GenericUnit`, this is no longer the case and special care has to be taken to use the *correct* unit for various fusion diagrams.
