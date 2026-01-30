@@ -1,5 +1,9 @@
 ```@meta
 CollapsedDocStrings = true
+
+DocTestSetup = quote
+    using TensorKitSectors
+end
 ```
 
 # Traits and Styles
@@ -23,9 +27,12 @@ GenericFusion
 It is additionally possible to combine fusion styles through the `&` operator, which returns the style with the least assumptions.
 For example:
 
-```julia
-UniqueFusion() & SimpleFusion() # SimpleFusion()
-GenericFusion() & UniqueFusion() # GenericFusion()
+```jldoctest
+julia> UniqueFusion() & SimpleFusion()
+SimpleFusion()
+
+julia> GenericFusion() & UniqueFusion()
+GenericFusion()
 ```
 
 Finally, some predefined combinations that appear often have dedicated names:
@@ -53,10 +60,15 @@ Anyonic
 It is also possible to combine braiding styles through the `&` operator, which returns the style with the least assumptions.
 For example:
 
-```julia
-Bosonic() & Fermionic() # Fermionic()
-Fermionic() & Anyonic() # Anyonic()
-Bosonic() & NoBraiding() # NoBraiding()
+```jldoctest
+julia> Bosonic() & Fermionic()
+Fermionic()
+
+julia> Fermionic() & Anyonic()
+Anyonic()
+
+julia> Bosonic() & NoBraiding()
+NoBraiding()
 ```
 
 Finally, some predefined combinations that appear often have dedicated names:
