@@ -26,6 +26,7 @@ Base.isless(::Trivial, ::Trivial) = false
 fusionscalartype(::Type{Trivial}) = Int
 braidingscalartype(::Type{Trivial}) = Int
 sectorscalartype(::Type{Trivial}) = Int
+dimscalartype(::Type{Trivial}) = Int
 
 # fusion rules
 ⊗(::Trivial, ::Trivial) = (Trivial(),)

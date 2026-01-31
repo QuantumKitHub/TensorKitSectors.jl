@@ -423,6 +423,15 @@ sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
 
 """
+    dimscalartype(::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the quantum dimensions associated to sectors of type `I`.
+In particular, this is the scalar type of [`dim`](@ref).
+"""
+@assume_effects :foldable dimscalartype(::Type{I}) where {I <: Sector} =
+    FusionStyle(I) isa UniqueFusion ? Int : typeof(dim(first(allunits(I))))
+
+"""
     frobenius_schur_phase(a::Sector)
 
 Return the Frobenius-Schur phase ``κₐ`` of a sector ``a``, which is a complex phase that

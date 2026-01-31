@@ -52,6 +52,7 @@ FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
 fusionscalartype(::Type{<:AbelianIrrep}) = Int
 braidingscalartype(::Type{<:AbelianIrrep}) = Int
 sectorscalartype(::Type{<:AbelianIrrep}) = Int
+dimscalartype(::Type{<:AbelianIrrep}) = Int
 
 Nsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = c == first(a ⊗ b)
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbelianIrrep}

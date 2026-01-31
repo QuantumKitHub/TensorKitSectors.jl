@@ -230,6 +230,9 @@ end
 @assume_effects :foldable function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
 end
+@assume_effects :foldable function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ dimscalartype, _sectors(T)))
+end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
 
