@@ -43,6 +43,8 @@ findindex(::SectorValues{SU2Irrep}, s::SU2Irrep) = twice(s.j) + 1
 dim(s::SU2Irrep) = twice(s.j) + 1
 
 FusionStyle(::Type{SU2Irrep}) = SimpleFusion()
+fusionscalartype(::Type{SU2Irrep}) = Float64
+braidingscalartype(::Type{SU2Irrep}) = Float64
 sectorscalartype(::Type{SU2Irrep}) = Float64
 
 Nsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep) = WignerSymbols.δ(sa.j, sb.j, sc.j)
@@ -56,26 +58,26 @@ function Fsymbol(
     else
         return sqrtdim(s5) * sqrtdim(s6) *
             WignerSymbols.racahW(
-            sectorscalartype(SU2Irrep), s1.j, s2.j, s4.j, s3.j,
+            fusionscalartype(SU2Irrep), s1.j, s2.j, s4.j, s3.j,
             s5.j, s6.j
         )
     end
 end
 
 function Rsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep)
-    Nsymbol(sa, sb, sc) || return zero(sectorscalartype(SU2Irrep))
-    return iseven(convert(Int, sa.j + sb.j - sc.j)) ? one(sectorscalartype(SU2Irrep)) :
-        -one(sectorscalartype(SU2Irrep))
+    T = braidingscalartype(SU2Irrep)
+    Nsymbol(sa, sb, sc) || return zero(T)
+    return iseven(convert(Int, sa.j + sb.j - sc.j)) ? one(T) : -one(T)
 end
 
 function fusiontensor(a::SU2Irrep, b::SU2Irrep, c::SU2Irrep)
-    C = Array{Float64}(undef, dim(a), dim(b), dim(c), 1)
+    T = sectorscalartype(SU2Irrep)
+    C = Array{T}(undef, dim(a), dim(b), dim(c), 1)
     ja, jb, jc = a.j, b.j, c.j
 
     for kc in 1:dim(c), kb in 1:dim(b), ka in 1:dim(a)
         C[ka, kb, kc, 1] = WignerSymbols.clebschgordan(
-            ja, ja + 1 - ka, jb, jb + 1 - kb, jc,
-            jc + 1 - kc
+            T, ja, ja + 1 - ka, jb, jb + 1 - kb, jc, jc + 1 - kc
         )
     end
     return C

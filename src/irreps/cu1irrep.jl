@@ -107,6 +107,8 @@ end
 dim(c::CU1Irrep) = ifelse(c.j == zero(HalfInt), 1, 2)
 
 FusionStyle(::Type{CU1Irrep}) = SimpleFusion()
+fusionscalartype(::Type{CU1Irrep}) = Float64
+braidingscalartype(::Type{CU1Irrep}) = Float64
 sectorscalartype(::Type{CU1Irrep}) = Float64
 Base.isreal(::Type{CU1Irrep}) = true
 
@@ -121,15 +123,15 @@ function Nsymbol(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
 end
 
 function Fsymbol(
-        a::CU1Irrep, b::CU1Irrep, c::CU1Irrep, d::CU1Irrep, e::CU1Irrep,
-        f::CU1Irrep
+        a::CU1Irrep, b::CU1Irrep, c::CU1Irrep,
+        d::CU1Irrep, e::CU1Irrep, f::CU1Irrep
     )
     Nabe = convert(Int, Nsymbol(a, b, e))
     Necd = convert(Int, Nsymbol(e, c, d))
     Nbcf = convert(Int, Nsymbol(b, c, f))
     Nafd = convert(Int, Nsymbol(a, f, d))
 
-    T = sectorscalartype(CU1Irrep)
+    T = fusionscalartype(CU1Irrep)
     Nabe * Necd * Nbcf * Nafd == 0 && return zero(T)
 
     op = CU1Irrep(0, 0)
@@ -211,12 +213,12 @@ function Fsymbol(
 end
 
 function Rsymbol(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
-    R = convert(sectorscalartype(CU1Irrep), Nsymbol(a, b, c))
+    R = convert(braidingscalartype(CU1Irrep), Nsymbol(a, b, c))
     return c.s == 1 && a.j > 0 ? -R : R
 end
 
 function fusiontensor(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
-    C = fill(0.0, dim(a), dim(b), dim(c), 1)
+    C = fill(zero(sectorscalartype(CU1Irrep)), dim(a), dim(b), dim(c), 1)
     !Nsymbol(a, b, c) && return C
     if c.j == 0
         if a.j == b.j == 0

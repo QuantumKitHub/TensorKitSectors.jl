@@ -162,25 +162,47 @@ Return the dual label of `a`, i.e. the unique label `ā = dual(a)` such that
 Base.conj(a::Sector) = dual(a)
 
 """
-    sectorscalartype(I::Type{<:Sector}) -> Type
+    sectorscalartype(I::Type{<:Sector}) -> Type{<:Number}
 
-Return the scalar type of the topological data ([`Fsymbol`](@ref) and [`Rsymbol`](@ref)) of the sector `I`.
+Return the scalar type of the topological data of the sector `I`.
+In particular, this is a combination of the scalar type of both the [`Fsymbol`](@ref) and [`Rsymbol`](@ref),
+and determines the scalar type of the [`fusiontensor`](@ref) whenever it is defined.
+
+See also [`fusionscalartype`](@ref) and [`braidingscalartype`](@ref).
 """
-function sectorscalartype(::Type{I}) where {I <: Sector}
-    if BraidingStyle(I) === NoBraiding()
-        return _Fscalartype(I)
+@assume_effects :foldable function sectorscalartype(::Type{I}) where {I <: Sector}
+    return if BraidingStyle(I) === NoBraiding()
+        fusionscalartype(I)
     else
-        return Base.promote_op(*, _Fscalartype(I), _Rscalartype(I))
+        typeof(zero(fusionscalartype(I)) * zero(braidingscalartype(I)))
     end
 end
-function _Fscalartype(::Type{I}) where {I <: Sector}
-    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
-    return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
+
+"""
+    fusionscalartype(I::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the topological data associated to fusion of the sector `I`.
+In particular, this is the scalar type of [`Fsymbol`](@ref).
+
+See also [`braidingscalartype`](@ref) and [`sectorscalartype`](@ref).
+"""
+@assume_effects :foldable function fusionscalartype(::Type{I}) where {I <: Sector}
+    u = first(allunits(I))
+    return eltype(Fsymbol(u, u, u, u, u, u))
 end
-function _Rscalartype(::Type{I}) where {I <: Sector}
+
+"""
+    braidingscalartype(I::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the topological data associated to braiding of the sector `I`.
+In particular, this is the scalar type of [`Rsymbol`](@ref).
+
+See also [`fusionscalartype`](@ref) and [`sectorscalartype`](@ref).
+"""
+@assume_effects :foldable function braidingscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
-    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-    return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
+    u = first(allunits(I))
+    return eltype(Rsymbol(u, u, u))
 end
 
 """
@@ -399,6 +421,15 @@ function dim(a::Sector)
 end
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
+
+"""
+    dimscalartype(::Type{<:Sector}) -> Type{<:Number}
+
+Return the scalar type of the quantum dimensions associated to sectors of type `I`.
+In particular, this is the scalar type of [`dim`](@ref).
+"""
+@assume_effects :foldable dimscalartype(::Type{I}) where {I <: Sector} =
+    FusionStyle(I) isa UniqueFusion ? Int : typeof(dim(first(allunits(I))))
 
 """
     frobenius_schur_phase(a::Sector)

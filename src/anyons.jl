@@ -28,6 +28,7 @@ dual(::PlanarTrivial) = PlanarTrivial()
 
 FusionStyle(::Type{PlanarTrivial}) = UniqueFusion()
 BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
+fusionscalartype(::Type{PlanarTrivial}) = Int
 sectorscalartype(::Type{PlanarTrivial}) = Int
 
 Nsymbol(::Vararg{PlanarTrivial, 3}) = 1
@@ -82,7 +83,9 @@ const _goldenratio = Float64(MathConstants.golden)
 dim(a::FibonacciAnyon) = isunit(a) ? one(_goldenratio) : _goldenratio
 
 FusionStyle(::Type{FibonacciAnyon}) = SimpleFusion()
+fusionscalartype(::Type{FibonacciAnyon}) = Float64
 BraidingStyle(::Type{FibonacciAnyon}) = Anyonic()
+braidingscalartype(::Type{FibonacciAnyon}) = ComplexF64
 sectorscalartype(::Type{FibonacciAnyon}) = ComplexF64
 
 const FibonacciAnyonProdIterator = SectorProductIterator{FibonacciAnyon}
@@ -198,7 +201,9 @@ dual(s::IsingAnyon) = s
 dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0
 
 FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
+fusionscalartype(::Type{IsingAnyon}) = Float64
 BraidingStyle(::Type{IsingAnyon}) = Anyonic()
+braidingscalartype(::Type{IsingAnyon}) = ComplexF64
 sectorscalartype(::Type{IsingAnyon}) = ComplexF64
 
 const IsingAnyonProdIterator = SectorProductIterator{IsingAnyon}

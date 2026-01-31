@@ -22,7 +22,7 @@ Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
 _sectors(::Type{Tuple{}}) = ()
-Base.@pure function _sectors(::Type{T}) where {T <: SectorTuple}
+@assume_effects :foldable function _sectors(::Type{T}) where {T <: SectorTuple}
     return (Base.tuple_type_head(T), _sectors(Base.tuple_type_tail(T))...)
 end
 
@@ -215,14 +215,23 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
+@assume_effects :foldable function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
+end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(sectorscalartype, promote_type, _sectors(T))
+@assume_effects :foldable function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
+end
+@assume_effects :foldable function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
+end
+@assume_effects :foldable function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ dimscalartype, _sectors(T)))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
@@ -272,20 +281,10 @@ group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G�
 ⊠(I1::Type{Trivial}, I2::Type{<:Sector}) = I2
 
 ⊠(I1::Type{<:ProductSector}, I2::Type{Trivial}) = I1
-@static if VERSION >= v"1.8"
-    Base.@assume_effects :foldable function ⊠(
-            I1::Type{<:ProductSector}, I2::Type{<:ProductSector}
-        )
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
-else
-    Base.@pure function ⊠(I1::Type{<:ProductSector}, I2::Type{<:ProductSector})
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
+@assume_effects :foldable function ⊠(I1::Type{<:ProductSector}, I2::Type{<:ProductSector})
+    T1 = I1.parameters[1]
+    T2 = I2.parameters[1]
+    return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
 end
 ⊠(I1::Type{<:ProductSector}, I2::Type{<:Sector}) = I1 ⊠ ProductSector{Tuple{I2}}
 
@@ -366,9 +365,9 @@ function type_repr(::Type{ProductSector{T}}) where {T <: Tuple{Vararg{AbstractIr
 end
 
 function Base.getindex(::IrrepTable, ::Type{ProductGroup{Gs}}) where {Gs <: GroupTuple}
-    G1 = tuple_type_head(Gs)
-    Grem = tuple_type_tail(Gs)
-    return ProductSector{Tuple{Irrep[G1]}} ⊠ Irrep[ProductGroup{tuple_type_tail(Gs)}]
+    G1 = Base.tuple_type_head(Gs)
+    Grem = Base.tuple_type_tail(Gs)
+    return ProductSector{Tuple{Irrep[G1]}} ⊠ Irrep[ProductGroup{Grem}]
 end
 function Base.getindex(::IrrepTable, ::Type{ProductGroup{Tuple{G}}}) where {G <: Group}
     return ProductSector{Tuple{Irrep[G]}}

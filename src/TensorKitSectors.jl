@@ -6,13 +6,12 @@ export Sector, Group, AbstractIrrep, AbstractGroupElement
 export Irrep, GroupElement
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
-export sectorscalartype
+export sectorscalartype, fusionscalartype, braidingscalartype, dimscalartype
 export dim, sqrtdim, invsqrtdim, frobenius_schur_indicator, frobenius_schur_phase, twist, fusiontensor, dual
 export otimes, deligneproduct, times
-export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion,
-    MultiplicityFreeFusion
-export UnitStyle, SimpleUnit, GenericUnit
+export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion, MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
+export UnitStyle, SimpleUnit, GenericUnit
 export SectorSet, SectorValues, findindex
 export unit, rightunit, leftunit, allunits, isunit
 
@@ -50,7 +49,7 @@ end
 using Base: SizeUnknown, HasLength, IsInfinite
 using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
-using Base: tuple_type_head, tuple_type_tail
+using Base: @assume_effects
 
 using LinearAlgebra: tr
 using TensorOperations

@@ -70,3 +70,8 @@ end
 function Base.isless(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return isless(c1.a, c2.a)
 end
+
+fusionscalartype(::Type{TimeReversed{I}}) where {I} = fusionscalartype(I)
+braidingscalartype(::Type{TimeReversed{I}}) where {I} = braidingscalartype(I)
+sectorscalartype(::Type{TimeReversed{I}}) where {I} = sectorscalartype(I)
+dimscalartype(::Type{TimeReversed{I}}) where {I} = dimscalartype(I)
