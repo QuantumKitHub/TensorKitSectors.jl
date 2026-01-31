@@ -215,8 +215,8 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
-function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(fusionscalartype, promote_type, _sectors(T))
+@assume_effects :foldable function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
 end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
@@ -224,11 +224,11 @@ end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(braidingscalartype, promote_type, _sectors(T))
+@assume_effects :foldable function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
 end
-function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(sectorscalartype, promote_type, _sectors(T))
+@assume_effects :foldable function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
@@ -279,7 +279,7 @@ group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G�
 
 ⊠(I1::Type{<:ProductSector}, I2::Type{Trivial}) = I1
 @static if VERSION >= v"1.8"
-    Base.@assume_effects :foldable function ⊠(
+    @assume_effects :foldable function ⊠(
             I1::Type{<:ProductSector}, I2::Type{<:ProductSector}
         )
         T1 = I1.parameters[1]

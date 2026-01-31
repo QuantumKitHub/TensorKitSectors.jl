@@ -170,11 +170,11 @@ and determines the scalar type of the [`fusiontensor`](@ref) whenever it is defi
 
 See also [`fusionscalartype`](@ref) and [`braidingscalartype`](@ref).
 """
-function sectorscalartype(::Type{I}) where {I <: Sector}
-    if BraidingStyle(I) === NoBraiding()
-        return fusionscalartype(I)
+@assume_effects :foldable function sectorscalartype(::Type{I}) where {I <: Sector}
+    return if BraidingStyle(I) === NoBraiding()
+        fusionscalartype(I)
     else
-        return Base.promote_op(*, fusionscalartype(I), braidingscalartype(I))
+        typeof(zero(fusionscalartype(I)) * zero(braidingscalartype(I)))
     end
 end
 
@@ -186,9 +186,9 @@ In particular, this is the scalar type of [`Fsymbol`](@ref).
 
 See also [`braidingscalartype`](@ref) and [`sectorscalartype`](@ref).
 """
-function fusionscalartype(::Type{I}) where {I <: Sector}
-    Ftype = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
-    return FusionStyle(I) === UniqueFusion() ? Ftype : eltype(Ftype)
+@assume_effects :foldable function fusionscalartype(::Type{I}) where {I <: Sector}
+    u = first(allunits(I))
+    return eltype(Fsymbol(u, u, u, u, u, u))
 end
 
 """
@@ -199,10 +199,10 @@ In particular, this is the scalar type of [`Rsymbol`](@ref).
 
 See also [`fusionscalartype`](@ref) and [`sectorscalartype`](@ref).
 """
-function braidingscalartype(::Type{I}) where {I <: Sector}
+@assume_effects :foldable function braidingscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
-    Rtype = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-    return FusionStyle(I) === UniqueFusion() ? Rtype : eltype(Rtype)
+    u = first(allunits(I))
+    return eltype(Rsymbol(u, u, u))
 end
 
 """
