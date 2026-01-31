@@ -49,7 +49,6 @@ end
 using Base: SizeUnknown, HasLength, IsInfinite
 using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
-using Base: tuple_type_head, tuple_type_tail
 using Base: @assume_effects
 
 using LinearAlgebra: tr

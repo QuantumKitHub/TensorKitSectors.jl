@@ -22,7 +22,7 @@ Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
 _sectors(::Type{Tuple{}}) = ()
-Base.@pure function _sectors(::Type{T}) where {T <: SectorTuple}
+@assume_effects :foldable function _sectors(::Type{T}) where {T <: SectorTuple}
     return (Base.tuple_type_head(T), _sectors(Base.tuple_type_tail(T))...)
 end
 
@@ -281,20 +281,10 @@ group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G�
 ⊠(I1::Type{Trivial}, I2::Type{<:Sector}) = I2
 
 ⊠(I1::Type{<:ProductSector}, I2::Type{Trivial}) = I1
-@static if VERSION >= v"1.8"
-    @assume_effects :foldable function ⊠(
-            I1::Type{<:ProductSector}, I2::Type{<:ProductSector}
-        )
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
-else
-    Base.@pure function ⊠(I1::Type{<:ProductSector}, I2::Type{<:ProductSector})
-        T1 = I1.parameters[1]
-        T2 = I2.parameters[1]
-        return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
-    end
+@assume_effects :foldable function ⊠(I1::Type{<:ProductSector}, I2::Type{<:ProductSector})
+    T1 = I1.parameters[1]
+    T2 = I2.parameters[1]
+    return ProductSector{Tuple{T1.parameters..., T2.parameters...}}
 end
 ⊠(I1::Type{<:ProductSector}, I2::Type{<:Sector}) = I1 ⊠ ProductSector{Tuple{I2}}
 
@@ -375,9 +365,9 @@ function type_repr(::Type{ProductSector{T}}) where {T <: Tuple{Vararg{AbstractIr
 end
 
 function Base.getindex(::IrrepTable, ::Type{ProductGroup{Gs}}) where {Gs <: GroupTuple}
-    G1 = tuple_type_head(Gs)
-    Grem = tuple_type_tail(Gs)
-    return ProductSector{Tuple{Irrep[G1]}} ⊠ Irrep[ProductGroup{tuple_type_tail(Gs)}]
+    G1 = Base.tuple_type_head(Gs)
+    Grem = Base.tuple_type_tail(Gs)
+    return ProductSector{Tuple{Irrep[G1]}} ⊠ Irrep[ProductGroup{Grem}]
 end
 function Base.getindex(::IrrepTable, ::Type{ProductGroup{Tuple{G}}}) where {G <: Group}
     return ProductSector{Tuple{Irrep[G]}}
