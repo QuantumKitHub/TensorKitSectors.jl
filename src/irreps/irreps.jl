@@ -47,20 +47,25 @@ function Base.show(io::IO, c::AbstractIrrep)
 end
 
 const AbelianIrrep{G} = AbstractIrrep{G} where {G <: AbelianGroup}
+
 FusionStyle(::Type{<:AbelianIrrep}) = UniqueFusion()
+fusionscalartype(::Type{<:AbelianIrrep}) = Int
+braidingscalartype(::Type{<:AbelianIrrep}) = Int
 sectorscalartype(::Type{<:AbelianIrrep}) = Int
 
 Nsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = c == first(a ⊗ b)
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: AbelianIrrep}
-    return Int(Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
+    T = fusionscalartype(I)
+    return T(Nsymbol(a, b, e) * Nsymbol(e, c, d) * Nsymbol(b, c, f) * Nsymbol(a, f, d))
 end
-frobenius_schur_phase(a::AbelianIrrep) = 1
-Asymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
-Bsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
-Rsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = Int(Nsymbol(a, b, c))
+frobenius_schur_phase(a::AbelianIrrep) = one(fusionscalartype(typeof(a)))
+Asymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = fusionscalartype(I)(Nsymbol(a, b, c))
+Bsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = fusionscalartype(I)(Nsymbol(a, b, c))
+Rsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = braidingscalartype(I)(Nsymbol(a, b, c))
 
 function fusiontensor(a::I, b::I, c::I) where {I <: AbelianIrrep}
-    return fill(Int(Nsymbol(a, b, c)), (1, 1, 1, 1))
+    T = sectorscalartype(I)
+    return fill(T(Nsymbol(a, b, c)), (1, 1, 1, 1))
 end
 
 include("znirrep.jl")

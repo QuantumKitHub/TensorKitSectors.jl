@@ -215,11 +215,17 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
+function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(fusionscalartype, promote_type, _sectors(T))
+end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
+end
+function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+    return mapreduce(braidingscalartype, promote_type, _sectors(T))
 end
 function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(sectorscalartype, promote_type, _sectors(T))

@@ -44,6 +44,8 @@ function Base.getproperty(a::DNIrrep{N}, sym::Symbol) where {N}
 end
 
 FusionStyle(::Type{DNIrrep{N}}) where {N} = N < 3 ? UniqueFusion() : SimpleFusion()
+fusionscalartype(::Type{DNIrrep{N}}) where {N} = Float64
+braidingscalartype(::Type{DNIrrep{N}}) where {N} = Float64
 sectorscalartype(::Type{DNIrrep{N}}) where {N} = Float64
 
 unit(::Type{DNIrrep{N}}) where {N} = DNIrrep{N}(0, false)
@@ -186,7 +188,7 @@ function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
-    T = sectorscalartype(I)
+    T = fusionscalartype(I)
     (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
 
     # tensoring with units gives 1
@@ -206,7 +208,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
 end
 
 function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
-    R = convert(sectorscalartype(I), Nsymbol(a, b, c))
+    R = convert(braidingscalartype(I), Nsymbol(a, b, c))
     return ifelse((c.j == 0) & c.isodd & !(a.j == b.j == 0) & !((2 * a.j) == (2 * b.j) == N), -R, R)
 end
 
