@@ -139,7 +139,7 @@ For regular fusion categories the unit object is unique, such that `unit`, `left
 ## Associativity
 
 The associativity of the fusion tensor product tells us how to relate the basis states ``|(a ⊗ b → e) ⊗ c → d\rangle`` to the states ``|a ⊗ (b ⊗ c → f) → d\rangle``.
-This is encoded in the F-symbols, which give the coefficients to transform the different ways of fusing three sectors into eachother.
+This is encoded in the F-symbols, which give the coefficients to transform the different ways of fusing three sectors to one.
 
 ```@docs; canonical = false
 Fsymbol
@@ -221,7 +221,7 @@ BraidingStyle(::Type{PlanarTrivial}) = NoBraiding()
 ## Utility Methods
 
 Sectors must support a deterministic ordering and hashing so they can be used as dictionary keys, sorted collections, and canonical fusion outputs.
-Keep the order consistent with `values(I)`, i.e. the enumeration of objects happens in a sorted fashion.
+One should keep the order consistent with `values(I)`, i.e. the enumeration of objects should happen in a sorted fashion.
 To achieve this, we must have
 
 - `Base.isless(::Sector, ::Sector)` — Define an order on the sectors.

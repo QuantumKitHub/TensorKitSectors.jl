@@ -43,7 +43,7 @@ Therefore, we distinguish the behavior through the [`FusionStyle`](@ref).
 - `Fsymbol(a, b, c, d, e, f)`: Returns a scalar of type `sectorscalartype(I)`.
 - `Rsymbol(a, b, c)`: Returns a scalar of type `sectorscalartype(I)`.
 
-Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond to valid fusion channels, the result is ``0```.
+Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond to valid fusion channels, the result is ``0``.
 
 In other words, we have:
 

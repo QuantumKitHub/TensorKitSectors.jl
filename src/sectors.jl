@@ -220,7 +220,7 @@ Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
     otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
-Each sector `c` should appear at most once in this iteration, even if the multipicity ``N_c^{ab} > 1``.
+Each sector `c` should appear at most once in this iteration, even if the multiplicity ``N_c^{ab} > 1``.
 The actual multiplicities are accessed separately through [`Nsymbol`](@ref).
 
 The return type is typically [`SectorProductIterator{I}`](@ref) which provides a type-stable iterable that supports pretty-printing, but could also be any custom iterable.
@@ -533,7 +533,7 @@ context of line bending.
 """
 function frobenius_schur_indicator(a::Sector)
     ν = frobenius_schur_phase(a)
-    return a == conj(a) ? ν : zero(ν)
+    return a == dual(a) ? ν : zero(ν)
 end
 
 """

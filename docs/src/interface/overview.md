@@ -17,10 +17,10 @@ Sectors encode the structural rules TensorKit needs:
 - **Associativity**: how different parenthesizations are related
 - **Braiding**: how labels behave under exchange (if supported)
 
-More rigourously, a `Sector` represents the isomorphism classes of simple objects in unitary and pivotal fusion categories.
+More rigorously, a `Sector` represents the isomorphism classes of simple objects in unitary and pivotal fusion categories.
 This package defines an interface for accessing the topological data that is associated to these categories.
 This section explains the required and optional methods needed to create a new sector type.
-Once this interface is fulfilled, TensorKit.jl should be able to create symmetric tensors that correspond to the implemented sector.
+Once this interface is fulfilled, TensorKit.jl will create symmetric tensors that correspond to the implemented sector.
 
 ## Organization
 
