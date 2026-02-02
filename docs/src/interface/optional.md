@@ -10,13 +10,14 @@ The following methods have default implementations but can be overridden for per
 
 The quantum dimension of a sector is a fundamental invariant that determines the behavior of fusions and braiding.
 The default implementation extracts the dimension from [`Fsymbol`](@ref) via the quantum dimension formula.
-For many common sectors, however, the dimension is known directly from representation theory.
-In these cases, it can be beneficial to overload `dim` to bypass computing F-symbols, either for performance reasons or to enforce tighter output types.
-For example, dimensions of irreducible representations of groups are always integers.
 
 ```math
 d_a = \left| \frac{1}{(F_{a \bar{a} a}^a)^{1_a}_{_a1} } \right|
 ```
+
+For many common sectors, however, the dimension is known directly from representation theory.
+In these cases, it can be beneficial to overload [`dim`](@ref) to bypass computing F-symbols, either for performance reasons or to enforce tighter output types.
+For example, dimensions of irreducible representations of groups are always integers.
 
 ```@docs; canonical = false
 dim
@@ -27,12 +28,13 @@ invsqrtdim
 ## Frobenius-Schur Indicators
 
 The Frobenius-Schur indicator and phase characterize the self-duality properties of sectors.
-The indicator distinguishes real, complex, and quaternionic representations.
-The phase is the category-theoretic version that appears in line bending operations.
 
 ```math
 \kappa_a = \text{sign}\left( (F_{a \bar{a} a}^a)^{1_a}_{_a1} \right)
 ```
+
+The indicator distinguishes real, complex, and quaternionic representations.
+The phase is the category-theoretic version that appears in line bending operations.
 
 ```@docs; canonical = false
 frobenius_schur_indicator
@@ -61,12 +63,12 @@ The A-symbol and B-symbol relate different ways of bending strands, while the tw
 
 The A-symbol ``A^{ab}_c`` relates splitting and fusion vertices:
 ```math
-A^{ab}_c = \sqrt{\frac{d_c}{d_b}} \overline{\kappa_a} F^{\bar{a} a b}_b
+A^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} \overline{\kappa_a} (F_{\bar{a} a b}^b)^1_c
 ```
 
 The B-symbol ``B^{ab}_c`` relates splitting and fusion vertices:
 ```math
-B^{ab}_c = \sqrt{\frac{d_c}{d_a}} F^{a b \bar{b}}_a R^{ab}_a F^{a \bar{b} b}_a
+B^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} (F_{a b \bar{b}}^a)^c_1
 ```
 
 The twist ``\theta_a`` of a sector is the topological spin phase, computed as the trace of the R-matrix for braiding a sector with itself:

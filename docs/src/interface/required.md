@@ -148,16 +148,18 @@ Fsymbol
 Formally, the F-symbol ``F^{abc}_d`` with intermediate sectors ``e`` and ``f`` is a linear transformation between the two different parenthesizations:
 
 ```math
-[F^{abc}_d]^f_e : (a ⊗ b → e) ⊗ c → d \quad \longrightarrow \quad a ⊗ (b ⊗ c → f) → d
+(F_{abc}^d)^e_f : (a ⊗ b → e) ⊗ c → d \quad \longrightarrow \quad a ⊗ (b ⊗ c → f) → d
 ```
 
 For sectors with `UniqueFusion` or `SimpleFusion`, the F-symbol is a scalar `<:Number`.
 For `GenericFusion`, it is a rank-4 tensor with indices corresponding to the multiplicity labels of each fusion vertex.
 
 The F-symbols must satisfy the **pentagon equation** for every choice of sectors:
+
 ```math
-\sum_n F^{bcd}_{gn} F^{abn}_{fe} = \sum_m F^{abc}_{em} F^{amc}_{fg} F^{bcd}_{gf}
+(F_{fcd}^e)^g_h (F_{abh}^e)^f_i = (F_{abc}^g)^f_j (F_{ajd}^e)^g_i (F_{bcd}^i)^j_h
 ```
+
 This ensures that all ways of reassociating four tensor factors ``(((a ⊗ b) ⊗ c) ⊗ d)`` to ``(a ⊗ (b ⊗ (c ⊗ d)))`` give the same result, regardless of the sequence of reassociations.
 
 **Examples:**
@@ -181,9 +183,11 @@ For sectors with `UniqueFusion` or `SimpleFusion`, the R-symbol is a complex pha
 For `GenericFusion`, it is a square matrix relating the multiplicity spaces of the two fusion orders.
 
 The R-symbols must satisfy the **hexagon equations** together with the F-symbols:
+
 ```math
-\sum_g R^{ab}_g F^{abx}_{cg} R^{ax}_c = \sum_{f,h} F^{bax}_{cf} R^{af}_h F^{axb}_{ch}
+R^{cd}_e (\overline{F}_{dab}^e)^g_c \overline{R}^{da}_g = (F_{abd}^e)^c_f R^{bd}_f (\overline{F}_{adb}^e)^g_f
 ```
+
 and the analogous equation with ``a`` and ``b`` swapped.
 These ensure that the braiding is compatible with the associativity encoded by F-symbols.
 

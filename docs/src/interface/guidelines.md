@@ -44,15 +44,14 @@ Therefore, we distinguish the behavior through the [`FusionStyle`](@ref).
 - `Rsymbol(a, b, c)`: Returns a scalar of type `sectorscalartype(I)`.
 
 Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond to valid fusion channels, the result is ``0``.
-
-In other words, we have:
+Therefore, computing the number of valid fusion channels for both diagrams as the product of the relevant [`Nsymbol`](@ref)s, we have:
 
 ```math
-\left(N^{ab}_e N^{ec}_d = 0 \lor N^{af}_d N^{bc}_f = 0\right) \implies (F_{abc}^d)_e^f = 0
+\left(N^{ab}_e N^{ec}_d = 0 \lor N^{af}_d N^{bc}_f = 0\right) \implies (F_{abc}^d)^e_f = 0
 ```
 
 ```math
-N^{ab}_c = 0 \implies R_{ab}^c = 0
+N^{ab}_c = 0 \implies R^{ab}_c = 0
 ```
 
 ### [`GenericFusion`](@ref)
