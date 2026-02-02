@@ -41,15 +41,18 @@ frobenius_schur_phase
 
 ## Scalar Type
 
-The scalar type declares what number type is used in the F-symbols and R-symbols for a given sector.
+Various utility functions exist for determining what number type is used in various parts of the topological data.
 
 ```@docs; canonical = false
+fusionscalartype
+braidingscalartype
+dimscalartype
 sectorscalartype
 ```
 
 !!! note
-    While there is a fallback definition that tries to infer the result from the return types of the `Fsymbol` and `Rsymbol`,
-    it is often a good idea to define this method explicitly to avoid depending on type inference.
+    While there is a fallback definition that tries to determine the result from computing the functions on the unit sector,
+    it is often a good idea to define this method explicitly to avoid depending on compiler heuristics to constant-fold these calls.
 
 ## Topological Data Symbols
 
