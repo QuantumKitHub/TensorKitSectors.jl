@@ -637,7 +637,6 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
     symmetricbraiding = BraidingStyle(I) isa SymmetricBraiding # bosonic/fermionic underbraiding = overbraiding
-    local p2_u
     for e in ⊗(c, a), f in ⊗(c, b)
         for d in intersect(⊗(e, b), ⊗(a, f))
             R1, R2 = Rsymbol(c, a, e), Rsymbol(c, b, f)
@@ -645,6 +644,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
             if FusionStyle(I) isa MultiplicityFreeFusion
                 p1_o = R1 * F1 * R2
                 p2_o = zero(p1_o)
+                p1_u, p2_u = nothing, nothing
                 if !symmetricbraiding
                     p1_u = conj(Rsymbol(a, c, e)) * F1 * conj(Rsymbol(b, c, f))
                     p2_u = zero(p1_u)
@@ -660,6 +660,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
             else
                 @tensor p1_o[α, β, μ, ν] := R1[α, λ] * F1[λ, β, γ, ν] * R2[γ, μ]
                 p2_o = zero(p1_o)
+                p1_u, p2_u = nothing, nothing
                 if !symmetricbraiding
                     @tensor p1_u[α, β, μ, ν] := conj(Rsymbol(a, c, e)[α, λ]) * F1[λ, β, γ, ν] * conj(Rsymbol(b, c, f)[γ, μ])
                     p2_u = zero(p1_u)
