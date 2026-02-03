@@ -119,7 +119,7 @@ const times = ×
 function ×(
         G1::Type{ProductGroup{T1}}, G2::Type{ProductGroup{T2}}
     ) where {T1 <: GroupTuple, T2 <: GroupTuple}
-    return tuple_type_head(T1) × (ProductGroup{tuple_type_tail(T1)} × G2)
+    return Base.tuple_type_head(T1) × (ProductGroup{Base.tuple_type_tail(T1)} × G2)
 end
 ×(G1::Type{ProductGroup{Tuple{}}}, G2::Type{<:Group}) = ProductGroup{Tuple{G2}}
 function ×(G1::Type{ProductGroup{T}}, G2::Type{<:Group}) where {T <: GroupTuple}

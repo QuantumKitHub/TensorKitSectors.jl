@@ -23,7 +23,10 @@ findindex(::SectorValues{Trivial}, c::Trivial) = 1
 unit(::Type{Trivial}) = Trivial()
 dual(::Trivial) = Trivial()
 Base.isless(::Trivial, ::Trivial) = false
+fusionscalartype(::Type{Trivial}) = Int
+braidingscalartype(::Type{Trivial}) = Int
 sectorscalartype(::Type{Trivial}) = Int
+dimscalartype(::Type{Trivial}) = Int
 
 # fusion rules
 ⊗(::Trivial, ::Trivial) = (Trivial(),)

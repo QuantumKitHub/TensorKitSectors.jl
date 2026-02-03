@@ -18,6 +18,8 @@ struct A4Irrep <: AbstractIrrep{A₄}
 end
 
 FusionStyle(::Type{A4Irrep}) = GenericFusion()
+fusionscalartype(::Type{A4Irrep}) = Float64
+braidingscalartype(::Type{A4Irrep}) = Float64
 sectorscalartype(::Type{A4Irrep}) = Float64
 
 unit(::Type{A4Irrep}) = A4Irrep(0)
@@ -80,7 +82,7 @@ end
 
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: A4Irrep}
-    T = sectorscalartype(I)
+    T = fusionscalartype(I)
     Nabe = Nsymbol(a, b, e)
     Necd = Nsymbol(e, c, d)
     Nbcf = Nsymbol(b, c, f)
@@ -103,7 +105,7 @@ end
 # bosonic
 function Rsymbol(a::I, b::I, c::I) where {I <: A4Irrep}
     Nabc = Nsymbol(a, b, c)
-    R = zeros(sectorscalartype(I), Nabc, Nabc)
+    R = zeros(braidingscalartype(I), Nabc, Nabc)
     Nabc == 0 && return R
     if a == b == c == A4Irrep(3)
         R[1, 1] = -1

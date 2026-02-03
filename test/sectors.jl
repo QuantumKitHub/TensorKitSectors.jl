@@ -16,8 +16,10 @@ using LinearAlgebra
     @testinferred Asymbol(s...)
     B = @testinferred Bsymbol(s...)
     F = @testinferred Fsymbol(s..., s...)
+    @test eltype(F) === @testinferred fusionscalartype(I)
     if BraidingStyle(I) isa HasBraiding
         R = @testinferred Rsymbol(s...)
+        @test eltype(R) === @testinferred braidingscalartype(I)
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
         else
