@@ -17,6 +17,10 @@ struct TimeReversed{I <: Sector} <: Sector
         return new{I}(a)
     end
 end
+
+TimeReversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
+TimeReversed(a::TimeReversed{<:Sector}) = a.a
+
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
 function Nsymbol(
@@ -36,6 +40,12 @@ function Rsymbol(
     ) where {I <: Sector}
     return adjoint(Rsymbol(a.a, b.a, c.a))
 end
+function fusiontensor(
+        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
+    ) where {I <: Sector}
+    return fusiontensor(a.a, b.a, c.a) # conj here? all fusiontensors available are real
+end
+dim(c::TimeReversed{I}) where {I <: Sector} = dim(c.a)
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
 allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
@@ -75,3 +85,13 @@ fusionscalartype(::Type{TimeReversed{I}}) where {I} = fusionscalartype(I)
 braidingscalartype(::Type{TimeReversed{I}}) where {I} = braidingscalartype(I)
 sectorscalartype(::Type{TimeReversed{I}}) where {I} = sectorscalartype(I)
 dimscalartype(::Type{TimeReversed{I}}) where {I} = dimscalartype(I)
+
+type_repr(::Type{TimeReversed{I}}) where {I <: Sector} = "TimeReversed{$(type_repr(I))}"
+function Base.show(io::IO, a::TimeReversed{I}) where {I <: Sector}
+    if get(io, :typeinfo, nothing) !== typeof(a)
+        print(io, type_repr(typeof(a)))
+    end
+    # print(io, "(", _tr_repr(a.a), ")") # FIXME: this adds extra brackets to sectorset printing as well
+    print(io, "(", a.a, ")")
+    return nothing
+end
