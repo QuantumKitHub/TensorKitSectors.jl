@@ -67,6 +67,8 @@ function Base.show(io::IO, a::DNIrrep)
     return nothing
 end
 
+_tr_repr(a::DNIrrep) = (a.j, a.isodd) # FIXME: a.j here is in bits
+
 # Sector iterator
 # ---------------
 Base.isless(a::DNIrrep{N}, b::DNIrrep{N}) where {N} = isless(a.data, b.data)

@@ -151,6 +151,8 @@ function Base.show(io::IO, a::FibonacciAnyon)
         print(io, s) : print(io, "FibonacciAnyon(", s, ")")
 end
 
+_tr_repr(a::FibonacciAnyon) = isunit(a) ? ":I" : ":τ"
+
 Base.hash(a::FibonacciAnyon, h::UInt) = hash(a.isunit, h)
 Base.isless(a::FibonacciAnyon, b::FibonacciAnyon) = isless(!a.isunit, !b.isunit)
 
@@ -292,6 +294,8 @@ function Base.show(io::IO, a::IsingAnyon)
         return print(io, "IsingAnyon(:$(a.s))")
     end
 end
+
+_tr_repr(a::IsingAnyon) = ":$(a.s)"
 
 Base.hash(s::IsingAnyon, h::UInt) = hash(s.s, h)
 

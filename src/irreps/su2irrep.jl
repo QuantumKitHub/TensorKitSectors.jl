@@ -85,3 +85,5 @@ end
 
 Base.hash(s::SU2Irrep, h::UInt) = hash(s.j, h)
 Base.isless(s1::SU2Irrep, s2::SU2Irrep) = isless(s1.j, s2.j)
+
+_tr_repr(s::SU2Irrep) = s.j

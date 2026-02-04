@@ -46,3 +46,5 @@ Base.hash(c::U1Irrep, h::UInt) = hash(c.charge, h)
 @inline function Base.isless(c1::U1Irrep, c2::U1Irrep)
     return isless(abs(charge(c1)), abs(charge(c2))) || zero(HalfInt) < charge(c1) == -charge(c2)
 end
+
+_tr_repr(a::U1Irrep) = charge(a)

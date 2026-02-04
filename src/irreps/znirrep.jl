@@ -105,3 +105,6 @@ function Base.show(io::IO, c::AnyZNIrrep)
     print_type && print(io, ')')
     return nothing
 end
+
+# TimeReversed print
+_tr_repr(a::AnyZNIrrep) = charge(a)

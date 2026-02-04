@@ -119,6 +119,7 @@ end
 ZNElement{N}(n::Integer) where {N} = ZNElement{N, 0}(n)
 Base.getindex(::ElementTable, ::Type{ℤ{N}}, p::Int = 0) where {N} = ZNElement{N, mod(p, N)}
 type_repr(::Type{ZNElement{N, p}}) where {N, p} = "GroupElement[ℤ{$N}, $p]"
+_tr_repr(c::ZNElement{N, 0}) where {N} = c.n # restricted to trivial cocycle, might change if twisted ZN remain braided
 
 Base.convert(T::Type{<:ZNElement}, n::Real) = T(n)
 const Z2Element{p} = ZNElement{2, p}

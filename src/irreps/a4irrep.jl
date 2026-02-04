@@ -30,6 +30,8 @@ Base.convert(::Type{A4Irrep}, n::Integer) = A4Irrep(n)
 
 Base.getindex(::IrrepTable, ::Type{A₄}) = A4Irrep
 
+_tr_repr(a::A4Irrep) = a.n
+
 
 # Sector iterator
 # ---------------
