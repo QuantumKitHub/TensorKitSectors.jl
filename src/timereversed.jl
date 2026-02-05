@@ -2,9 +2,9 @@
 
 """
     struct TimeReversed{I <: Sector}
-    TimeReversed(a::I) where {I <: Sector}
+    TimeReversed{I}(a::I) where {I <: Sector}
 
-Represents the time-reversed version of the sector `I`, i.e. the
+Represents the time-reversed version of the sector `a`, i.e. the
 sector with the same fusion rules and `F`-symbols, but with the
 inverse braiding.
 """
@@ -17,6 +17,12 @@ struct TimeReversed{I <: Sector} <: Sector
     end
 end
 
+"""
+    timereversed(a::I) where {I <: Sector}
+
+Return the time-reversed version of the sector `a`. 
+If `a` is already a time-reversed sector, return the original sector.
+"""
 timereversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
 timereversed(a::TimeReversed{<:Sector}) = a.a
 
