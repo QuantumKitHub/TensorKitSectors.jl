@@ -13,7 +13,7 @@ using WignerSymbols
 using TensorKitSectors
 
 import TensorKitSectors: FusionStyle, BraidingStyle, Nsymbol, Fsymbol, Rsymbol, dim,
-    fusiontensor, ⊗, unit, dual, _tr_repr
+    fusiontensor, ⊗, unit, dual
 
 struct NewSU2Irrep <: Sector
     j::HalfInt
@@ -78,6 +78,5 @@ end
 
 Base.hash(s::NewSU2Irrep, h::UInt) = hash(s.j, h)
 Base.isless(s1::NewSU2Irrep, s2::NewSU2Irrep) = isless(s1.j, s2.j)
-_tr_repr(s::NewSU2Irrep) = s.j
 
 end # module NewSectors

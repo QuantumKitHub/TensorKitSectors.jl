@@ -61,8 +61,6 @@ function Base.isless(c1::CU1Irrep, c2::CU1Irrep)
     return isless(c1.j, c2.j) || (c1.j == c2.j == zero(HalfInt) && c1.s < c2.s)
 end
 
-_tr_repr(a::CU1Irrep) = (a.j, a.s)
-
 # CU1Irrep(j::Real, s::Int = ifelse(j>0, 2, 0)) = CU1Irrep(convert(HalfInteger, j), s)
 
 Base.convert(::Type{CU1Irrep}, j::Real) = CU1Irrep(j)

@@ -321,7 +321,6 @@ function type_repr(P::Type{<:ProductSector})
     end
     return s
 end
-_tr_repr(P::ProductSector) = map(_tr_repr, P.sectors)
 
 #==============================================================================
 TODO: the following would implement pretty-printing of product sectors, i.e.
