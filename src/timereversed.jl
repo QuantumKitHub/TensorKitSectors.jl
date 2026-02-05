@@ -96,7 +96,7 @@ function Base.show(io::IO, c::TimeReversed{I}) where {I <: Sector}
         print(io, type_repr(typeof(c)), "(")
         for k in 1:fieldcount(I)
             k > 1 && print(io, ", ")
-            print(io, repr(getfield(c.a, k)))
+            print(io, getfield(c.a, k))
         end
         print(io, ")")
     else
@@ -104,7 +104,7 @@ function Base.show(io::IO, c::TimeReversed{I}) where {I <: Sector}
         fieldcount(I) > 1 && print(io, "(")
         for k in 1:fieldcount(I)
             k > 1 && print(io, ", ")
-            print(io, repr(getfield(c.a, k)))
+            print(io, getfield(c.a, k))
         end
         fieldcount(I) > 1 && print(io, ")")
         print(io, ")")
