@@ -10,16 +10,11 @@ inverse braiding.
 """
 struct TimeReversed{I <: Sector} <: Sector
     a::I
-    function TimeReversed{I}(a::I) where {I <: Sector}
-        if BraidingStyle(I) isa NoBraiding
+    function TimeReversed{I}(a) where {I <: Sector}
+        BraidingStyle(I) isa NoBraiding &&
             throw(ArgumentError("TimeReversed is not defined for sectors $I with no braiding"))
-        end
         return new{I}(a)
     end
-end
-
-function TimeReversed{I}(fields...) where {I <: Sector}
-    return TimeReversed{I}(I(fields...))
 end
 
 timereversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
@@ -92,21 +87,9 @@ dimscalartype(::Type{TimeReversed{I}}) where {I} = dimscalartype(I)
 
 type_repr(::Type{TimeReversed{I}}) where {I <: Sector} = "TimeReversed{$(type_repr(I))}"
 function Base.show(io::IO, c::TimeReversed{I}) where {I <: Sector}
-    return if get(io, :typeinfo, nothing) !== I
-        print(io, type_repr(typeof(c)), "(")
-        for k in 1:fieldcount(I)
-            k > 1 && print(io, ", ")
-            print(io, getfield(c.a, k))
-        end
-        print(io, ")")
-    else
-        print(io, type_repr(typeof(c)) * "(")
-        fieldcount(I) > 1 && print(io, "(")
-        for k in 1:fieldcount(I)
-            k > 1 && print(io, ", ")
-            print(io, getfield(c.a, k))
-        end
-        fieldcount(I) > 1 && print(io, ")")
-        print(io, ")")
-    end
+    print_info = get(io, :typeinfo, nothing) !== typeof(c)
+    print_info && print(io, type_repr(typeof(c)), "(")
+    show(IOContext(io, :typeinfo => I), c.a)
+    print_info && print(io, ")")
+    return nothing
 end
