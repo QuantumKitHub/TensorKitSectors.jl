@@ -22,8 +22,8 @@ function TimeReversed{I}(fields...) where {I <: Sector}
     return TimeReversed{I}(I(fields...))
 end
 
-TimeReversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
-TimeReversed(a::TimeReversed{<:Sector}) = a.a
+timereversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
+timereversed(a::TimeReversed{<:Sector}) = a.a
 
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)

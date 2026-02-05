@@ -14,6 +14,7 @@ export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermi
 export UnitStyle, SimpleUnit, GenericUnit
 export SectorSet, SectorValues, findindex
 export unit, rightunit, leftunit, allunits, isunit
+export timereversed
 
 export triangle_equation, pentagon_equation, hexagon_equation
 
