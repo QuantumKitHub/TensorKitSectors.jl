@@ -54,6 +54,56 @@ end
     end
 end
 
+@testsuite "Shapes and data types of topological data" I -> begin
+    # shape of data from fusion style
+    Ftype = fusionscalartype(I)
+    TF_actual = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
+    TF_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : Array{Ftype, 4} # won't work for sparse arrays (CategoryData)
+    @test TF_actual == TF_imposed
+
+    if BraidingStyle(I) isa HasBraiding
+        Rtype = braidingscalartype(I)
+        TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
+        TR_imposed = if FusionStyle(I) isa MultiplicityFreeFusion
+            Rtype
+        else
+            I <: TimeReversed ? LinearAlgebra.Adjoint{Rtype, Array{Rtype, 2}} : Array{Rtype, 2} # same here
+        end
+        @test TR_actual == TR_imposed
+    end
+
+    # shape of data from multiplicities
+    for a in smallset(I), b in smallset(I), c in smallset(I)
+        for e in ⊗(a, b), f in ⊗(b, c)
+            for d in intersect(⊗(e, c), ⊗(a, f))
+                F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))
+                @test size(Fsymbol(a, b, c, d, e, f)) == F_size
+            end
+        end
+
+        if BraidingStyle(I) isa HasBraiding
+            Nabc = Nsymbol(a, b, c)
+            R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabc, Nabc)
+            @test size(Rsymbol(a, b, c)) == R_size
+        end
+    end
+end
+
+# https://arxiv.org/pdf/2507.07023v2#=&page=9
+@testsuite "Fusion ring properties" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in smallset(I), d in smallset(I) # associativity
+            L = sum(e -> Nsymbol(a, b, e) * Nsymbol(e, c, d), intersect(⊗(a, b), ⊗(d, dual(c))); init = zero(Int))
+            R = sum(f -> Nsymbol(b, c, f) * Nsymbol(a, f, d), intersect(⊗(b, c), ⊗(dual(a), d)); init = zero(Int))
+            @test L == R
+        end
+        for c in ⊗(a, b) # Frobenius reciprocity
+            @test Nsymbol(a, b, c) == Nsymbol(c, dual(b), a) == Nsymbol(dual(c), a, dual(b)) ==
+                Nsymbol(dual(b), dual(a), dual(c)) == Nsymbol(b, dual(c), dual(a)) == Nsymbol(dual(a), c, b)
+        end
+    end
+end
+
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
         da = dim(a)
