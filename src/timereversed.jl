@@ -2,7 +2,8 @@
 
 """
     struct TimeReversed{I <: Sector}
-    TimeReversed{I}(a::I) where {I <: Sector}
+    TimeReversed(a::Sector)
+    timereversed(a::Sector)
 
 Represents the time-reversed version of the sector `a`, i.e. the
 sector with the same fusion rules and `F`-symbols, but with the
@@ -16,6 +17,9 @@ struct TimeReversed{I <: Sector} <: Sector
         return new{I}(a)
     end
 end
+
+TimeReversed(a::Sector) = TimeReversed{typeof(a)}(a)
+TimeReversed(a::TimeReversed{<:Sector}) = a.a
 
 """
     timereversed(a::I) where {I <: Sector}
