@@ -215,7 +215,7 @@ end
 function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
-@assume_effects :foldable function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
 end
 function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
@@ -224,13 +224,13 @@ end
 function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-@assume_effects :foldable function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
 end
-@assume_effects :foldable function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
 end
-@assume_effects :foldable function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ dimscalartype, _sectors(T)))
 end
 
