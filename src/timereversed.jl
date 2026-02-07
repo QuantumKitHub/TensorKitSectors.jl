@@ -8,6 +8,8 @@
 Represents the time-reversed version of the sector `a`, i.e. the
 sector with the same fusion rules and `F`-symbols, but with the
 inverse braiding.
+Time reversal acts trivially on sectors with symmetric braiding.
+In such cases, `timereversed(a)` simply returns `a`.
 """
 struct TimeReversed{I <: Sector} <: Sector
     a::I
@@ -19,7 +21,6 @@ struct TimeReversed{I <: Sector} <: Sector
 end
 
 TimeReversed(a::Sector) = TimeReversed{typeof(a)}(a)
-TimeReversed(a::TimeReversed{<:Sector}) = a.a
 
 """
     timereversed(a::I) where {I <: Sector}
@@ -27,8 +28,10 @@ TimeReversed(a::TimeReversed{<:Sector}) = a.a
 Return the time-reversed version of the sector `a`. 
 If `a` is already a time-reversed sector, return the original sector.
 """
-timereversed(a::I) where {I <: Sector} = TimeReversed{I}(a)
-timereversed(a::TimeReversed{<:Sector}) = a.a
+function timereversed(a::Sector)
+    return BraidingStyle(typeof(a)) isa SymmetricBraiding ? a : TimeReversed(a)
+end
+timereversed(a::TimeReversed) = a.a
 
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
@@ -48,11 +51,6 @@ function Rsymbol(
         a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
     ) where {I <: Sector}
     return adjoint(Rsymbol(a.a, b.a, c.a))
-end
-function fusiontensor(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
-    ) where {I <: Sector}
-    return fusiontensor(a.a, b.a, c.a) # conj here? all fusiontensors available are real
 end
 dim(c::TimeReversed{I}) where {I <: Sector} = dim(c.a)
 
