@@ -402,6 +402,22 @@ it is a rank 4 array of size
 `(Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))`.
 """
 function Fsymbol end
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    T = fusionscalartype(I)
+    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
+    if !(Nabe > 0 & Necd > 0 & Nbcd > 0 & Nafd > 0)
+        return FusionStyle(I) isa GenericFusion ? zeros(T, Nabe, Necd, Nbcd, Nafd) : zero(T)
+    end
+
+    # most generic definition through fusiontensor
+    A = fusiontensor(a, b, e)
+    B = fusiontensor(e, c, d)[:, :, 1, :]
+    C = fusiontensor(b, c, f)
+    D = fusiontensor(a, f, d)[:, :, 1, :]
+    @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
+        A[1, 2, 3, -1] * B[3, 4, -2]
+    return FusionStyle(I) isa GenericFusion ? F : only(F)
+end
 
 # properties that can be determined in terms of the F symbol
 # TODO: find mechanism for returning these numbers with custom type T <: AbstractFloat
@@ -410,7 +426,8 @@ function Fsymbol end
 
 Return the (quantum) dimension of the sector `a`.
 """
-function dim(a::Sector)
+dim(a::Sector) = dim_from_Fsymbol(a)
+function dim_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
@@ -440,7 +457,8 @@ When `a == dual(a)`, it is restricted to ``κₐ ∈ \\{1, -1\\}`` and coincides
 the group-theoretic version [`frobenius_schur_indicator`](@ref).
 When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
-function frobenius_schur_phase(a::Sector)
+frobenius_schur_phase(a::Sector) = FS_phase_from_Fsymbol(a)
+function FS_phase_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
@@ -457,12 +475,12 @@ between real, complex and quaternionic representations.
 See also [`frobenius_schur_phase`](@ref) for the category-theoretic version that appears in the
 context of line bending.
 """
-function frobenius_schur_indicator(a::Sector)
+frobenius_schur_indicator(a::Sector) = FS_indicator_from_Fsymbol(a)
+function FS_indicator_from_Fsymbol(a::Sector)
     ν = frobenius_schur_phase(a)
     return a == conj(a) ? ν : zero(ν)
 end
 
-# Not necessary
 """
     Asymbol(a::I, b::I, c::I) where {I <: Sector}
 
@@ -477,7 +495,8 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the A-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(dual(a), c, b)`.
 """
-function Asymbol(a::I, b::I, c::I) where {I <: Sector}
+Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
+function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
             conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
@@ -504,7 +523,8 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the B-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
-function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
+Bsymbol(a::I, b::I, c::I) where {I <: Sector} = Bsymbol_from_Fsymbol(a, b, c)
+function Bsymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
     else
@@ -581,7 +601,8 @@ function Rsymbol end
 
 Return the twist of a sector `a`.
 """
-twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
+twist(a::Sector) = twist_from_Rsymbol(a)
+twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 # Triangle equation
 #-------------------------------------------------------------------------------
