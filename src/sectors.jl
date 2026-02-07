@@ -405,7 +405,7 @@ function Fsymbol end
 function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
     T = fusionscalartype(I)
     Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    if !(Nabe > 0 & Necd > 0 & Nbcd > 0 & Nafd > 0)
+    if !(Nabe > 0 && Necd > 0 && Nbcd > 0 && Nafd > 0)
         return FusionStyle(I) isa GenericFusion ? zeros(T, Nabe, Necd, Nbcd, Nafd) : zero(T)
     end
 
