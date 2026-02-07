@@ -48,7 +48,7 @@ end
 dim(c::AbstractGroupElement) = 1
 frobenius_schur_phase(c::AbstractGroupElement) = cocycle(c, inv(c), c)
 function Asymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement}
-    A = frobenius_schur_phase(dual(a)) * cocycle(inv(a), a, b)
+    A = frobenius_schur_phase(inv(a)) * conj(cocycle(inv(a), a, b))
     return c == a * b ? A : zero(A)
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: AbstractGroupElement}
