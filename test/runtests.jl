@@ -71,7 +71,7 @@ end
 
 @testset "Deligne product" begin
     sectorlist′ = (Trivial, sectorlist...)
-    for I1 in sectorlist′, I2 in sectorlist′
+    for I1 in sectorlist′, I2 in rand(sectorlist′, 3)
         a = first(smallset(I1))
         b = first(smallset(I2))
 

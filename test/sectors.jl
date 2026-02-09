@@ -99,6 +99,28 @@ end
     end
 end
 
+@testsuite "Fusion tensor and Asymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            A1 = Asymbol(a, b, c)
+            A2 = TKS.Asymbol_from_fusiontensor(a, b, c)
+            @test A1 ≈ A2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fusion tensor and Bsymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            B1 = Bsymbol(a, b, c)
+            B2 = TKS.Bsymbol_from_fusiontensor(a, b, c)
+            @test B1 ≈ B2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
 @testsuite "Fsymbol and dim" I -> begin
     for a in smallset(I)
         @test dim(a) ≈ TKS.dim_from_Fsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
