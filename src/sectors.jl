@@ -403,6 +403,46 @@ it is a rank 4 array of size
 """
 function Fsymbol end
 
+Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector} =
+    Fsymbol_from_fusiontensor(FusionStyle(I), a, b, c, d, e, f)
+
+function Fsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    A = only(fusiontensor(a, b, e))
+    B = only(fusiontensor(e, c, d))
+    C = only(fusiontensor(b, c, f))
+    D = only(fusiontensor(a, f, d))
+    return A * B * conj(C * D)
+end
+function Fsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    T = fusionscalartype(I)
+
+    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
+    Nabe + Necd + Nbcd + Nafd > 0 || return zero(T)
+
+    # unpack trivial dimensions from fusiontensors
+    A = dropdims(fusiontensor(a, b, e); dims = 4)
+    B = view(dropdims(fusiontensor(e, c, d); dims = 4), :, :, 1)
+    C = dropdims(fusiontensor(b, c, f); dims = 4)
+    D = view(dropdims(fusiontensor(a, f, d); dims = 4), :, :, 1)
+
+    return @tensor conj(D[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B[3 4]
+end
+function Fsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    T = fusionscalartype(I)
+
+    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
+    Nabe + Necd + Nbcd + Nafd > 0 || return zeros(T, Nabe, Necd, Nbcd, Nafd)
+
+    # most generic definition through fusiontensor
+    A = fusiontensor(a, b, e)
+    B = @view fusiontensor(e, c, d)[:, :, 1, :]
+    C = fusiontensor(b, c, f)
+    D = @view fusiontensor(a, f, d)[:, :, 1, :]
+
+    return @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
+        A[1, 2, 3, -1] * B[3, 4, -2]
+end
+
 # properties that can be determined in terms of the F symbol
 # TODO: find mechanism for returning these numbers with custom type T <: AbstractFloat
 """
@@ -410,7 +450,9 @@ function Fsymbol end
 
 Return the (quantum) dimension of the sector `a`.
 """
-function dim(a::Sector)
+dim(a::Sector) = dim_from_Fsymbol(a)
+
+function dim_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
@@ -440,7 +482,9 @@ When `a == dual(a)`, it is restricted to ``κₐ ∈ \\{1, -1\\}`` and coincides
 the group-theoretic version [`frobenius_schur_indicator`](@ref).
 When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
-function frobenius_schur_phase(a::Sector)
+frobenius_schur_phase(a::Sector) = frobenius_schur_phase_from_Fsymbol(a)
+
+function frobenius_schur_phase_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
@@ -462,7 +506,6 @@ function frobenius_schur_indicator(a::Sector)
     return a == conj(a) ? ν : zero(ν)
 end
 
-# Not necessary
 """
     Asymbol(a::I, b::I, c::I) where {I <: Sector}
 
@@ -477,7 +520,9 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the A-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(dual(a), c, b)`.
 """
-function Asymbol(a::I, b::I, c::I) where {I <: Sector}
+Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
+
+function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
             conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c))
@@ -504,7 +549,9 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the B-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
-function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
+Bsymbol(a::I, b::I, c::I) where {I <: Sector} = Bsymbol_from_Fsymbol(a, b, c)
+
+function Bsymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
     else
@@ -574,6 +621,33 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Rsymbol end
 
+Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector} =
+    Rsymbol_from_fusiontensor(FusionStyle(I), a, b, c)
+
+function Rsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I) where {I <: Sector}
+    A = only(fusiontensor(a, b, c))
+    B = only(fusiontensor(b, a, c))
+    return conj(B) * A
+end
+function Rsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I) where {I <: Sector}
+    T = braidingscalartype(I)
+    Nsymbol(a, b, c) == 0 && return zero(T)
+
+    A = view(dropdims(fusiontensor(a, b, c); dims = 4), :, :, 1)
+    B = view(dropdims(fusiontensor(b, a, c); dims = 4), :, :, 1)
+
+    return @tensor conj(B[1 2]) * A[2 1]
+end
+function Rsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I) where {I <: Sector}
+    T = braidingscalartype(I)
+    Nsymbol(a, b, c) == 0 && return zero(T)
+
+    A = view(fusiontensor(a, b, c), :, :, 1, :)
+    B = view(fusiontensor(b, a, c), :, :, 1, :)
+
+    return @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
+end
+
 # properties that can be determined in terms of the R symbol
 
 """
@@ -581,7 +655,8 @@ function Rsymbol end
 
 Return the twist of a sector `a`.
 """
-twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
+twist(a::Sector) = twist_from_Rsymbol(a)
+twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 # Triangle equation
 #-------------------------------------------------------------------------------
