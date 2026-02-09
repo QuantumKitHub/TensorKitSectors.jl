@@ -403,44 +403,20 @@ it is a rank 4 array of size
 """
 function Fsymbol end
 
-Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector} =
-    Fsymbol_from_fusiontensor(FusionStyle(I), a, b, c, d, e, f)
-
-function Fsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
-    A = only(fusiontensor(a, b, e))
-    B = only(fusiontensor(e, c, d))
-    C = only(fusiontensor(b, c, f))
-    D = only(fusiontensor(a, f, d))
-    return A * B * conj(C * D)
-end
-function Fsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
     T = fusionscalartype(I)
-
     Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    iszero(Nabe * Necd * Nbcd * Nafd) && return zero(T)
+    if iszero(Nabe * Necd * Nbcd * Nafd)
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, Nabe, Necd, Nbcd, Nafd)
+    else
+        A = fusiontensor(a, b, e)
+        B = @view fusiontensor(e, c, d)[:, :, 1, :]
+        C = fusiontensor(b, c, f)
+        D = @view fusiontensor(a, f, d)[:, :, 1, :]
 
-    # unpack trivial dimensions from fusiontensors
-    A = dropdims(fusiontensor(a, b, e); dims = 4)
-    B = view(dropdims(fusiontensor(e, c, d); dims = 4), :, :, 1)
-    C = dropdims(fusiontensor(b, c, f); dims = 4)
-    D = view(dropdims(fusiontensor(a, f, d); dims = 4), :, :, 1)
-
-    return @tensor conj(D[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B[3 4]
-end
-function Fsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
-    T = fusionscalartype(I)
-
-    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    iszero(Nabe * Necd * Nbcd * Nafd) && return zeros(T, Nabe, Necd, Nbcd, Nafd)
-
-    # most generic definition through fusiontensor
-    A = fusiontensor(a, b, e)
-    B = @view fusiontensor(e, c, d)[:, :, 1, :]
-    C = fusiontensor(b, c, f)
-    D = @view fusiontensor(a, f, d)[:, :, 1, :]
-
-    return @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
-        A[1, 2, 3, -1] * B[3, 4, -2]
+        @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) * A[1, 2, 3, -1] * B[3, 4, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(F) : F
+    end
 end
 
 # properties that can be determined in terms of the F symbol
@@ -523,7 +499,7 @@ number. Otherwise it is a square matrix with row and column size
 Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
 
 function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+    return if FusionStyle(I) isa MultiplicityFreeFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
             conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c))
     else
@@ -532,6 +508,19 @@ function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
                 conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
+    end
+end
+function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
+    T = fusionscalartype(I)
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        C1 = view(fusiontensor(a, b, c), :, 1, :, :)
+        C2 = view(fusiontensor(dual(a), c, b), :, :, 1, :)
+        Za = sqrtdim(a) * view(fusiontensor(a, dual(a), leftunit(a)), :, :, 1, 1)
+        @tensor A[-1, -2] := sqrtdim(b) / sqrtdim(c) * conj(Za[1, 2]) * C1[1, 3, -1] * C2[2, 3, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(A) : A
     end
 end
 
@@ -552,13 +541,26 @@ number. Otherwise it is a square matrix with row and column size
 Bsymbol(a::I, b::I, c::I) where {I <: Sector} = Bsymbol_from_Fsymbol(a, b, c)
 
 function Bsymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+    return if FusionStyle(I) isa MultiplicityFreeFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a)),
             (Nsymbol(a, b, c), Nsymbol(c, dual(b), a))
         )
+    end
+end
+function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
+    T = fusionscalartype(I)
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        C1 = view(fusiontensor(a, b, c), 1, :, :, :)
+        C2 = view(fusiontensor(c, dual(b), a), :, :, 1, :)
+        Zb = sqrtdim(b) * view(fusiontensor(b, dual(b), leftunit(b)), :, :, 1, 1)
+        @tensor B[-1, -2] := sqrtdim(a) / sqrtdim(c) * conj(Zb[1, 2]) * C1[1, 3, -1] * C2[3, 2, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(B) : B
     end
 end
 
@@ -621,31 +623,17 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Rsymbol end
 
-Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector} =
-    Rsymbol_from_fusiontensor(FusionStyle(I), a, b, c)
-
-function Rsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I) where {I <: Sector}
-    A = only(fusiontensor(a, b, c))
-    B = only(fusiontensor(b, a, c))
-    return conj(B) * A
-end
-function Rsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I) where {I <: Sector}
+function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
     T = braidingscalartype(I)
-    Nsymbol(a, b, c) == 0 && return zero(T)
-
-    A = view(dropdims(fusiontensor(a, b, c); dims = 4), :, :, 1)
-    B = view(dropdims(fusiontensor(b, a, c); dims = 4), :, :, 1)
-
-    return @tensor conj(B[1 2]) * A[2 1]
-end
-function Rsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I) where {I <: Sector}
-    T = braidingscalartype(I)
-    Nsymbol(a, b, c) == 0 && return zero(T)
-
-    A = view(fusiontensor(a, b, c), :, :, 1, :)
-    B = view(fusiontensor(b, a, c), :, :, 1, :)
-
-    return @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        A = view(fusiontensor(a, b, c), :, :, 1, :)
+        B = view(fusiontensor(b, a, c), :, :, 1, :)
+        @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(R) : R
+    end
 end
 
 # properties that can be determined in terms of the R symbol
