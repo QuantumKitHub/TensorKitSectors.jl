@@ -170,7 +170,7 @@ and determines the scalar type of the [`fusiontensor`](@ref) whenever it is defi
 
 See also [`fusionscalartype`](@ref) and [`braidingscalartype`](@ref).
 """
-@assume_effects :foldable function sectorscalartype(::Type{I}) where {I <: Sector}
+function sectorscalartype(::Type{I}) where {I <: Sector}
     return if BraidingStyle(I) === NoBraiding()
         fusionscalartype(I)
     else
@@ -186,7 +186,7 @@ In particular, this is the scalar type of [`Fsymbol`](@ref).
 
 See also [`braidingscalartype`](@ref) and [`sectorscalartype`](@ref).
 """
-@assume_effects :foldable function fusionscalartype(::Type{I}) where {I <: Sector}
+function fusionscalartype(::Type{I}) where {I <: Sector}
     u = first(allunits(I))
     return eltype(Fsymbol(u, u, u, u, u, u))
 end
@@ -199,7 +199,7 @@ In particular, this is the scalar type of [`Rsymbol`](@ref).
 
 See also [`fusionscalartype`](@ref) and [`sectorscalartype`](@ref).
 """
-@assume_effects :foldable function braidingscalartype(::Type{I}) where {I <: Sector}
+function braidingscalartype(::Type{I}) where {I <: Sector}
     BraidingStyle(I) === NoBraiding() && throw(ArgumentError("No braiding for sector $I"))
     u = first(allunits(I))
     return eltype(Rsymbol(u, u, u))
@@ -445,7 +445,7 @@ invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a))
 Return the scalar type of the quantum dimensions associated to sectors of type `I`.
 In particular, this is the scalar type of [`dim`](@ref).
 """
-@assume_effects :foldable dimscalartype(::Type{I}) where {I <: Sector} =
+dimscalartype(::Type{I}) where {I <: Sector} =
     FusionStyle(I) isa UniqueFusion ? Int : typeof(dim(first(allunits(I))))
 
 """
@@ -499,11 +499,11 @@ Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
 function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
+            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
+                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
     end
