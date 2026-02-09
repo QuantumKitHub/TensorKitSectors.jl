@@ -402,21 +402,45 @@ it is a rank 4 array of size
 `(Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))`.
 """
 function Fsymbol end
-function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+
+Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector} =
+    Fsymbol_from_fusiontensor(FusionStyle(I), a, b, c, d, e, f)
+
+function Fsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    A = only(fusiontensor(a, b, e))
+    B = only(fusiontensor(e, c, d))
+    C = only(fusiontensor(b, c, f))
+    D = only(fusiontensor(a, f, d))
+    return A * B * conj(C * D)
+end
+function Fsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
     T = fusionscalartype(I)
+
     Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    if !(Nabe > 0 && Necd > 0 && Nbcd > 0 && Nafd > 0)
-        return FusionStyle(I) isa GenericFusion ? zeros(T, Nabe, Necd, Nbcd, Nafd) : zero(T)
-    end
+    Nabe + Necd + Nbcd + Nafd > 0 || return zero(T)
+
+    # unpack trivial dimensions from fusiontensors
+    A = dropdims(fusiontensor(a, b, e); dims = 4)
+    B = view(dropdims(fusiontensor(e, c, d); dims = 4), :, :, 1)
+    C = dropdims(fusiontensor(b, c, f); dims = 4)
+    D = view(dropdims(fusiontensor(a, f, d); dims = 4), :, :, 1)
+
+    return @tensor conj(D[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B[3 4]
+end
+function Fsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    T = fusionscalartype(I)
+
+    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
+    Nabe + Necd + Nbcd + Nafd > 0 || return zeros(T, Nabe, Necd, Nbcd, Nafd)
 
     # most generic definition through fusiontensor
     A = fusiontensor(a, b, e)
-    B = fusiontensor(e, c, d)[:, :, 1, :]
+    B = @view fusiontensor(e, c, d)[:, :, 1, :]
     C = fusiontensor(b, c, f)
-    D = fusiontensor(a, f, d)[:, :, 1, :]
-    @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
+    D = @view fusiontensor(a, f, d)[:, :, 1, :]
+
+    return @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
         A[1, 2, 3, -1] * B[3, 4, -2]
-    return FusionStyle(I) isa GenericFusion ? F : only(F)
 end
 
 # properties that can be determined in terms of the F symbol
