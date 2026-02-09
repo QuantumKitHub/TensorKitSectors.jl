@@ -480,11 +480,11 @@ number. Otherwise it is a square matrix with row and column size
 function Asymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
+            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
+                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
     end
