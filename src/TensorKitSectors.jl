@@ -42,6 +42,13 @@ export fℤ₂, fU₁, fSU₂
 # ------
 @static if VERSION >= v"1.11.0-DEV.469"
     eval(Expr(:public, :type_repr))
+    eval(
+        Expr(
+            :public, :Asymbol_from_Fsymbol, :Bsymbol_from_Fsymbol, :dim_from_Fsymbol,
+            :frobenius_schur_phase_from_Fsymbol, :Fsymbol_from_fusiontensor,
+            :Rsymbol_from_fusiontensor, :twist_from_Rsymbol,
+        )
+    )
 end
 
 # imports
