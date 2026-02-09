@@ -52,7 +52,9 @@ function Rsymbol(
     ) where {I <: Sector}
     return adjoint(Rsymbol(a.a, b.a, c.a))
 end
-dim(c::TimeReversed{I}) where {I <: Sector} = dim(c.a)
+dim(c::TimeReversed) = dim(c.a)
+Asymbol(a::I, b::I, c::I) where {I <: TimeReversed} = Asymbol(a.a, b.a, c.a)
+Bsymbol(a::I, b::I, c::I) where {I <: TimeReversed} = Bsymbol(a.a, b.a, c.a)
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
 allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
