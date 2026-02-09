@@ -501,9 +501,7 @@ between real, complex and quaternionic representations.
 See also [`frobenius_schur_phase`](@ref) for the category-theoretic version that appears in the
 context of line bending.
 """
-frobenius_schur_indicator(a::Sector) = frobenius_schur_indicator_from_Fsymbol(a)
-
-function frobenius_schur_indicator_from_Fsymbol(a::Sector)
+function frobenius_schur_indicator(a::Sector)
     ν = frobenius_schur_phase(a)
     return a == conj(a) ? ν : zero(ν)
 end
