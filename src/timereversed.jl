@@ -23,38 +23,27 @@ end
 TimeReversed(a::Sector) = TimeReversed{typeof(a)}(a)
 
 """
-    timereversed(a::I) where {I <: Sector}
+    timereversed(a::Sector)
 
 Return the time-reversed version of the sector `a`. 
 If `a` is already a time-reversed sector, return the original sector.
 """
-function timereversed(a::Sector)
-    return BraidingStyle(typeof(a)) isa SymmetricBraiding ? a : TimeReversed(a)
-end
+timereversed(a::Sector) = BraidingStyle(typeof(a)) isa SymmetricBraiding ? a : TimeReversed(a)
 timereversed(a::TimeReversed) = a.a
 
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
-function Nsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
-    ) where {I <: Sector}
-    return Nsymbol(a.a, b.a, c.a)
-end
 
-function Fsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I},
-        d::TimeReversed{I}, e::TimeReversed{I}, f::TimeReversed{I}
-    ) where {I <: Sector}
-    return Fsymbol(a.a, b.a, c.a, d.a, e.a, f.a)
-end
-function Rsymbol(
-        a::TimeReversed{I}, b::TimeReversed{I}, c::TimeReversed{I}
-    ) where {I <: Sector}
-    return adjoint(Rsymbol(a.a, b.a, c.a))
-end
-dim(c::TimeReversed) = dim(c.a)
+Nsymbol(a::I, b::I, c::I) where {I <: TimeReversed} = Nsymbol(a.a, b.a, c.a)
+
+Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: TimeReversed} =
+    Fsymbol(a.a, b.a, c.a, d.a, e.a, f.a)
 Asymbol(a::I, b::I, c::I) where {I <: TimeReversed} = Asymbol(a.a, b.a, c.a)
 Bsymbol(a::I, b::I, c::I) where {I <: TimeReversed} = Bsymbol(a.a, b.a, c.a)
+
+dim(c::TimeReversed) = dim(c.a)
+
+Rsymbol(a::I, b::I, c::I) where {I <: TimeReversed} = adjoint(Rsymbol(a.a, b.a, c.a))
 
 unit(::Type{TimeReversed{I}}) where {I <: Sector} = TimeReversed{I}(unit(I))
 allunits(::Type{TimeReversed{I}}) where {I <: Sector} = SectorSet{TimeReversed{I}}(TimeReversed{I}, allunits(I))
