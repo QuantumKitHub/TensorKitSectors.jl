@@ -451,6 +451,7 @@ end
 Return the (quantum) dimension of the sector `a`.
 """
 dim(a::Sector) = dim_from_Fsymbol(a)
+
 function dim_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
@@ -482,6 +483,7 @@ the group-theoretic version [`frobenius_schur_indicator`](@ref).
 When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
 frobenius_schur_phase(a::Sector) = frobenius_schur_phase_from_Fsymbol(a)
+
 function frobenius_schur_phase_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
@@ -500,6 +502,7 @@ See also [`frobenius_schur_phase`](@ref) for the category-theoretic version that
 context of line bending.
 """
 frobenius_schur_indicator(a::Sector) = frobenius_schur_indicator_from_Fsymbol(a)
+
 function frobenius_schur_indicator_from_Fsymbol(a::Sector)
     ν = frobenius_schur_phase(a)
     return a == conj(a) ? ν : zero(ν)
@@ -520,6 +523,7 @@ number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(dual(a), c, b)`.
 """
 Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
+
 function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
@@ -548,6 +552,7 @@ number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
 Bsymbol(a::I, b::I, c::I) where {I <: Sector} = Bsymbol_from_Fsymbol(a, b, c)
+
 function Bsymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
     return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
