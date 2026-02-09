@@ -623,6 +623,33 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Rsymbol end
 
+Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector} =
+    Rsymbol_from_fusiontensor(FusionStyle(I), a, b, c)
+
+function Rsymbol_from_fusiontensor(::UniqueFusion, a::I, b::I, c::I) where {I <: Sector}
+    A = only(fusiontensor(a, b, c))
+    B = only(fusiontensor(b, a, c))
+    return conj(B) * A
+end
+function Rsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I) where {I <: Sector}
+    T = braidingscalartype(I)
+    Nsymbol(a, b, c) == 0 && return zero(T)
+
+    A = view(dropdims(fusiontensor(a, b, c); dims = 4), :, :, 1)
+    B = view(dropdims(fusiontensor(b, a, c); dims = 4), :, :, 1)
+
+    return @tensor conj(B[1 2]) * A[2 1]
+end
+function Rsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I) where {I <: Sector}
+    T = braidingscalartype(I)
+    Nsymbol(a, b, c) == 0 && return zero(T)
+
+    A = view(fusiontensor(a, b, c), :, :, 1, :)
+    B = view(fusiontensor(b, a, c), :, :, 1, :)
+
+    return @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
+end
+
 # properties that can be determined in terms of the R symbol
 
 """
