@@ -417,7 +417,7 @@ function Fsymbol_from_fusiontensor(::SimpleFusion, a::I, b::I, c::I, d::I, e::I,
     T = fusionscalartype(I)
 
     Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    Nabe + Necd + Nbcd + Nafd > 0 || return zero(T)
+    iszero(Nabe * Necd * Nbcd * Nafd) && return zero(T)
 
     # unpack trivial dimensions from fusiontensors
     A = dropdims(fusiontensor(a, b, e); dims = 4)
@@ -431,7 +431,7 @@ function Fsymbol_from_fusiontensor(::GenericFusion, a::I, b::I, c::I, d::I, e::I
     T = fusionscalartype(I)
 
     Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
-    Nabe + Necd + Nbcd + Nafd > 0 || return zeros(T, Nabe, Necd, Nbcd, Nafd)
+    iszero(Nabe * Necd * Nbcd * Nafd) && return zeros(T, Nabe, Necd, Nbcd, Nafd)
 
     # most generic definition through fusiontensor
     A = fusiontensor(a, b, e)
