@@ -64,6 +64,14 @@ compact non-Abelian Lie group.
 abstract type SU{N} <: Group end
 
 """
+    abstract type Heisenberg{N} <: Group
+
+Type to represent the Heisenberg group of dimension `N`, which is the
+non-Abelian group of 3x3 upper triangular matrices with ones on the diagonal.
+"""
+abstract type Heisenberg{N} <: Group end
+
+"""
     abstract type CU₁ <: Group
 
 Type to represent the group of U₁ in combination with charge conjugation,
@@ -82,6 +90,7 @@ const D₃ = Dihedral{3}
 const D₄ = Dihedral{4}
 const A₄ = Alternating{4}
 const SU₂ = SU{2}
+const Heis₃ = Heisenberg{3}
 
 type_repr(::Type{ℤ₂}) = "ℤ₂"
 type_repr(::Type{ℤ₃}) = "ℤ₃"
@@ -91,6 +100,7 @@ type_repr(::Type{D₃}) = "D₃"
 type_repr(::Type{D₄}) = "D₄"
 type_repr(::Type{A₄}) = "A₄"
 type_repr(::Type{SU₂}) = "SU₂"
+type_repr(::Type{Heis₃}) = "Heis₃"
 type_repr(::Type{U₁}) = "U₁"
 type_repr(::Type{CU₁}) = "CU₁"
 
