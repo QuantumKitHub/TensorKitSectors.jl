@@ -69,7 +69,13 @@ function test_sector(I::Type)
     end
 end
 
-smallset(::Type{I}) where {I <: Sector} = take(values(I), 5)
+function smallset(::Type{I}) where {I <: Sector}
+    return if Base.IteratorSize(I) === Base.IsInfinite()
+        take(values(I), 5)
+    else
+        Random.shuffle(collect(values(I)))[1:5] # take random 5
+    end
+end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
     iter = product(smallset(I1), smallset(I2))
     s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
