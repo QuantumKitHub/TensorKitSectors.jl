@@ -6,7 +6,7 @@
 Represents irreps of the finite Heisenberg group ``H_N``.
 There are N² one-dimensional irreps labeled by a pair of integers ``(a, b)`` with ``a, b ∈ ℤ_N``,
 and N - 1 irreps of dimension N labeled by an integer ``k ∈ ℤ_N \\ {0}``.
-These are commonly referred to as the characters and the Schrödinger representations, respectively.
+These are commonly referred to as the characters ``χₐ,ᵦ`` and the Schrödinger representations ``πₖ``, respectively.
 
 ## Properties
 
@@ -38,7 +38,7 @@ end
 # TODO: consider union of 2 kinds of irreps?
 
 FusionStyle(::Type{HeisenbergIrrep{N}}) where {N} = GenericFusion()
-BraidingStyle(::Type{HeisenbergIrrep{N}}) where {N} = NoBraiding()
+BraidingStyle(::Type{HeisenbergIrrep{N}}) where {N} = NoBraiding() #TODO: make braided again after fusiontensor is fixed
 fusionscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
 sectorscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
 
@@ -111,8 +111,8 @@ const HeisenbergIrrepProdIterator{N} = SectorProductIterator{HeisenbergIrrep{N}}
 Base.IteratorSize(::Type{HeisenbergIrrepProdIterator{N}}) where {N} = Base.HasLength()
 function Base.length(x::HeisenbergIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
-    if !iszero(a.k) && !iszero(b.k) # Schrödinger ⊗ Schrödinger
-        return iszero(mod(a.k + b.k, N)) ? N^2 : N # special case: k1 + k2 = 0 gives N^2 1d irreps, otherwise gives N Schrödinger irreps
+    if !iszero(a.k) && !iszero(b.k) # π ⊗ π
+        return iszero(mod(a.k + b.k, N)) ? N^2 : N # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps
     else
         return 1
     end
@@ -121,25 +121,25 @@ end
 function Base.iterate(p::HeisenbergIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if state == 1
-        if !(iszero(a.k) && iszero(b.k)) # Schrödinger ⊗ Schrödinger
+        if !(iszero(a.k) && iszero(b.k)) # π ⊗ π
             k_new = mod(a.k + b.k, N)
-            if iszero(k_new) # special case: k1 + k2 = 0 gives the N^2 1d irreps
-                return (unit(typeof(a)), 2) # return unit 1d irrep first, then iterate over the other 1d irreps in the next states
+            if iszero(k_new) # special case: k1 + k2 = 0 gives the N^2 χ's
+                return (unit(typeof(a)), 2) # return unit χ first, then iterate over the other χ's in the next states
             else
                 return (HeisenbergIrrep{N}(0, 0, k_new), 2) # return this only once, even with multiplicity N
             end
-        elseif iszero(a.k) && iszero(b.k) # 1d ⊗ 1d
+        elseif iszero(a.k) && iszero(b.k) # χ ⊗ χ
             a_new = mod(a.a + b.a, N)
             b_new = mod(a.b + b.b, N)
             return (HeisenbergIrrep{N}(a_new, b_new, 0), 2)
-        else # 1d ⊗ Schrödinger or Schrödinger ⊗ 1d
+        else # χ ⊗ π or π ⊗ χ
             return (HeisenbergIrrep{N}(0, 0, a.k + b.k), 2)
         end
-    elseif state <= length(p) # Schrödinger ⊗ Schrödinger
+    elseif state <= length(p) # π ⊗ π
         k_new = mod(a.k + b.k, N)
         if iszero(k_new) # special case
             return (HeisenbergIrrep{N}(div(state - 1, N), mod(state - 1, N), 0), state + 1)
-        else # all other Schrödinger irreps
+        else # all other π irreps
             return nothing
         end
     else
@@ -158,15 +158,15 @@ function Nsymbol(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrre
     c_1d = iszero(c.k)
 
     # immediate zeroes
-    (a_1d && b_1d && !c_1d) && return 0 # 1d ⊗ 1d -> Schrödinger
-    (a_1d && !b_1d && c_1d) && return 0 # 1d ⊗ Schrödinger -> 1d
-    (!a_1d && b_1d && c_1d) && return 0 # Schrödinger ⊗ 1d -> 1d
+    (a_1d && b_1d && !c_1d) && return 0 # χ ⊗ χ -> π
+    (a_1d && !b_1d && c_1d) && return 0 # χ ⊗ π -> χ
+    (!a_1d && b_1d && c_1d) && return 0 # π ⊗ χ -> χ
 
-    if a_1d && b_1d && c_1d # 1d ⊗ 1d -> 1d
+    if a_1d && b_1d && c_1d # χ ⊗ χ -> χ
         return Int(mod(a.a + b.a, N) == c.a && mod(a.b + b.b, N) == c.b)
-    elseif !(a_1d * b_1d) && !c_1d # 1d ⊗ Schrödinger or Schrödinger ⊗ 1d -> Schrödinger
+    elseif ((a_1d && !b_1d) || (!a_1d && b_1d)) && !c_1d # χ ⊗ π or π ⊗ χ -> π
         return Int(a.k + b.k == c.k)
-    else # Schrödinger ⊗ Schrödinger
+    else # π ⊗ π
         k_new = mod(a.k + b.k, N)
         iszero(k_new) && return Int(c_1d) # special case
         return mod(k_new, N) == c.k ? N : 0
@@ -196,6 +196,9 @@ end
 Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: HeisenbergIrrep} =
     Fsymbol_from_fusiontensor(a, b, c, d, e, f)
 
+# Rsymbol(a::I, b::I, c::I) where {I <: HeisenbergIrrep} = Rsymbol_from_fusiontensor(a, b, c)
+
+# https://www.rintonpress.com/xxqic8/qic-8-5/0438-0467.pdf eqs 60, 63, 67
 function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::HeisenbergIrrep{N}) where {N}
     T = fusionscalartype(HeisenbergIrrep{N})
     Nxyz = Nsymbol(x, y, z)
@@ -203,31 +206,33 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
     C = zeros(T, dx, dy, dz, Nxyz)
     isempty(C) && return C
 
-    if iszero(x.k) && iszero(y.k) && iszero(z.k) # 1d ⊗ 1d -> 1d
+    if iszero(x.k) && iszero(y.k) && iszero(z.k) # χ ⊗ χ -> χ
         C[1, 1, 1, 1] = 1
         return C
     end
 
     ω = cispi(2 / N)
-    if !iszero(x.k) && !iszero(y.k) # Schrödinger ⊗ Schrödinger
+    if !iszero(x.k) && !iszero(y.k) # π ⊗ π
         k_new = mod(x.k + y.k, N)
-        if !iszero(k_new) # fuse to Schrödinger
-            for i in 1:dx, j in 1:dy, r in 1:dz, μ in 1:Nxyz
-                C[i, j, r, μ] = ω^((y.k * i^2) / (2 * x.k)) * T((i + j) == r) / sqrt(N) # double check this formula, in particular the deltas
+        if !iszero(k_new) # fuse to π
+            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz
+                C[i, j, m, μ] = T(μ == i) * T(m == (j - m * x.k / k_new)) # missing elements on diagonal in overlap
             end
         else # special case
             for i in 1:dx, j in 1:dy
-                C[i, j, 1, 1] = ω^(z.a * i) * T((i - j) == z.b) / sqrt(N)
+                C[i, j, 1, 1] = ω^(x.k * z.a * i) * T((j - i) == 1) / sqrt(N - 1) # right for N = 3 at least at level of orthogonality, rest untested
             end
         end
     else
-        if iszero(x.k) && !iszero(y.k) # 1d ⊗ Schrödinger
-            for n in 1:dy, m in 1:dz
-                C[1, n, m, 1] = ω^(x.a * n) * T(n == m)
+        if iszero(x.k) && !iszero(y.k) # χ ⊗ π
+            @info "χ x π: x = $x, y = $y"
+            for j in 1:N, m in 1:N
+                C[1, j, m, 1] = ω^(- x.a * j) * T(j + x.b/y.k == m) # missing elements on diagonal in overlap
             end
-        else # Schrödinger ⊗ 1d
-            for n in 1:dx, m in 1:dz
-                C[n, 1, m, 1] = ω^(y.a * m) * T(m == n)
+        else # π ⊗ χ
+                @info "π x χ: x = $x, y = $y"
+            for i in 1:N, m in 1:N
+                C[i, 1, m, 1] = ω^(- y.a * i) * T(i + y.b/x.k == m) # missing elements on diagonal in overlap
             end
         end
     end
