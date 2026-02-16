@@ -78,7 +78,6 @@ end
 end
 
 @testsuite "Fsymbol and Asymbol" I -> begin
-    hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I)
         for c in ⊗(a, b)
             A1 = Asymbol(a, b, c)
@@ -89,7 +88,6 @@ end
 end
 
 @testsuite "Fsymbol and Bsymbol" I -> begin
-    hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I)
         for c in ⊗(a, b)
             B1 = Bsymbol(a, b, c)
