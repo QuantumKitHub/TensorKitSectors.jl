@@ -153,7 +153,7 @@ end
     hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I)
         cs = vec(collect(a ⊗ b))
-        cgcs = map(c -> fusiontensor(a, b, c), cs)
+        cgcs = map(c -> Array(fusiontensor(a, b, c)), cs) # make dense for sparse arrays to work
         for (c, cgc) in zip(cs, cgcs), (c′, cgc′) in zip(cs, cgcs)
             for μ in 1:Nsymbol(a, b, c), ν in 1:Nsymbol(a, b, c′)
                 @tensor overlap[mc mc'] := conj(view(cgc, :, :, :, μ)[ma mb mc]) *
