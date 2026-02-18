@@ -1,5 +1,6 @@
 using TensorOperations
 using LinearAlgebra
+using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
     s = (randsector(I), randsector(I), randsector(I))
@@ -63,39 +64,88 @@ end
     end
 end
 
-@testsuite "Fusion tensor and F-move" I -> begin
+@testsuite "Fusion tensor and Fsymbol" I -> begin
     hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
         for e in ⊗(a, b), f in ⊗(b, c)
             for d in intersect(⊗(e, c), ⊗(a, f))
-                X1 = fusiontensor(a, b, e)
-                X2 = fusiontensor(e, c, d)
-                Y1 = fusiontensor(b, c, f)
-                Y2 = fusiontensor(a, f, d)
-                @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
-                    conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
-                if FusionStyle(I) isa MultiplicityFreeFusion
-                    f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
-                else
-                    f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
-                end
-                @test isapprox(f1, f2; atol = 1.0e-12, rtol = 1.0e-12)
+                F1 = Fsymbol(a, b, c, d, e, f)
+                F2 = TKS.Fsymbol_from_fusiontensor(a, b, c, d, e, f)
+                @test F1 ≈ F2 atol = 1.0e-12 rtol = 1.0e-12
             end
         end
     end
 end
 
-@testsuite "Fusion tensor and R-move" I -> begin
+@testsuite "Fsymbol and Asymbol" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            A1 = Asymbol(a, b, c)
+            A2 = TKS.Asymbol_from_Fsymbol(a, b, c)
+            @test A1 ≈ A2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fsymbol and Bsymbol" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            B1 = Bsymbol(a, b, c)
+            B2 = TKS.Bsymbol_from_Fsymbol(a, b, c)
+            @test B1 ≈ B2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fusion tensor and Asymbol" I -> begin
     (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
     for a in smallset(I), b in smallset(I)
         for c in ⊗(a, b)
-            X1 = permutedims(fusiontensor(a, b, c), (2, 1, 3, 4))
-            X2 = fusiontensor(b, a, c)
-            l = dim(a) * dim(b) * dim(c)
-            R = LinearAlgebra.transpose(Rsymbol(a, b, c))
-            sz = (l, convert(Int, Nsymbol(a, b, c)))
-            @test reshape(X1, sz) ≈ reshape(X2, sz) * R
+            A1 = Asymbol(a, b, c)
+            A2 = TKS.Asymbol_from_fusiontensor(a, b, c)
+            @test A1 ≈ A2 atol = 1.0e-12 rtol = 1.0e-12
         end
+    end
+end
+
+@testsuite "Fusion tensor and Bsymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            B1 = Bsymbol(a, b, c)
+            B2 = TKS.Bsymbol_from_fusiontensor(a, b, c)
+            @test B1 ≈ B2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fsymbol and dim" I -> begin
+    for a in smallset(I)
+        @test dim(a) ≈ TKS.dim_from_Fsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
+    end
+end
+
+@testsuite "Fsymbol and frobenius_schur_phase" I -> begin
+    for a in smallset(I)
+        @test frobenius_schur_phase(a) ≈ TKS.frobenius_schur_phase_from_Fsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
+    end
+end
+
+@testsuite "Fusion tensor and Rsymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            R1 = Rsymbol(a, b, c)
+            R2 = TKS.Rsymbol_from_fusiontensor(a, b, c)
+            @test R1 ≈ R2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Rsymbol and twist" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I)
+        @test twist(a) ≈ TKS.twist_from_Rsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
     end
 end
 
@@ -106,8 +156,8 @@ end
         cgcs = map(c -> fusiontensor(a, b, c), cs)
         for (c, cgc) in zip(cs, cgcs), (c′, cgc′) in zip(cs, cgcs)
             for μ in 1:Nsymbol(a, b, c), ν in 1:Nsymbol(a, b, c′)
-                @tensor overlap[mc mc'] := conj(view(cgc, :, :, :, μ)[ma mb mc]) *
-                    view(cgc′, :, :, :, ν)[ma mb mc']
+                @tensor overlap[mc mc'] := conj(cgc[:, :, :, μ][ma mb mc]) *
+                    cgc′[:, :, :, ν][ma mb mc']
                 if μ == ν && c == c′
                     @test isapprox(overlap, LinearAlgebra.I; atol = 1.0e-12)
                 else

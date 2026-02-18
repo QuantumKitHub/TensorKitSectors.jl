@@ -187,25 +187,8 @@ function Nsymbol(a::DNIrrep{N}, b::DNIrrep{N}, c::DNIrrep{N}) where {N}
     return j_satisfied & s_satisfied
 end
 
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, I <: DNIrrep{N}}
-    T = fusionscalartype(I)
-    (Nsymbol(a, b, e) & Nsymbol(e, c, d) & Nsymbol(b, c, f) & Nsymbol(a, f, d)) || return zero(T)
-
-    # tensoring with units gives 1
-    (isunit(a) || isunit(b) || isunit(c)) && return one(T)
-
-    # fallback through fusiontensor
-    A = fusiontensor(a, b, e)
-    A = reshape(A, size(A, 1), size(A, 2), size(A, 3))
-    B = fusiontensor(e, c, d)
-    B1 = reshape(view(B, :, :, 1), size(B, 1), size(B, 2))
-    C = fusiontensor(b, c, f)
-    C = reshape(C, size(C, 1), size(C, 2), size(C, 3))
-    D = fusiontensor(a, f, d)
-    D1 = reshape(view(D, :, :, 1), size(D, 1), size(D, 2))
-
-    return @tensor conj(D1[1 5]) * conj(C[2 4 5]) * A[1 2 3] * B1[3 4]
-end
+Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: DNIrrep} =
+    Fsymbol_from_fusiontensor(a, b, c, d, e, f)
 
 function Rsymbol(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     R = convert(braidingscalartype(I), Nsymbol(a, b, c))
