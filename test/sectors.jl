@@ -156,8 +156,8 @@ end
         cgcs = map(c -> fusiontensor(a, b, c), cs)
         for (c, cgc) in zip(cs, cgcs), (c′, cgc′) in zip(cs, cgcs)
             for μ in 1:Nsymbol(a, b, c), ν in 1:Nsymbol(a, b, c′)
-                @tensor overlap[mc mc'] := conj(view(cgc, :, :, :, μ)[ma mb mc]) *
-                    view(cgc′, :, :, :, ν)[ma mb mc']
+                @tensor overlap[mc mc'] := conj(cgc[:, :, :, μ][ma mb mc]) *
+                    cgc′[:, :, :, ν][ma mb mc']
                 if μ == ν && c == c′
                     @test isapprox(overlap, LinearAlgebra.I; atol = 1.0e-12)
                 else
