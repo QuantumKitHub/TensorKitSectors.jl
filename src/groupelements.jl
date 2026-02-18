@@ -149,10 +149,10 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # Experimental
-BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = p == 0 ? Bosonic() : NoBraiding()
+BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = (p == 0 || N ÷ p == 2) ? Bosonic() : NoBraiding()
 
 Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
-# function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
-#     R = cispi(2 * p * a.n * b.n / N^2)
-#     return ifelse(c == a * b, R, zero(R))
-# end
+function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
+    R = cispi(2 * p * a.n * b.n / N^2)
+    return ifelse(c == a * b, R, zero(R))
+end
