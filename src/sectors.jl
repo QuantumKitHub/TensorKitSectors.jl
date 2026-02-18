@@ -220,9 +220,12 @@ Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
     otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
+Each sector `c` should appear at most once in this iteration, even if the multiplicity ``N_c^{ab} > 1``.
+The actual multiplicities are accessed separately through [`Nsymbol`](@ref).
 
-Note that every element `c` should appear at most once, fusion degeneracies (if
-`FusionStyle(I) == GenericFusion()`) should be accessed via `Nsymbol(a, b, c)`.
+The return type is typically [`SectorProductIterator{I}`](@ref) which provides a type-stable iterable that supports pretty-printing, but could also be any custom iterable.
+
+See also [`FusionStyle`](@ref) for the trait associated to the fusion behavior of a given sector type.
 """
 function ⊗ end
 const otimes = ⊗
@@ -297,8 +300,11 @@ end
 """
     Nsymbol(a::I, b::I, c::I) where {I <: Sector} -> Integer
 
-Return an `Integer` representing the number of times `c` appears in the fusion product
-`a ⊗ b`. Could be a `Bool` if `FusionStyle(I) == UniqueFusion()` or `SimpleFusion()`.
+The fusion multiplicity ``N_c^{ab}``, indicating how many times sector `c` appears in the fusion product `a ⊗ b`.
+
+The return type depends on the [`FusionStyle]`(@ref), where [`UniqueFusion`](@ref) and [`SimpleFusion`](@ref) return `Bool` values, while [`GenericFusion`] returns `Int`.
+
+See also [`⊗`](@ref) to obtain the set of sectors `c` that appear in `a ⊗ b`.
 """
 function Nsymbol end
 
@@ -309,29 +315,63 @@ function Nsymbol end
     FusionStyle(I::Type{<:Sector})
 
 Trait to describe the fusion behavior of sectors of type `I`, which can be either
-*   `UniqueFusion()`: single fusion output when fusing two sectors;
-*   `SimpleFusion()`: multiple outputs, but every output occurs at most one,
-    also known as multiplicity-free (e.g. irreps of ``SU(2)``);
-*   `GenericFusion()`: multiple outputs that can occur more than once (e.g. irreps
-    of ``SU(3)``).
+* [`UniqueFusion`](@ref): each fusion `a ⊗ b` has exactly one output `c`.
+* [`SimpleFusion`](@ref): fusing `a ⊗ b` can lead to multiple values `c`, but each appears at most once.
+* [`GenericFusion`](@ref): fusing `a ⊗ b` can lead to multiple values `c` that could appear multiple times.
 
-There is an abstract supertype `MultipleFusion` of which both `SimpleFusion` and
-`GenericFusion` are subtypes. Furthermore, there is a type alias `MultiplicityFreeFusion`
-for those fusion types which do not require muliplicity labels, i.e.
-`MultiplicityFreeFusion = Union{UniqueFusion,SimpleFusion}`.
+There is an abstract supertype [`MultipleFusion`](@ref) of which both `SimpleFusion` and `GenericFusion` are subtypes.
+Furthermore, there is a type alias [`MultiplicityFreeFusion`](@ref) for those fusion types which do not require muliplicity labels.
 """
 abstract type FusionStyle end
 FusionStyle(a::Sector) = FusionStyle(typeof(a))
 
-struct UniqueFusion <: FusionStyle end # unique fusion output when fusing two sectors
-abstract type MultipleFusion <: FusionStyle end
-struct SimpleFusion <: MultipleFusion end # multiple fusion but multiplicity free
-struct GenericFusion <: MultipleFusion end # multiple fusion with multiplicities
-const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
+"""
+    struct UniqueFusion <: FusionStyle
 
-@doc (@doc FusionStyle) UniqueFusion
-@doc (@doc FusionStyle) SimpleFusion
-@doc (@doc FusionStyle) GenericFusion
+Fusion style where every product `a ⊗ b` has exactly one output `c`.
+As a result, ``N_c^{ab} ≤ 1`` and no multiplicity labels are needed.
+
+See also [`FusionStyle`](@ref).
+"""
+struct UniqueFusion <: FusionStyle end
+
+"""
+    abstract type MultipleFusion <: FusionStyle
+
+Fusion styles that allow more than one fusion output for `a ⊗ b`.
+
+See also [`SimpleFusion`](@ref), [`GenericFusion`](@ref) and [`FusionStyle`](@ref).
+"""
+abstract type MultipleFusion <: FusionStyle end
+
+"""
+    struct SimpleFusion <: MultipleFusion
+
+Fusion style where multiple outputs `c` can appear in `a ⊗ b`, but each appears at most once.
+As a result, ``N_c^{ab} ≤ 1`` and no multiplicity labels are needed.
+
+See also [`FusionStyle`](@ref).
+"""
+struct SimpleFusion <: MultipleFusion end
+
+"""
+    struct GenericFusion <: MultipleFusion
+
+Fusion style with potentially multiple outputs `c` and nontrivial multiplicities.
+Here ``N_c^{ab}`` can exceed 1, and multiplicity labels are required.
+
+See also [`FusionStyle`](@ref).
+"""
+struct GenericFusion <: MultipleFusion end
+
+"""
+    const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
+
+Convenience alias for fusion styles that can assume `Nsymbol(a, b, c)::Bool`, and therefore never require multiplicity labels.
+
+See also [`UniqueFusion`](@ref), [`SimpleFusion`](@ref) and [`FusionStyle`](@ref).
+"""
+const MultiplicityFreeFusion = Union{UniqueFusion, SimpleFusion}
 
 # combine fusion properties of tensor products of sectors
 Base.:&(f::F, ::F) where {F <: FusionStyle} = f
@@ -349,17 +389,31 @@ Base.:&(::GenericFusion, ::SimpleFusion) = GenericFusion()
 
 Trait to describe the semisimplicity of the unit sector of type `I`.
 This can be either
-*   `SimpleUnit()`: the unit is simple (e.g. fusion categories);
-*   `GenericUnit()`: the unit is semisimple.
+* [`SimpleUnit`](@ref): the unit is simple (e.g. fusion categories).
+* [`GenericUnit`](@ref): the unit is semisimple (e.g. multifusion categories).
 """
 abstract type UnitStyle end
 UnitStyle(a::Sector) = UnitStyle(typeof(a))
 
-struct SimpleUnit <: UnitStyle end
-struct GenericUnit <: UnitStyle end
+"""
+    struct SimpleUnit <: UnitStyle
 
-@doc (@doc UnitStyle) SimpleUnit
-@doc (@doc UnitStyle) GenericUnit
+Unit style for fusion categories with a unique unit (identity) object.
+The unit satisfies ``\\mathbb{1} ⊗ a ≅ a ≅ a ⊗ \\mathbb{1}`` for all sectors.
+
+See also [`UnitStyle`](@ref).
+"""
+struct SimpleUnit <: UnitStyle end
+
+"""
+    struct GenericUnit <: UnitStyle
+
+Unit style for multifusion categories with multiple unit objects (semisimple unit).
+Requires implementation of `allunits(::Type{I})`, `leftunit(a)`, and `rightunit(a)`.
+
+See also [`UnitStyle`](@ref).
+"""
+struct GenericUnit <: UnitStyle end
 
 UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit() : GenericUnit()
 
@@ -367,7 +421,7 @@ UnitStyle(::Type{I}) where {I <: Sector} = length(allunits(I)) == 1 ? SimpleUnit
     throw(DomainError(I, "Sector has multiple units, use `allunits` instead of `unit`"))
 end
 
-# combine fusion properties of tensor products of multifusion sectors
+# combine unitstyle properties of tensor products of multifusion sectors
 Base.:&(f::F, ::F) where {F <: UnitStyle} = f
 Base.:&(f₁::UnitStyle, f₂::UnitStyle) = f₂ & f₁
 
@@ -437,7 +491,27 @@ function dim_from_Fsymbol(a::Sector)
         abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
+
+"""
+    sqrtdim(a::Sector)
+
+Return the square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `sqrt(1)` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `sqrt(dim(a))`.
+"""
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
+
+"""
+    invsqrtdim(a::Sector)
+
+Return the inverse square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `inv(sqrt(1))` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `inv(sqrt(dim(a)))`.
+"""
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
 
 """
@@ -479,7 +553,7 @@ context of line bending.
 """
 function frobenius_schur_indicator(a::Sector)
     ν = frobenius_schur_phase(a)
-    return a == conj(a) ? ν : zero(ν)
+    return a == dual(a) ? ν : zero(ν)
 end
 
 """
@@ -569,35 +643,81 @@ end
 # trait to describe type to denote how the elementary spaces in a tensor product space
 # interact under permutations or actions of the braid group
 """
-    abstract type BradingStyle
+    abstract type BraidingStyle
     BraidingStyle(::Sector) -> ::BraidingStyle
     BraidingStyle(I::Type{<:Sector}) -> ::BraidingStyle
 
-Return the type of braiding and twist behavior of sectors of type `I`, which can be either
-*   `NoBraiding()`: no braiding structure
-*   `Bosonic()`: symmetric braiding with trivial twist (i.e. identity)
-*   `Fermionic()`: symmetric braiding with non-trivial twist (squares to identity)
-*   `Anyonic()`: general ``R^{ab}_c`` phase or matrix (depending on `SimpleFusion` or
-    `GenericFusion` fusion) and arbitrary twists
+Trait to describe the braiding behavior of sectors of type `I`, which can be either
+* [`NoBraiding`](@ref): no braiding structure defined.
+* [`Bosonic`](@ref): symmetric braiding structure with a trivial twist.
+* [`Fermionic`](@ref): symmetric braiding structure with a non-trivial twist that squares to identity.
+* [`Anyonic`](@ref): general braiding structure and arbitrary twists.
 
-Note that `Bosonic` and `Fermionic` are subtypes of `SymmetricBraiding`, which means that
-braids are in fact equivalent to crossings (i.e. braiding twice is an identity:
-`isone(Rsymbol(b,a,c)*Rsymbol(a,b,c)) == true`) and permutations are uniquely defined.
+There is an abstract supertype [`HasBraiding`](@ref) that includes all styles that define [`Rsymbol`](@ref) (everything but `NoBraiding`).
+Furthermore, the abstract supertype [`SymmetricBraiding`](@ref) denotes the cases where braidings are equivalent to crossings, i.e. braiding twice is an identity operation.
+This includes the `Bosonic` and `Fermionic` styles, for which we can uniquely define permutations.
 """
 abstract type BraidingStyle end
 BraidingStyle(a::Sector) = BraidingStyle(typeof(a))
 
-abstract type HasBraiding <: BraidingStyle end
-struct NoBraiding <: BraidingStyle end
-abstract type SymmetricBraiding <: HasBraiding end # symmetric braiding => actions of permutation group are well defined
-struct Bosonic <: SymmetricBraiding end # all twists are one
-struct Fermionic <: SymmetricBraiding end # twists one and minus one
-struct Anyonic <: HasBraiding end
+"""
+    abstract type HasBraiding <: BraidingStyle
 
-@doc (@doc BraidingStyle) NoBraiding
-@doc (@doc BraidingStyle) Bosonic
-@doc (@doc BraidingStyle) Fermionic
-@doc (@doc BraidingStyle) Anyonic
+Supertype for all braiding styles where an [`Rsymbol`](@ref) is defined.
+This includes all current `BraidingStyle`s except `NoBraiding`.
+"""
+abstract type HasBraiding <: BraidingStyle end
+
+"""
+    struct NoBraiding <: BraidingStyle
+
+Braiding style for categories without a braiding structure.
+Except for braiding with the unit sector, only planar diagrams are meaningful; [`Rsymbol`](@ref) is undefined.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct NoBraiding <: BraidingStyle end
+
+"""
+    abstract type SymmetricBraiding <: HasBraiding
+
+Supertype for braiding styles with symmetric braiding, where braiding twice is the identity operation.
+Subtypes include [`Bosonic`](@ref) (trivial twist) and [`Fermionic`](@ref) (nontrivial twist ±1).
+Supports permutation group statistics.
+
+See also [`BraidingStyle`](@ref).
+"""
+abstract type SymmetricBraiding <: HasBraiding end
+
+"""
+    struct Bosonic <: SymmetricBraiding
+
+Braiding style with symmetric braiding and trivial twist.
+This is characterized by ``R^{ab}_c R^{ba}_c = 1`` and ``\\theta_a = 1`` for all sectors.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Bosonic <: SymmetricBraiding end
+
+"""
+    struct Fermionic <: SymmetricBraiding
+
+Braiding style with symmetric braiding and nontrivial (symmetric) twist.
+This is characterized by ``R^{ab}_c R^{ba}_c = 1`` and ``\\theta_a = \\pm 1`` for all sectors.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Fermionic <: SymmetricBraiding end
+
+"""
+    struct Anyonic <: HasBraiding
+
+Braiding style with general (non-symmetric) braiding and arbitrary twists.
+Characterized by nontrivial braid group representations where ``R^{ab}_c R^{ba}_c ≠ 1`` in general.
+
+See also [`BraidingStyle`](@ref).
+"""
+struct Anyonic <: HasBraiding end
 
 Base.:&(b::B, ::B) where {B <: BraidingStyle} = b
 Base.:&(B1::BraidingStyle, B2::BraidingStyle) = B2 & B1
