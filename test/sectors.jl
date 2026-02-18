@@ -247,7 +247,7 @@ end
         θa = twist(a)
         oneT = one(eltype(θa))
         @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
-                isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
+            isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
         for b in smallset(I)
             for c in ⊗(a, b)
                 R1, R2 = Rsymbol(a, b, c), Rsymbol(b, a, c)
