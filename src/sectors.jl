@@ -414,11 +414,7 @@ function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I 
         C = fusiontensor(b, c, f)
         D = @view fusiontensor(a, f, d)[:, :, 1, :]
 
-        if !isa(A, Array) # might be a sparse array
-            @tensor F[-1, -2, -3, -4] := conj(Array(D)[1, 5, -4]) * conj(Array(C)[2, 4, 5, -3]) * Array(A)[1, 2, 3, -1] * Array(B)[3, 4, -2]
-        else
-            @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) * A[1, 2, 3, -1] * B[3, 4, -2]
-        end
+        @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) * A[1, 2, 3, -1] * B[3, 4, -2]
         return FusionStyle(I) isa MultiplicityFreeFusion ? only(F) : F
     end
 end
@@ -520,16 +516,10 @@ function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
     if Nabc == 0
         return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
     else
-        _C1 = fusiontensor(a, b, c)
-        C1 = view(_C1, :, 1, :, :)
+        C1 = view(fusiontensor(a, b, c), :, 1, :, :)
         C2 = view(fusiontensor(dual(a), c, b), :, :, 1, :)
         Za = sqrtdim(a) * view(fusiontensor(a, dual(a), leftunit(a)), :, :, 1, 1)
-
-        if !isa(_C1, Array) # might be a sparse array
-            @tensor A[-1, -2] := sqrtdim(b) / sqrtdim(c) * conj(Array(Za)[1, 2]) * Array(C1)[1, 3, -1] * Array(C2)[2, 3, -2]
-        else
-            @tensor A[-1, -2] := sqrtdim(b) / sqrtdim(c) * conj(Za[1, 2]) * C1[1, 3, -1] * C2[2, 3, -2]
-        end
+        @tensor A[-1, -2] := sqrtdim(b) / sqrtdim(c) * conj(Za[1, 2]) * C1[1, 3, -1] * C2[2, 3, -2]
         return FusionStyle(I) isa MultiplicityFreeFusion ? only(A) : A
     end
 end
@@ -566,16 +556,10 @@ function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
     if Nabc == 0
         return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
     else
-        _C1 = fusiontensor(a, b, c)
-        C1 = view(_C1, 1, :, :, :)
+        C1 = view(fusiontensor(a, b, c), 1, :, :, :)
         C2 = view(fusiontensor(c, dual(b), a), :, :, 1, :)
         Zb = sqrtdim(b) * view(fusiontensor(b, dual(b), leftunit(b)), :, :, 1, 1)
-
-        if !isa(_C1, Array) # might be a sparse array
-            @tensor B[-1, -2] := sqrtdim(a) / sqrtdim(c) * conj(Array(Zb)[1, 2]) * Array(C1)[1, 3, -1] * Array(C2)[3, 2, -2]
-        else
-            @tensor B[-1, -2] := sqrtdim(a) / sqrtdim(c) * conj(Zb[1, 2]) * C1[1, 3, -1] * C2[3, 2, -2]
-        end
+        @tensor B[-1, -2] := sqrtdim(a) / sqrtdim(c) * conj(Zb[1, 2]) * C1[1, 3, -1] * C2[3, 2, -2]
         return FusionStyle(I) isa MultiplicityFreeFusion ? only(B) : B
     end
 end
@@ -645,14 +629,9 @@ function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
     if Nabc == 0
         return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
     else
-        _A = fusiontensor(a, b, c)
-        A = view(_A, :, :, 1, :)
+        A = view(fusiontensor(a, b, c), :, :, 1, :)
         B = view(fusiontensor(b, a, c), :, :, 1, :)
-        if !isa(_A, Array) # might be a sparse array
-            @tensor R[-1, -2] := conj(Array(B)[1 2 -2]) * Array(A)[2 1 -1]
-        else
-            @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
-        end
+        @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
         return FusionStyle(I) isa MultiplicityFreeFusion ? only(R) : R
     end
 end
