@@ -149,7 +149,15 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # Experimental
-BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = (p == 0 || N ÷ p == 2) ? Bosonic() : NoBraiding()
+function BraidingStyle(::Type{ZNElement{N, p}}) where {N, p}
+    return if p == 0
+        Bosonic() # trivial cocycle is symmetric
+    elseif p == N ÷ 2 && iseven(N)
+        Anyonic() # non-trivial cocycle
+    else
+        NoBraiding()
+    end
+end
 
 Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
 function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}

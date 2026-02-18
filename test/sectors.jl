@@ -241,6 +241,26 @@ end
     end
 end
 
+@testsuite "Symmetric braiding condition" I -> begin
+    BraidingStyle(I) isa SymmetricBraiding || return nothing
+    for a in smallset(I)
+        θa = twist(a)
+        oneT = one(eltype(θa))
+        @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
+                isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
+        for b in smallset(I)
+            for c in ⊗(a, b)
+                R1, R2 = Rsymbol(a, b, c), Rsymbol(b, a, c)
+                if FusionStyle(I) isa GenericFusion
+                    @test isapprox(R1 * R2, LinearAlgebra.I; atol = 1.0e-12, rtol = 1.0e-12)
+                else
+                    @test isapprox(R1 * R2, one(eltype(R1)); atol = 1.0e-12, rtol = 1.0e-12)
+                end
+            end
+        end
+    end
+end
+
 # https://quantumkithub.github.io/TensorKit.jl/stable/man/sectors/#Manipulations-on-a-fusion-tree
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
