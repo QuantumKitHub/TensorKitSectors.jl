@@ -45,10 +45,10 @@ Istr = TensorKitSectors.type_repr(I)
     end
 
     @testset "$Istr: Printing and errors" begin
-        @test Base.eval(Meta.parse(sprint(show, C))) == C
-        @test Base.eval(Meta.parse(sprint(show, M))) == M
-        @test Base.eval(Meta.parse(sprint(show, Mop))) == Mop
-        @test Base.eval(Meta.parse(sprint(show, D))) == D
+        @test eval(Meta.parse(sprint(show, C))) == C
+        @test eval(Meta.parse(sprint(show, M))) == M
+        @test eval(Meta.parse(sprint(show, Mop))) == Mop
+        @test eval(Meta.parse(sprint(show, D))) == D
         @test_throws DomainError unit(M)
         @test_throws DomainError unit(Mop)
     end
