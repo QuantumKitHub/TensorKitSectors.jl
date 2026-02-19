@@ -142,7 +142,7 @@ function unitarity_test(a::I, b::I, c::I) where {I <: Sector}
         es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
         fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
         if FusionStyle(I) isa MultiplicityFreeFusion
-            @test length(es) == length(fs)
+            @assert length(es) == length(fs)
             F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
         else
             Fblocks = Vector{Any}()
