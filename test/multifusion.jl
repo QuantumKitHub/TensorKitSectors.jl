@@ -2,9 +2,6 @@ I = IsingBimodule
 Istr = TensorKitSectors.type_repr(I)
 @testset "$Istr sector" begin
     @testset "Basic type properties" begin
-        @test eval(Meta.parse(sprint(show, I))) == I
-        @test eval(Meta.parse(TensorKitSectors.type_repr(I))) == I
-
         prodsec = I ⊠ Z2Irrep
         @test UnitStyle(prodsec) isa GenericUnit
         @test FusionStyle(prodsec) isa SimpleFusion
@@ -23,13 +20,13 @@ Istr = TensorKitSectors.type_repr(I)
     s = rand((M, Mop, C, D))
 
     @testset "Basic properties" begin
-        @test @constinferred(unit(C1)) == @constinferred(leftunit(C1)) ==
-            @constinferred(rightunit(C1))
+        @test @testinferred(unit(C1)) == @testinferred(leftunit(C1)) ==
+            @testinferred(rightunit(C1))
         @test unit(D1) == leftunit(D1) == rightunit(D1)
         @test unit(C1) == leftunit(M) == rightunit(Mop)
         @test unit(D1) == rightunit(M) == leftunit(Mop)
 
-        @test @constinferred(isunit(C0))
+        @test @testinferred(isunit(C0))
         @test isunit(D0)
         @test !isunit(C1) && !isunit(D1) && !isunit(M) && !isunit(Mop)
 
@@ -44,42 +41,14 @@ Istr = TensorKitSectors.type_repr(I)
         @test length(allunits(I ⊠ I)) == 4
 
         @test leftunit(M ⊠ Mop) == C0 ⊠ D0 == rightunit(Mop ⊠ M)
-
-        @test eval(Meta.parse(sprint(show, s))) == s
-        @test @constinferred(hash(s)) == hash(deepcopy(s))
-        @constinferred dual(s)
-        @test dual(dual(s)) == s
-        @constinferred dim(s)
-        @constinferred frobenius_schur_phase(s)
-        @constinferred convert(IsingAnyon, s)
-
-        @constinferred Bsymbol(C, C, C)
-        @constinferred Fsymbol(D, D, D, D, D, D)
-    end
-
-    @testset "$Istr: Value iterator" begin
-        @test eltype(values(I)) == I
-        @test_throws ArgumentError unit(I)
-        sprev = C0 # first in SectorValues
-        for (i, s) in enumerate(values(I))
-            @test !isless(s, sprev) # confirm compatibility with sort order
-            @test s == @constinferred (values(I)[i])
-            @test findindex(values(I), s) == i
-            sprev = s
-            i >= 10 && break
-        end
-        @test C0 == first(values(I))
-        @test (@constinferred findindex(values(I), C0)) == 1
-        for s in collect(values(I))
-            @test (@constinferred values(I)[findindex(values(I), s)]) == s
-        end
+        @testinferred convert(IsingAnyon, s)
     end
 
     @testset "$Istr: Printing and errors" begin
-        @test eval(Meta.parse(sprint(show, C))) == C
-        @test eval(Meta.parse(sprint(show, M))) == M
-        @test eval(Meta.parse(sprint(show, Mop))) == Mop
-        @test eval(Meta.parse(sprint(show, D))) == D
+        @test Base.eval(Meta.parse(sprint(show, C))) == C
+        @test Base.eval(Meta.parse(sprint(show, M))) == M
+        @test Base.eval(Meta.parse(sprint(show, Mop))) == Mop
+        @test Base.eval(Meta.parse(sprint(show, D))) == D
         @test_throws DomainError unit(M)
         @test_throws DomainError unit(Mop)
     end
@@ -121,32 +90,5 @@ Istr = TensorKitSectors.type_repr(I)
             (C.label * D.label == 0 ? inv(sqrt(2)) : -inv(sqrt(2))) # ℳᵒᵖ x ℳ x ℳᵒᵖ → ℳᵒᵖ allowed
 
         @test_throws argerr Fsymbol(M, Mop, M, Mop, C, D)
-    end
-
-    @testset "$Istr: Unitarity of F-move" begin
-        objects = collect(values(I))
-        for a in objects, b in objects, c in objects
-            for d in ⊗(a, b, c)
-                es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
-                fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
-                @test length(es) == length(fs)
-                F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
-                @test isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12)
-            end
-        end
-    end
-
-    @testset "$Istr: Triangle equation" begin
-        for a in smallset(I), b in smallset(I)
-            @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
-        end
-    end
-
-    @testset "$Istr: Pentagon equation" begin
-        objects = collect(values(I))
-        for a in objects, b in objects, c in objects, d in objects
-            # compatibility checks built in Fsymbol
-            @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
-        end
     end
 end
