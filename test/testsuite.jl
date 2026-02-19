@@ -20,11 +20,12 @@ SectorTestSuite.test_sector(MySectorType)
 Additionally, this test suite exports the following convenience testing utilities:
 * [`smallset`](@ref)
 * [`randsector`](@ref)
+* [`random_fusion`](@ref)
 * [`hasfusiontensor`](@ref)
 """
 module SectorTestSuite
 
-export smallset, randsector, hasfusiontensor
+export smallset, randsector, random_fusion, hasfusiontensor
 
 using Test
 using TestExtras
@@ -69,7 +70,14 @@ function test_sector(I::Type)
     end
 end
 
-smallset(::Type{I}) where {I <: Sector} = take(values(I), 5)
+function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
+    Base.IteratorSize(I) === Base.IsInfinite() && return take(values(I), size)
+    return if length(values(I)) > size
+        Random.shuffle(collect(values(I)))[1:size] # take random size of elements
+    else
+        values(I) # take all
+    end
+end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
     iter = product(smallset(I1), smallset(I2))
     s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
@@ -91,7 +99,26 @@ function randsector(::Type{I}) where {I <: Sector}
 end
 randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 
+"""
+    random_fusion(I::Type, ::Val{N})
+
+Returns a random tuple of `N` sectors from `I` that have a non-empty coupled sector.
+Compatible with any `Sector` type, including those with `UnitStyle(I) == GenericUnit()`.
+"""
+function random_fusion(I::Type{<:Sector}, ::Val{N}) where {N}
+    N == 1 && return (randsector(I),)
+    tail = random_fusion(I, Val(N - 1))
+    s = randsector(I)
+    counter = 0
+    while isempty(⊗(s, first(tail))) && counter < 20
+        counter += 1
+        s = (counter < 20) ? randsector(I) : leftunit(first(tail))
+    end
+    return (s, tail...)
+end
+
 function hasfusiontensor(I::Type{<:Sector})
+    UnitStyle(I) isa SimpleUnit || return false
     try
         fusiontensor(unit(I), unit(I), unit(I))
         return true
