@@ -38,10 +38,10 @@ Base.length(P::SectorValues{<:ProductSector}) = *(size(P)...)
 function Base.IteratorSize(::Type{SectorValues{TimeReversed{ProductSector{T}}}}) where {T <: SectorTuple}
     return Base.IteratorSize(SectorValues{ProductSector{T}})
 end
-function Base.size(P::SectorValues{TimeReversed{ProductSector{T}}}) where {T <: SectorTuple}
+function Base.size(::SectorValues{TimeReversed{ProductSector{T}}}) where {T <: SectorTuple}
     return size(SectorValues{ProductSector{T}}())
 end
-function Base.length(P::SectorValues{TimeReversed{ProductSector{T}}}) where {T <: SectorTuple}
+function Base.length(::SectorValues{TimeReversed{ProductSector{T}}}) where {T <: SectorTuple}
     return length(SectorValues{ProductSector{T}}())
 end
 

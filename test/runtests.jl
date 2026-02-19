@@ -83,8 +83,10 @@ end
         @testinferred I1 ⊠ I2
         @test typeof(a ⊠ b) == I1 ⊠ I2
 
-        @test @testinferred(length(allunits(I1 ⊠ I2))) == 1
-        @test @testinferred(unit(I1 ⊠ I2)) == leftunit(a ⊠ b) == rightunit(a ⊠ b)
+        if UnitStyle(I1 ⊠ I2) isa SimpleUnit
+            @test @testinferred(length(allunits(I1 ⊠ I2))) == 1
+            @test @testinferred(unit(I1 ⊠ I2)) == leftunit(a ⊠ b) == rightunit(a ⊠ b)
+        end
     end
     @test @testinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
     @test @testinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3
