@@ -71,7 +71,7 @@ function test_sector(I::Type)
 end
 
 function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
-    Base.IteratorSize(I) === Base.IsInfinite() && return take(values(I), size)
+    Base.IteratorSize(values(I)) === Base.IsInfinite() && return take(values(I), size)
     return if length(values(I)) > size
         Random.shuffle(collect(values(I)))[1:size] # take random size of elements
     else
