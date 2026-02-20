@@ -151,7 +151,6 @@ end
 # ----------------
 dim(a::HeisenbergIrrep{N}) where {N} = iszero(a.k) ? 1 : N
 
-#TODO: k1 + k2 = 0 is a special case
 function Nsymbol(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrrep{N}) where {N}
     a_1d = iszero(a.k)
     b_1d = iszero(b.k)
@@ -215,24 +214,23 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
     if !iszero(x.k) && !iszero(y.k) # π ⊗ π
         k_new = mod(x.k + y.k, N)
         if !iszero(k_new) # fuse to π
-            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz
-                C[i, j, m, μ] = T(μ == i) * T(m == (j - m * x.k / k_new)) # missing elements on diagonal in overlap
+            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz # this should be only permutations
+                @assert Nxyz == N && dx == dy == dz == N
+                C[i, j, m, μ] = T(mod(i + j, N) == μ) / sqrt(N) # wrong: overlap is all ones
             end
         else # special case
             for i in 1:dx, j in 1:dy
-                C[i, j, 1, 1] = ω^(x.k * z.a * i) * T((j - i) == 1) / sqrt(N - 1) # right for N = 3 at least at level of orthogonality, rest untested
+                C[i, j, 1, 1] = ω^(z.a * i + z.b * j) / N
             end
         end
     else
         if iszero(x.k) && !iszero(y.k) # χ ⊗ π
-            @info "χ x π: x = $x, y = $y"
             for j in 1:N, m in 1:N
-                C[1, j, m, 1] = ω^(- x.a * j) * T(j + x.b/y.k == m) # missing elements on diagonal in overlap
+                C[1, j, m, 1] = T(j == m)
             end
         else # π ⊗ χ
-                @info "π x χ: x = $x, y = $y"
             for i in 1:N, m in 1:N
-                C[i, 1, m, 1] = ω^(- y.a * i) * T(i + y.b/x.k == m) # missing elements on diagonal in overlap
+                C[i, 1, m, 1] = T(i == m)
             end
         end
     end
