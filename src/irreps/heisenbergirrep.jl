@@ -38,8 +38,9 @@ end
 # TODO: consider union of 2 kinds of irreps?
 
 FusionStyle(::Type{HeisenbergIrrep{N}}) where {N} = GenericFusion()
-BraidingStyle(::Type{HeisenbergIrrep{N}}) where {N} = NoBraiding() #TODO: make braided again after fusiontensor is fixed
+# BraidingStyle(::Type{HeisenbergIrrep{N}}) where {N} = Anyonic() #TODO: make braided again after fusiontensor is fixed + check if symmetric or not
 fusionscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
+# braidingscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
 sectorscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
 
 unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0, 0, 0)
@@ -210,13 +211,12 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
         return C
     end
 
-    ω = cispi(2 / N)
     if !iszero(x.k) && !iszero(y.k) # π ⊗ π
-        k_new = mod(x.k + y.k, N)
-        if !iszero(k_new) # fuse to π
-            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz # this should be only permutations
+        ω = cispi(2 / N)
+        if !iszero(mod(x.k + y.k, N)) # fuse to π
+            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz
                 @assert Nxyz == N && dx == dy == dz == N
-                C[i, j, m, μ] = T(mod(i + j, N) == μ) / sqrt(N) # wrong: overlap is all ones
+                C[i, j, m, μ] = ω^((μ - 1) * i) * T(mod(i + j, N) == m - 1) / sqrt(N)
             end
         else # special case
             for i in 1:dx, j in 1:dy
