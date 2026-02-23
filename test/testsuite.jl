@@ -70,13 +70,18 @@ function test_sector(I::Type)
     end
 end
 
-function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
+function Random.rand(::SectorValues{I}, size::Int) where {I <: Sector}
+    Base.IteratorSize(values(I)) === Base.IsInfinite() &&
+        throw(ArgumentError("Cannot take random sample of infinite sector values."))
+    return rand(collect(values(I)), size)
+end
+function smallset(::Type{I}, size::Int = 10) where {I <: Sector}
     vals = values(I)
     Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
     return if length(vals) > size
-        Random.shuffle(collect(vals))[1:size] # take random size of elements
+        Random.rand(vals, size) # take random size of elements
     else
-        vals # take all
+        Random.rand(vals, length(vals)) # take all
     end
 end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
