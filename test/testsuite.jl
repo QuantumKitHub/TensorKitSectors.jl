@@ -78,10 +78,11 @@ end
 function smallset(::Type{I}, size::Int = 10) where {I <: Sector}
     vals = values(I)
     Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
-    return if length(vals) > size
+    l = length(vals)
+    return if l > size
         Random.rand(vals, size) # take random size of elements
     else
-        Random.rand(vals, length(vals)) # take all
+        reshape(collect(vals), l) # take all, no copies
     end
 end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
@@ -106,21 +107,26 @@ end
 randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 
 """
-    random_fusion(I::Type, ::Val{N})
+    random_fusion(I::Type, N::Int)
 
-Returns a random tuple of `N` sectors from `I` that have a non-empty coupled sector.
+Returns a vector of `N` random sectors from `I` that have a non-empty coupled sector.
 Compatible with any `Sector` type, including those with `UnitStyle(I) == GenericUnit()`.
 """
-function random_fusion(I::Type{<:Sector}, ::Val{N}) where {N}
-    N == 1 && return (randsector(I),)
-    tail = random_fusion(I, Val(N - 1))
-    s = randsector(I)
-    counter = 0
-    while isempty(⊗(s, first(tail))) && counter < 20
-        counter += 1
-        s = (counter < 20) ? randsector(I) : leftunit(first(tail))
+function random_fusion(I::Type{<:Sector}, N::Int)
+    vec = Vector{I}(undef, N)
+    vec[1] = randsector(I)
+    N == 1 && return vec
+    for i in 2:N
+        s = randsector(I)
+        sprev = vec[i - 1]
+        counter = 0
+        while isempty(⊗(sprev, s)) && counter < 20
+            counter += 1
+            s = (counter < 20) ? randsector(I) : rightunit(sprev)
+        end
+        vec[i] = s
     end
-    return (s, tail...)
+    return vec
 end
 
 function hasfusiontensor(I::Type{<:Sector})

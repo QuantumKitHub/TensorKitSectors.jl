@@ -3,7 +3,7 @@ using LinearAlgebra
 using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
-    s = random_fusion(I, Val(2))
+    s = random_fusion(I, 2)
     sc = @testinferred(first(⊗(s...)))
     @test Base.eval(Main, Meta.parse(sprint(show, I))) == I
     @test Base.eval(Main, Meta.parse(TensorKitSectors.type_repr(I))) == I
@@ -20,7 +20,7 @@ using TensorKitSectors: TensorKitSectors as TKS
     @testinferred Nsymbol(s..., sc)
     @testinferred Asymbol(s..., sc)
     B = @testinferred Bsymbol(s..., sc)
-    s2 = random_fusion(I, Val(3))
+    s2 = random_fusion(I, 3)
     s2c = first(⊗(s2...))
     e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
     F = @testinferred Fsymbol(s2..., s2c, e, f)
