@@ -75,7 +75,7 @@ function Random.rand(::SectorValues{I}, size::Int) where {I <: Sector}
         throw(ArgumentError("Cannot take random sample of infinite sector values."))
     return rand(collect(values(I)), size)
 end
-function smallset(::Type{I}, size::Int = 10) where {I <: Sector}
+function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
     vals = values(I)
     Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
     l = length(vals)
