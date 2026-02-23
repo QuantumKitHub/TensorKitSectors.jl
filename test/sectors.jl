@@ -173,20 +173,32 @@ end
 end
 
 @testsuite "Unitarity of F-move" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        @test unitarity_test(a, b, c)
+    for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
+        for c in smallset(I)
+            !isempty(⊗(b, c)) || continue
+            @test unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+        end
     end
 end
 
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Pentagon equation" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
-        @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
+        for c in smallset(I)
+            !isempty(⊗(b, c)) || continue
+            for d in smallset(I)
+                !isempty(⊗(c, d)) || continue
+                @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
     end
 end
 

@@ -149,7 +149,7 @@ end
 Tests the unitarity of the F-symbols for the fusion of `a`, `b`, and `c`.
 Returns `true` if the F-symbols are unitary, and `false` otherwise.
 """
-function unitarity_test(a::I, b::I, c::I) where {I <: Sector}
+function unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     for d in ⊗(a, b, c)
         es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
         fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
@@ -164,7 +164,7 @@ function unitarity_test(a::I, b::I, c::I) where {I <: Sector}
             end
             F = hvcat(length(fs), Fblocks...)
         end
-        isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12) || return false
+        isapprox(F' * F, one(F); kwargs...) || return false
     end
     return true
 end
