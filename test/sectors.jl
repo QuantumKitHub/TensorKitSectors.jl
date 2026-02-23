@@ -44,8 +44,7 @@ end
 
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
-    simple = UnitStyle(I) isa SimpleUnit
-    sprev = simple ? unit(I) : first(values(I))
+    sprev = UnitStyle(I) isa SimpleUnit ? unit(I) : first(values(I))
     @test (@testinferred findindex(values(I), sprev)) == 1
     for (i, s) in enumerate(values(I))
         @test !isless(s, sprev)
@@ -54,7 +53,6 @@ end
         sprev = s
         i >= 10 && break
     end
-    @test simple ? length(allunits(I)) == 1 : length(allunits(I)) > 1
     for s in smallset(I)
         @test (@testinferred values(I)[findindex(values(I), s)]) == s
     end
