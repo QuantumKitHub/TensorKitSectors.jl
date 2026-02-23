@@ -239,7 +239,11 @@ function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
 end
 function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
-    return typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
+    return if BraidingStyle(ProductSector{T}) == NoBraiding()
+        typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
+    else
+        typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
+    end
 end
 function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ dimscalartype, _sectors(T)))

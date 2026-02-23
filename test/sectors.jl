@@ -33,6 +33,12 @@ using TensorKitSectors: TensorKitSectors as TKS
         else
             @test Base.promote_op(*, eltype(R), eltype(F)) <: @testinferred sectorscalartype(I)
         end
+    else
+        if FusionStyle(I) === SimpleFusion()
+            @test typeof(F) <: @testinferred sectorscalartype(I)
+        else
+            @test eltype(F) <: @testinferred sectorscalartype(I)
+        end
     end
 end
 
