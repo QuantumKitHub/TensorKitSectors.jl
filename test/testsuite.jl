@@ -25,7 +25,7 @@ Additionally, this test suite exports the following convenience testing utilitie
 """
 module SectorTestSuite
 
-export smallset, randsector, random_fusion, hasfusiontensor, unitarity_test
+export smallset, randsector, random_fusion, hasfusiontensor, F_unitarity_test
 
 using Test
 using TestExtras
@@ -144,12 +144,12 @@ function hasfusiontensor(I::Type{<:Sector})
 end
 
 """
-    unitarity_test(a::I, b::I, c::I) where {I <: Sector}
+    F_unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
 
 Tests the unitarity of the F-symbols for the fusion of `a`, `b`, and `c`.
 Returns `true` if the F-symbols are unitary, and `false` otherwise.
 """
-function unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
+function F_unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     for d in ⊗(a, b, c)
         es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
         fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))

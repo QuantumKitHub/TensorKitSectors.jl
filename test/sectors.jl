@@ -177,7 +177,7 @@ end
         !isempty(⊗(a, b)) || continue
         for c in smallset(I)
             !isempty(⊗(b, c)) || continue
-            @test unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+            @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
 end
