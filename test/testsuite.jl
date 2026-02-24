@@ -130,9 +130,9 @@ function random_fusion(I::Type{<:Sector}, N::Int)
 end
 
 function hasfusiontensor(I::Type{<:Sector})
-    UnitStyle(I) isa SimpleUnit || return false
     try
-        fusiontensor(unit(I), unit(I), unit(I))
+        u = first(allunits(I))
+        fusiontensor(u, u, u)
         return true
     catch e
         if e isa MethodError
