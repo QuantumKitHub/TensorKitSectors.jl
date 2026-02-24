@@ -3,23 +3,30 @@ using LinearAlgebra
 using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
-    s = (randsector(I), randsector(I), randsector(I))
+    s = random_fusion(I, 2)
+    sc = @testinferred(first(⊗(s...)))
     @test Base.eval(Main, Meta.parse(sprint(show, I))) == I
     @test Base.eval(Main, Meta.parse(TensorKitSectors.type_repr(I))) == I
-    @test Base.eval(Main, Meta.parse(sprint(show, s[1]))) == s[1]
-    @test @testinferred(hash(s[1])) == hash(deepcopy(s[1]))
-    @test @testinferred(unit(s[1])) == @testinferred(unit(I))
-    @testinferred dual(s[1])
-    @testinferred dim(s[1])
-    @testinferred frobenius_schur_phase(s[1])
-    @testinferred frobenius_schur_indicator(s[1])
-    @testinferred Nsymbol(s...)
-    @testinferred Asymbol(s...)
-    B = @testinferred Bsymbol(s...)
-    F = @testinferred Fsymbol(s..., s...)
+    @test Base.eval(Main, Meta.parse(sprint(show, sc))) == sc
+    @test @testinferred(hash(sc)) == hash(deepcopy(sc))
+    if UnitStyle(I) isa SimpleUnit
+        @test @testinferred(unit(sc)) == @testinferred(unit(I))
+    end
+    @testinferred dual(sc)
+    @testinferred dim(sc)
+    @testinferred frobenius_schur_phase(sc)
+    @testinferred frobenius_schur_indicator(sc)
+    @testinferred(⊗(s..., s...))
+    @testinferred Nsymbol(s..., sc)
+    @testinferred Asymbol(s..., sc)
+    B = @testinferred Bsymbol(s..., sc)
+    s2 = random_fusion(I, 3)
+    s2c = first(⊗(s2...))
+    e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
+    F = @testinferred Fsymbol(s2..., s2c, e, f)
     @test eltype(F) === @testinferred fusionscalartype(I)
     if BraidingStyle(I) isa HasBraiding
-        R = @testinferred Rsymbol(s...)
+        R = @testinferred Rsymbol(s..., sc)
         @test eltype(R) === @testinferred braidingscalartype(I)
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
@@ -33,13 +40,12 @@ using TensorKitSectors: TensorKitSectors as TKS
             @test eltype(F) <: @testinferred sectorscalartype(I)
         end
     end
-    @testinferred(s[1] ⊗ s[2])
-    @testinferred(⊗(s..., s...))
 end
 
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
-    sprev = unit(I)
+    sprev = UnitStyle(I) isa SimpleUnit ? unit(I) : first(values(I))
+    @test (@testinferred findindex(values(I), sprev)) == 1
     for (i, s) in enumerate(values(I))
         @test !isless(s, sprev)
         @test s == @testinferred(values(I)[i])
@@ -47,9 +53,6 @@ end
         sprev = s
         i >= 10 && break
     end
-    @test unit(I) == first(values(I))
-    @test length(allunits(I)) == 1
-    @test (@testinferred findindex(values(I), unit(I))) == 1
     for s in smallset(I)
         @test (@testinferred values(I)[findindex(values(I), s)]) == s
     end
@@ -57,6 +60,7 @@ end
 
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
+        isempty(⊗(a, b)) && continue
         da = dim(a)
         db = dim(b)
         dc = sum(c -> dim(c) * Nsymbol(a, b, c), a ⊗ b)
@@ -169,35 +173,32 @@ end
 end
 
 @testsuite "Unitarity of F-move" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        for d in ⊗(a, b, c)
-            es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
-            fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
-            if FusionStyle(I) isa MultiplicityFreeFusion
-                @test length(es) == length(fs)
-                F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
-            else
-                Fblocks = Vector{Any}()
-                for e in es, f in fs
-                    Fs = Fsymbol(a, b, c, d, e, f)
-                    push!(Fblocks, reshape(Fs, (size(Fs, 1) * size(Fs, 2), size(Fs, 3) * size(Fs, 4))))
-                end
-                F = hvcat(length(fs), Fblocks...)
-            end
-            @test isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
+        for c in smallset(I)
+            !isempty(⊗(b, c)) || continue
+            @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
 end
 
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Pentagon equation" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
-        @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        !isempty(⊗(a, b)) || continue
+        for c in smallset(I)
+            !isempty(⊗(b, c)) || continue
+            for d in smallset(I)
+                !isempty(⊗(c, d)) || continue
+                @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
     end
 end
 
