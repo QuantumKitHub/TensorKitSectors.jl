@@ -24,7 +24,7 @@ Additionally, this test suite exports the following convenience testing utilitie
 """
 module SectorTestSuite
 
-export smallset, randsector, hasfusiontensor
+export smallset, randsector, hasfusiontensor, F_unitarity_test
 
 using Test
 using TestExtras
