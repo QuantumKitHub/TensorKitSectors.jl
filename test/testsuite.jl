@@ -31,6 +31,7 @@ using TestExtras
 using TensorKitSectors
 using TensorKitSectors: type_repr
 using Random
+using StatsBase
 using Base.Iterators: take, product
 
 const tests = Dict()
@@ -69,7 +70,16 @@ function test_sector(I::Type)
     end
 end
 
-smallset(::Type{I}) where {I <: Sector} = take(values(I), 5)
+function StatsBase.sample(::SectorValues{I}, size::Int) where {I <: Sector}
+    Base.IteratorSize(values(I)) === Base.IsInfinite() &&
+        throw(ArgumentError("Cannot take random sample of infinite sector values."))
+    return sample(collect(values(I)), size; replace = false) # unique sampling
+end
+function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
+    vals = values(I)
+    Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
+    return sample(vals, min(size, length(vals)))
+end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
     iter = product(smallset(I1), smallset(I2))
     s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
