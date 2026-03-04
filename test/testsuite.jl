@@ -155,9 +155,9 @@ function eval_module(a::I; _module = parentmodule(I)) where {I <: Sector}
     if occursin("NewSU2Irrep", string(I)) # special case since NewSU2Irrep is defined in test setup, not in TensorKitSectors
         _module = Main
     end
-    Base.eval(_module, Meta.parse(sprint(show, I))) == I &&
-    Base.eval(_module, Meta.parse(TensorKitSectors.type_repr(I))) == I &&
-    Base.eval(_module, Meta.parse(sprint(show, a))) == a
+    return Base.eval(_module, Meta.parse(sprint(show, I))) == I &&
+        Base.eval(_module, Meta.parse(TensorKitSectors.type_repr(I))) == I &&
+        Base.eval(_module, Meta.parse(sprint(show, a))) == a
 end
 
 """
