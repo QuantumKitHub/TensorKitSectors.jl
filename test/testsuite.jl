@@ -74,6 +74,9 @@ function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
     Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
     L = length(vals)
     set = Random.randsubseq(collect(vals), min(size, L) / L) # contains between size and length(values(I)) sectors
+    while isempty(set)
+        Random.randsubseq!(set, collect(vals), min(size, L) / L)
+    end
     return set # returns all sectors if L < size
 end
 function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
