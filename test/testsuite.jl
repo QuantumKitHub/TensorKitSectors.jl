@@ -24,7 +24,7 @@ Additionally, this test suite exports the following convenience testing utilitie
 """
 module SectorTestSuite
 
-export smallset, randsector, hasfusiontensor
+export smallset, randsector, hasfusiontensor, F_unitarity_test
 
 using Test
 using TestExtras
@@ -102,6 +102,32 @@ function hasfusiontensor(I::Type{<:Sector})
             rethrow(e)
         end
     end
+end
+
+"""
+    F_unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
+
+Tests the unitarity of the F-symbols for the fusion of `a`, `b`, and `c`.
+Returns `true` if the F-symbols are unitary, and `false` otherwise.
+"""
+function F_unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
+    for d in ⊗(a, b, c)
+        es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
+        fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
+        if FusionStyle(I) isa MultiplicityFreeFusion
+            @assert length(es) == length(fs)
+            F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
+        else
+            Fblocks = Vector{Any}()
+            for e in es, f in fs
+                Fs = Fsymbol(a, b, c, d, e, f)
+                push!(Fblocks, reshape(Fs, (size(Fs, 1) * size(Fs, 2), size(Fs, 3) * size(Fs, 4))))
+            end
+            F = hvcat(length(fs), Fblocks...)
+        end
+        isapprox(F' * F, one(F); kwargs...) || return false
+    end
+    return true
 end
 
 include("sectors.jl")

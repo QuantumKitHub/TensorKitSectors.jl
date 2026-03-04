@@ -11,7 +11,7 @@ const sectorlist = (
     DNIrrep{3}, DNIrrep{4}, DNIrrep{5}, CU1Irrep,
     A4Irrep, SU2Irrep, NewSU2Irrep,
     FibonacciAnyon, IsingAnyon, FermionParity,
-    FermionParity ⊠ FermionParity,
+    FermionParity ⊠ FermionParity, FibonacciAnyon ⊠ PlanarTrivial,
     Z3Irrep ⊠ Z4Irrep, FermionParity ⊠ U1Irrep ⊠ SU2Irrep,
     FermionParity ⊠ SU2Irrep ⊠ SU2Irrep, NewSU2Irrep ⊠ NewSU2Irrep,
     NewSU2Irrep ⊠ SU2Irrep, FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep,
