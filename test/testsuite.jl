@@ -69,25 +69,43 @@ function test_sector(I::Type)
     end
 end
 
+function Random.randsubseq(v::SectorValues{I}, p::Float64) where {I <: Sector}
+    cvals = collect(v)
+    set = Random.randsubseq(cvals, p) # contains between size and length(values(I)) sectors
+    while isempty(set)
+        Random.randsubseq!(set, cvals, p) # sector types with many sectors sample with low probability
+    end
+    return set
+end
 function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
     vals = values(I)
     Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
     L = length(vals)
-    set = Random.randsubseq(collect(vals), min(size, L) / L) # contains between size and length(values(I)) sectors
-    while isempty(set)
-        Random.randsubseq!(set, collect(vals), min(size, L) / L)
-    end
-    return set # returns all sectors if L < size
+    return Random.randsubseq(vals, min(size, L) / L) # returns all sectors if L < size
 end
-function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
+function smallset(I::Type{ProductSector{Tuple{I1, I2}}}, size::Int = 6) where {I1, I2}
     iter = product(smallset(I1), smallset(I2))
     s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
+    if length(s) < 6
+        return s
+    else
+        vals = values(I)
+        Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
+        L = length(vals)
+        return Random.randsubseq(vals, min(size, L) / L)
+    end
 end
-function smallset(::Type{ProductSector{Tuple{I1, I2, I3}}}) where {I1, I2, I3}
+function smallset(I::Type{ProductSector{Tuple{I1, I2, I3}}}, size::Int = 6) where {I1, I2, I3}
     iter = product(smallset(I1), smallset(I2), smallset(I3))
     s = collect(i ⊠ j ⊠ k for (i, j, k) in iter if dim(i) * dim(j) * dim(k) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
+    if length(s) < 6
+        return s
+    else
+        vals = values(I)
+        Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
+        L = length(vals)
+        return Random.randsubseq(vals, min(size, L) / L)
+    end
 end
 
 function randsector(::Type{I}) where {I <: Sector}
