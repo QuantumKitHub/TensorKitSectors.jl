@@ -70,11 +70,9 @@ function test_sector(I::Type)
 end
 
 function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
-    vals = values(I)
-    L = Base.IteratorSize(vals) === Base.IsInfinite() ? 10 * size : min(10 * size, length(vals))
-    sectors = getindex.((vals,), 1:L) # include unit in simple-unit categories
+    sectors = collect(Iterators.take(values(I), 10 * size)) # include unit in simple-unit categories
     sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
-    return sectors[1:min(size, length(sectors))]
+    return resize!(sectors, min(size, length(sectors)))
 end
 
 function randsector(::Type{I}) where {I <: Sector}
