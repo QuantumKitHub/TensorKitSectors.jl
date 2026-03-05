@@ -70,7 +70,7 @@ function test_sector(I::Type)
 end
 
 function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
-    sectors = collect(Iterators.take(values(I), 10 * size)) # include unit in simple-unit categories
+    sectors = collect(Iterators.take(values(I), 10 * size))
     sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
     return resize!(sectors, min(size, length(sectors)))
 end

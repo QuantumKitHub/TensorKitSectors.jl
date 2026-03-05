@@ -52,7 +52,6 @@ function ⊗(c1::TimeReversed{I}, c2::TimeReversed{I}) where {I <: Sector}
     return SectorSet{TimeReversed{I}}(TimeReversed{I}, c1.a ⊗ c2.a)
 end
 
-# capture product sectors as well
 function Base.IteratorSize(::Type{SectorValues{TimeReversed{I}}}) where {I}
     return Base.IteratorSize(values(I))
 end
