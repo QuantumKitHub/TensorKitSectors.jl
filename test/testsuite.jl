@@ -69,38 +69,12 @@ function test_sector(I::Type)
     end
 end
 
-function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
+function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
     vals = values(I)
-    Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
-    L = length(vals)
-    p = resize!(randperm(L), min(size, L)) # sampling with fixed size
-    return collect(vals)[p]
-end
-function smallset(I::Type{ProductSector{Tuple{I1, I2}}}, size::Int = 6) where {I1, I2}
-    iter = product(smallset(I1), smallset(I2))
-    s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
-    if length(s) < 6
-        return s
-    else
-        vals = values(I)
-        Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
-        L = length(vals)
-        p = resize!(randperm(L), min(size, L))
-        return collect(vals)[p]
-    end
-end
-function smallset(I::Type{ProductSector{Tuple{I1, I2, I3}}}, size::Int = 6) where {I1, I2, I3}
-    iter = product(smallset(I1), smallset(I2), smallset(I3))
-    s = collect(i ⊠ j ⊠ k for (i, j, k) in iter if dim(i) * dim(j) * dim(k) <= 6)
-    if length(s) < 6
-        return s
-    else
-        vals = values(I)
-        Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
-        L = length(vals)
-        p = resize!(randperm(L), min(size, L))
-        return collect(vals)[p]
-    end
+    L = Base.IteratorSize(vals) === Base.IsInfinite() ? 10 * size : min(10 * size, length(vals))
+    sectors = getindex.((vals,), 1:L) # include unit in simple-unit categories
+    sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
+    return sectors[1:min(size, length(sectors))]
 end
 
 function randsector(::Type{I}) where {I <: Sector}
