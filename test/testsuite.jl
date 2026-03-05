@@ -69,16 +69,10 @@ function test_sector(I::Type)
     end
 end
 
-smallset(::Type{I}) where {I <: Sector} = take(values(I), 5)
-function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
-    iter = product(smallset(I1), smallset(I2))
-    s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
-end
-function smallset(::Type{ProductSector{Tuple{I1, I2, I3}}}) where {I1, I2, I3}
-    iter = product(smallset(I1), smallset(I2), smallset(I3))
-    s = collect(i ⊠ j ⊠ k for (i, j, k) in iter if dim(i) * dim(j) * dim(k) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
+function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
+    sectors = collect(Iterators.take(values(I), 10 * size))
+    sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
+    return resize!(sectors, min(size, length(sectors)))
 end
 
 function randsector(::Type{I}) where {I <: Sector}

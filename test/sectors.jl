@@ -4,9 +4,6 @@ using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
     s = (randsector(I), randsector(I), randsector(I))
-    @test Base.eval(Main, Meta.parse(sprint(show, I))) == I
-    @test Base.eval(Main, Meta.parse(TensorKitSectors.type_repr(I))) == I
-    @test Base.eval(Main, Meta.parse(sprint(show, s[1]))) == s[1]
     @test @testinferred(hash(s[1])) == hash(deepcopy(s[1]))
     @test @testinferred(unit(s[1])) == @testinferred(unit(I))
     @testinferred dual(s[1])
@@ -35,6 +32,18 @@ using TensorKitSectors: TensorKitSectors as TKS
     end
     @testinferred(s[1] ⊗ s[2])
     @testinferred(⊗(s..., s...))
+end
+
+@testsuite "Show and parse" I -> begin
+    # test in the parent module of where the test is defined
+    _module = parentmodule(@__MODULE__)
+    _eval(x) = Base.eval(_module, x)
+    _sprint(x) = sprint(show, x; context = (:module => _module))
+    @test _eval(Meta.parse(_sprint(I))) == I
+    @test _eval(Meta.parse(TKS.type_repr(I))) == I
+    for a in smallset(I)
+        @test _eval(Meta.parse(_sprint(a))) == a
+    end
 end
 
 @testsuite "Value iterator" I -> begin
