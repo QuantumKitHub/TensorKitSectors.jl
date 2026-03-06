@@ -730,47 +730,35 @@ of the hexagon equations.
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
         throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
-    symmetricbraiding = BraidingStyle(I) isa SymmetricBraiding # bosonic/fermionic underbraiding = overbraiding
-    for e in ⊗(c, a), f in ⊗(c, b)
-        for d in intersect(⊗(e, b), ⊗(a, f))
-            R1, R2 = Rsymbol(c, a, e), Rsymbol(c, b, f)
-            F1 = Fsymbol(a, c, b, d, e, f)
-            if FusionStyle(I) isa MultiplicityFreeFusion
-                p1_o = R1 * F1 * R2
-                p2_o = zero(p1_o)
-                p1_u, p2_u = nothing, nothing
-                if !symmetricbraiding
-                    p1_u = conj(Rsymbol(a, c, e)) * F1 * conj(Rsymbol(b, c, f))
-                    p2_u = zero(p1_u)
+    for e in ⊗(c, a)
+        Rcae, Race = Rsymbol(c, a, e), Rsymbol(a, c, e)
+        for f in ⊗(c, b)
+            Rcbf, Rbcf = Rsymbol(c, b, f), Rsymbol(b, c, f)
+            for d in intersect(⊗(e, b), ⊗(a, f))
+                Facbdef = Fsymbol(a, c, b, d, e, f)
+                if FusionStyle(I) isa MultiplicityFreeFusion
+                    RFR1 = Rcae * Facbdef * Rcbf
+                    RFR2 = conj(Race) * Facbdef * conj(Rbcf)
+                else
+                    @tensor RFR1[α, β, μ, ν] := Rcae[α, λ] * Facbdef[λ, β, γ, ν] * Rcbf[γ, μ]
+                    @tensor RFR2[α, β, μ, ν] := conj(Race[α, λ]) * Facbdef[λ, β, γ, ν] * conj(Rbcf[γ, μ])
                 end
+
+                FRF1, FRF2 = zero(RFR1), zero(RFR2)
                 for g in ⊗(a, b)
-                    R3 = Rsymbol(c, g, d)
-                    F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
-                    p2_o += F2 * R3 * F3
-                    if !symmetricbraiding
-                        p2_u += F2 * conj(Rsymbol(g, c, d)) * F3
+                    Rcgd, Rgcd = Rsymbol(c, g, d), Rsymbol(g, c, d)
+                    Fcabdeg = Fsymbol(c, a, b, d, e, g)
+                    Fabcdgf = Fsymbol(a, b, c, d, g, f)
+                    if FusionStyle(I) isa MultiplicityFreeFusion
+                        FRF1 += Fcabdeg * Rcgd * Fabcdgf
+                        FRF2 += Fcabdeg * conj(Rgcd) * Fabcdgf
+                    else
+                        @tensor FRF1[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * Rcgd[σ, ψ] * Fabcdgf[δ, ψ, μ, ν]
+                        @tensor FRF2[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * conj(Rgcd[σ, ψ]) * Fabcdgf[δ, ψ, μ, ν]
                     end
                 end
-            else
-                @tensor p1_o[α, β, μ, ν] := R1[α, λ] * F1[λ, β, γ, ν] * R2[γ, μ]
-                p2_o = zero(p1_o)
-                p1_u, p2_u = nothing, nothing
-                if !symmetricbraiding
-                    @tensor p1_u[α, β, μ, ν] := conj(Rsymbol(a, c, e)[α, λ]) * F1[λ, β, γ, ν] * conj(Rsymbol(b, c, f)[γ, μ])
-                    p2_u = zero(p1_u)
-                end
-                for g in ⊗(a, b)
-                    R3 = Rsymbol(c, g, d)
-                    F2, F3 = Fsymbol(c, a, b, d, e, g), Fsymbol(a, b, c, d, g, f)
-                    @tensor p2_o[α, β, μ, ν] += F2[α, β, δ, σ] * R3[σ, ψ] * F3[δ, ψ, μ, ν]
-                    if !symmetricbraiding
-                        @tensor p2_u[α, β, μ, ν] += F2[α, β, δ, σ] * conj(Rsymbol(g, c, d)[σ, ψ]) * F3[δ, ψ, μ, ν]
-                    end
-                end
-            end
-            isapprox(p1_o, p2_o; kwargs...) || return false
-            if !symmetricbraiding
-                isapprox(p1_u, p2_u; kwargs...) || return false
+                isapprox(RFR1, FRF1; kwargs...) || return false
+                isapprox(RFR2, FRF2; kwargs...) || return false
             end
         end
     end
