@@ -149,18 +149,12 @@ Base.hash(c::ZNElement, h::UInt) = hash(c.n, h)
 Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n, c2.n)
 
 # Experimental
-function BraidingStyle(::Type{ZNElement{N, p}}) where {N, p}
-    return if p == 0
-        Bosonic() # trivial cocycle is symmetric
-    elseif p == N ÷ 2 && iseven(N)
-        Anyonic() # non-trivial cocycle
-    else
-        NoBraiding()
-    end
-end
+BraidingStyle(::Type{ZNElement{N, 0}}) where {N} = Bosonic()
+BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = 2p == N ? Anyonic() : NoBraiding()
 
-Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
+Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = Int(Nsymbol(a, b, c))
 function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
+    2p == N || throw(ArgumentError("No braiding for $(type_repr(ZNElement{N, p}))"))
     R = cispi(2 * p * a.n * b.n / N^2)
     return ifelse(c == a * b, R, zero(R))
 end
