@@ -73,30 +73,10 @@ function test_sector(I::Type)
     end
 end
 
-function Random.rand(::SectorValues{I}, size::Int) where {I <: Sector}
-    Base.IteratorSize(values(I)) === Base.IsInfinite() &&
-        throw(ArgumentError("Cannot take random sample of infinite sector values."))
-    return rand(collect(values(I)), size)
-end
-function smallset(::Type{I}, size::Int = 5) where {I <: Sector}
-    vals = values(I)
-    Base.IteratorSize(vals) === Base.IsInfinite() && return take(vals, size)
-    l = length(vals)
-    return if l > size
-        Random.rand(vals, size) # take random size of elements
-    else
-        reshape(collect(vals), l) # take all, no copies
-    end
-end
-function smallset(::Type{ProductSector{Tuple{I1, I2}}}) where {I1, I2}
-    iter = product(smallset(I1), smallset(I2))
-    s = collect(i ⊠ j for (i, j) in iter if dim(i) * dim(j) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
-end
-function smallset(::Type{ProductSector{Tuple{I1, I2, I3}}}) where {I1, I2, I3}
-    iter = product(smallset(I1), smallset(I2), smallset(I3))
-    s = collect(i ⊠ j ⊠ k for (i, j, k) in iter if dim(i) * dim(j) * dim(k) <= 6)
-    return length(s) > 6 ? rand(s, 6) : s
+function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
+    sectors = collect(Iterators.take(values(I), 10 * size))
+    sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
+    return resize!(sectors, min(size, length(sectors)))
 end
 
 function randsector(::Type{I}) where {I <: Sector}
