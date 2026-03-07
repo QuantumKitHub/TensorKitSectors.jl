@@ -1,6 +1,6 @@
 # Deligne tensor product of different sectors: ⊠
 #------------------------------------------------------------------------------#
-const SectorTuple = Tuple{Vararg{Sector}}
+const SectorTuple = Tuple{Sector, Vararg{Sector}}
 
 """
     struct ProductSector{T <: SectorTuple}
