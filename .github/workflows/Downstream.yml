@@ -4,10 +4,12 @@ on:
     branches: [main]
     tags: [v*]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   test:
     name: ${{ matrix.package.user }}/${{ matrix.package.repo }}
+    if: github.event.pull_request.draft == false
     runs-on: ${{ matrix.os }}
     env:
       GROUP: ${{ matrix.package.group }}
