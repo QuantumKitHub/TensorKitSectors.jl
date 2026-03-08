@@ -144,31 +144,20 @@ function fusiontensor(a::P, b::P, c::P) where {P <: NamedSector}
 end
 
 # Style traits
-function FusionStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return mapreduce(FusionStyle, &, _sectors(_sectortupletype(NT)))
-end
-function fusionscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return typeof(prod(zero ∘ fusionscalartype, _sectors(_sectortupletype(NT))))
-end
-function UnitStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return mapreduce(UnitStyle, &, _sectors(_sectortupletype(NT)))
-end
-function BraidingStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return mapreduce(BraidingStyle, &, _sectors(_sectortupletype(NT)))
-end
-function braidingscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return typeof(prod(zero ∘ braidingscalartype, _sectors(_sectortupletype(NT))))
-end
-function sectorscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return if BraidingStyle(NamedSector{NT}) == NoBraiding()
-        typeof(prod(zero ∘ fusionscalartype, _sectors(_sectortupletype(NT))))
-    else
-        typeof(prod(zero ∘ sectorscalartype, _sectors(_sectortupletype(NT))))
-    end
-end
-function dimscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    return typeof(prod(zero ∘ dimscalartype, _sectors(_sectortupletype(NT))))
-end
+FusionStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    FusionStyle(ProductSector{_sectortupletype(NT)})
+fusionscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    fusionscalartype(ProductSector{_sectortupletype(NT)})
+UnitStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    UnitStyle(ProductSector{_sectortupletype(NT)})
+BraidingStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    BraidingStyle(ProductSector{_sectortupletype(NT)})
+braidingscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    braidingscalartype(ProductSector{_sectortupletype(NT)})
+sectorscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    sectorscalartype(ProductSector{_sectortupletype(NT)})
+dimscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
+    dimscalartype(ProductSector{_sectortupletype(NT)})
 
 fermionparity(p::NamedSector) = mapreduce(fermionparity, xor, Tuple(p.sectors))
 frobenius_schur_phase(p::NamedSector) = prod(frobenius_schur_phase, Tuple(p.sectors))

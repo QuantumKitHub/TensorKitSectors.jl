@@ -1,6 +1,6 @@
 # Deligne tensor product of different sectors: ⊠
 #------------------------------------------------------------------------------#
-const SectorTuple = Tuple{Sector, Vararg{Sector}}
+const SectorTuple = Tuple{Vararg{Sector}}
 
 """
     struct ProductSector{T <: SectorTuple}
@@ -22,7 +22,7 @@ Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
 _sectors(::Type{Tuple{}}) = ()
-@assume_effects :foldable function _sectors(::Type{T}) where {T <: SectorTuple}
+@assume_effects :foldable function _sectors(::Type{T}) where {T <: Tuple{Sector, Vararg{Sector}}}
     return (Base.tuple_type_head(T), _sectors(Base.tuple_type_tail(T))...)
 end
 
@@ -212,29 +212,29 @@ function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector
     return fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
-function FusionStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function FusionStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(FusionStyle, &, _sectors(T))
 end
-function fusionscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function fusionscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
 end
-function UnitStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function UnitStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(UnitStyle, &, _sectors(T))
 end
-function BraidingStyle(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function BraidingStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return mapreduce(BraidingStyle, &, _sectors(T))
 end
-function braidingscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function braidingscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
 end
-function sectorscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function sectorscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return if BraidingStyle(ProductSector{T}) == NoBraiding()
         typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
     else
         typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
     end
 end
-function dimscalartype(::Type{<:ProductSector{T}}) where {T <: SectorTuple}
+function dimscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
     return typeof(prod(zero ∘ dimscalartype, _sectors(T)))
 end
 
