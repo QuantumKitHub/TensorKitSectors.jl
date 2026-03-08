@@ -53,9 +53,11 @@ end
 
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
-    sprev = UnitStyle(I) isa SimpleUnit ? unit(I) : first(values(I))
-    @test (@testinferred findindex(values(I), sprev)) == 1
-    for (i, s) in enumerate(values(I))
+    sprev, rest = Iterators.peel(values(I))
+    i = 1
+    @test (@testinferred findindex(values(I), sprev)) == i
+    for s in rest
+        i += 1
         @test !isless(s, sprev)
         @test s == @testinferred(values(I)[i])
         @test findindex(values(I), s) == i
