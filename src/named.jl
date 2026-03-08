@@ -221,7 +221,7 @@ end
     @NamedSector{name₁::T₁, name₂::T₂, ...}
 
 Convenience macro for constructing a `NamedSector` type with named components,
-analogous to [`@NamedTuple`](@ref).
+analogous to `@NamedTuple`.
 
 # Examples
 ```julia
