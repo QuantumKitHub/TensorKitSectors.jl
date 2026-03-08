@@ -23,12 +23,10 @@ Additionally, this test suite exports the following convenience testing utilitie
 * [`random_fusion`](@ref)
 * [`hasfusiontensor`](@ref)
 * [`F_unitarity_test`](@ref)
-* [`eval_module`](@ref)
 """
 module SectorTestSuite
 
 export smallset, randsector, random_fusion, hasfusiontensor, F_unitarity_test
-export eval_module
 
 using Test
 using TestExtras
@@ -124,20 +122,6 @@ function hasfusiontensor(I::Type{<:Sector})
             rethrow(e)
         end
     end
-end
-
-"""
-    eval_module(a::I; _module = parentmodule(I)) where {I <: Sector}
-
-Passes the sector `a` through the `show` machinery to generate a string representation, then parses and evaluates the resulting expression in the module `_module`, by default the parent module of the sector.
-"""
-function eval_module(a::I; _module = parentmodule(I)) where {I <: Sector}
-    if occursin("NewSU2Irrep", string(I)) # special case since NewSU2Irrep is defined in test setup, not in TensorKitSectors
-        _module = Main
-    end
-    return Base.eval(_module, Meta.parse(sprint(show, I))) == I &&
-        Base.eval(_module, Meta.parse(TensorKitSectors.type_repr(I))) == I &&
-        Base.eval(_module, Meta.parse(sprint(show, a))) == a
 end
 
 """

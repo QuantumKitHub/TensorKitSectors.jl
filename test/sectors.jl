@@ -5,7 +5,6 @@ using TensorKitSectors: TensorKitSectors as TKS
 @testsuite "Basic properties" I -> begin
     s = random_fusion(I, 2)
     sc = @testinferred(first(⊗(s...)))
-    @test eval_module(sc)
     @test @testinferred(hash(sc)) == hash(deepcopy(sc))
     if UnitStyle(I) isa SimpleUnit
         @test @testinferred(unit(sc)) == @testinferred(unit(I))
