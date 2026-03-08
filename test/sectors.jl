@@ -40,6 +40,18 @@ using TensorKitSectors: TensorKitSectors as TKS
     end
 end
 
+@testsuite "Show and parse" I -> begin
+    # test in the parent module of where the test is defined
+    _module = parentmodule(@__MODULE__)
+    _eval(x) = Base.eval(_module, x)
+    _sprint(x) = sprint(show, x; context = (:module => _module))
+    @test _eval(Meta.parse(_sprint(I))) == I
+    @test _eval(Meta.parse(TKS.type_repr(I))) == I
+    for a in smallset(I)
+        @test _eval(Meta.parse(_sprint(a))) == a
+    end
+end
+
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
     sprev = UnitStyle(I) isa SimpleUnit ? unit(I) : first(values(I))
