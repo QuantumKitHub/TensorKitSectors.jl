@@ -69,7 +69,7 @@ end
 
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
-        isempty(⊗(a, b)) && continue
+        can_fuse(a, b) || continue
         da = dim(a)
         db = dim(b)
         dc = sum(c -> dim(c) * Nsymbol(a, b, c), a ⊗ b)
@@ -183,9 +183,9 @@ end
 
 @testsuite "Unitarity of F-move" I -> begin
     for a in smallset(I), b in smallset(I)
-        !isempty(⊗(a, b)) || continue
+        can_fuse(a, b) || continue
         for c in smallset(I)
-            !isempty(⊗(b, c)) || continue
+            can_fuse(b, c) || continue
             @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
         end
     end
@@ -193,18 +193,18 @@ end
 
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
-        !isempty(⊗(a, b)) || continue
+        can_fuse(a, b) || continue
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Pentagon equation" I -> begin
     for a in smallset(I), b in smallset(I)
-        !isempty(⊗(a, b)) || continue
+        can_fuse(a, b) || continue
         for c in smallset(I)
-            !isempty(⊗(b, c)) || continue
+            can_fuse(b, c) || continue
             for d in smallset(I)
-                !isempty(⊗(c, d)) || continue
+                can_fuse(c, d) || continue
                 @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
             end
         end

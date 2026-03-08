@@ -88,6 +88,13 @@ end
 randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 
 """
+    can_fuse(a::I, b::I) where {I <: Sector}
+
+Returns a boolean indicating whether the fusion of `a` and `b` is allowed, i.e. whether there exists a sector `c` such that `c ∈ ⊗(a, b)`.
+"""
+can_fuse(a::I, b::I) where {I <: Sector} = !isempty(⊗(a, b))
+
+"""
     random_fusion(I::Type, N::Int)
 
 Returns a vector of `N` random sectors from `I` that have a non-empty coupled sector.
@@ -101,7 +108,7 @@ function random_fusion(I::Type{<:Sector}, N::Int)
         s = randsector(I)
         sprev = vec[i - 1]
         counter = 0
-        while isempty(⊗(sprev, s)) && counter < 20
+        while !can_fuse(sprev, s) && counter < 20
             counter += 1
             s = (counter < 20) ? randsector(I) : rightunit(sprev)
         end
