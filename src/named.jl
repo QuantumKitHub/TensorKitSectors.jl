@@ -28,7 +28,8 @@ end
 
 # Construction
 NamedSector(; kwargs...) = NamedSector(values(kwargs))
-NamedSector{T}(args...) where {T <: NamedSectorTuple} = NamedSector{T}(args)
+NamedSector{T}(args::Tuple) where {T <: NamedSectorTuple} =
+    NamedSector{T}(T(convert(_sectortupletype(T), args)))
 NamedSector{NT}(args::Vararg{Sector}) where {NT <: NamedSectorTuple} = NamedSector{NT}(NT(args))
 function Base.convert(::Type{NamedSector{NT}}, nt::NamedTuple) where {NT <: NamedSectorTuple}
     return NamedSector{NT}(convert(NT, nt))

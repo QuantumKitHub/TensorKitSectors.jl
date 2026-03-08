@@ -113,7 +113,7 @@ end
     s1 = CS(U1Irrep(1), SU2Irrep(1 // 2))
     s2 = NamedSector(; charge = U1Irrep(1), spin = SU2Irrep(1 // 2))
     s3 = NamedSector((; charge = U1Irrep(1), spin = SU2Irrep(1 // 2)))
-    s4 = CS(1, 1 // 2)
+    s4 = CS((1, 1 // 2))
     @test s1 == s2 == s3 == s4
     @test typeof(s1) == typeof(s2) == typeof(s3) == typeof(s4) == CS
 
