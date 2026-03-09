@@ -720,34 +720,46 @@ end
 """
     hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector} -> Bool
 
-Check whether the hexagon equation holds for braiding the sector `a` around the fusion
-product of `b` and `c` along the two different paths.
+Check whether the hexagon equations hold for braiding the sector `a` around the fusion
+product of `b` and `c` along the two different paths. There are two hexagon equations,
+one for braiding `a` over `b ⊗ c` and one for braiding `a` under `b ⊗ c`.
 
 If `kwargs` are provided, they are forwarded to `isapprox` when comparing the two sides
-of the hexagon equation.
+of the hexagon equations.
 """
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
-        throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
-    for e in ⊗(c, a), f in ⊗(c, b)
-        for d in intersect(⊗(e, b), ⊗(a, f))
-            if FusionStyle(I) isa MultiplicityFreeFusion
-                p1 = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
-                p2 = zero(p1)
-                for g in ⊗(a, b)
-                    p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(c, g, d) *
-                        Fsymbol(a, b, c, d, g, f)
+        throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
+    for e in ⊗(c, a)
+        Rcae, Race = Rsymbol(c, a, e), Rsymbol(a, c, e)
+        for f in ⊗(c, b)
+            Rcbf, Rbcf = Rsymbol(c, b, f), Rsymbol(b, c, f)
+            for d in intersect(⊗(e, b), ⊗(a, f))
+                Facbdef = Fsymbol(a, c, b, d, e, f)
+                if FusionStyle(I) isa MultiplicityFreeFusion
+                    RFR1 = Rcae * Facbdef * Rcbf
+                    RFR2 = conj(Race) * Facbdef * conj(Rbcf)
+                else
+                    @tensor RFR1[α, β, μ, ν] := Rcae[α, λ] * Facbdef[λ, β, γ, ν] * Rcbf[γ, μ]
+                    @tensor RFR2[α, β, μ, ν] := conj(Race[α, λ]) * Facbdef[λ, β, γ, ν] * conj(Rbcf[γ, μ])
                 end
-            else
-                @tensor p1[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
-                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(c, b, f)[γ, μ]
-                p2 = zero(p1)
+
+                FRF1, FRF2 = zero(RFR1), zero(RFR2)
                 for g in ⊗(a, b)
-                    @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
-                        Rsymbol(c, g, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
+                    Rcgd, Rgcd = Rsymbol(c, g, d), Rsymbol(g, c, d)
+                    Fcabdeg = Fsymbol(c, a, b, d, e, g)
+                    Fabcdgf = Fsymbol(a, b, c, d, g, f)
+                    if FusionStyle(I) isa MultiplicityFreeFusion
+                        FRF1 += Fcabdeg * Rcgd * Fabcdgf
+                        FRF2 += Fcabdeg * conj(Rgcd) * Fabcdgf
+                    else
+                        @tensor FRF1[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * Rcgd[σ, ψ] * Fabcdgf[δ, ψ, μ, ν]
+                        @tensor FRF2[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * conj(Rgcd[σ, ψ]) * Fabcdgf[δ, ψ, μ, ν]
+                    end
                 end
+                isapprox(RFR1, FRF1; kwargs...) || return false
+                isapprox(RFR2, FRF2; kwargs...) || return false
             end
-            isapprox(p1, p2; kwargs...) || return false
         end
     end
     return true
