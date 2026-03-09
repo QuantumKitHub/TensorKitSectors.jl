@@ -150,10 +150,11 @@ Base.isless(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} = isless(c1.n
 
 # Experimental
 BraidingStyle(::Type{ZNElement{N, 0}}) where {N} = Bosonic()
-Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = ifelse(a * b == c, 1, zero(1))
+BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = 2p == N ? Anyonic() : NoBraiding()
 
-BraidingStyle(::Type{ZNElement{N, p}}) where {N, p} = Anyonic()
+Rsymbol(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = Int(Nsymbol(a, b, c))
 function Rsymbol(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
+    2p == N || throw(ArgumentError("No braiding for $(type_repr(ZNElement{N, p}))"))
     R = cispi(2 * p * a.n * b.n / N^2)
     return ifelse(c == a * b, R, zero(R))
 end
