@@ -28,8 +28,9 @@ end
 
 # Construction
 NamedSector(; kwargs...) = NamedSector(values(kwargs))
-NamedSector{T}(args::Tuple) where {T <: NamedSectorTuple} =
-    NamedSector{T}(T(convert(_sectortupletype(T), args)))
+NamedSector{NT}(args...) where {NT <: NamedSectorTuple} = NamedSector{NT}(args)
+NamedSector{NT}(args::Tuple) where {NT <: NamedSectorTuple} =
+    NamedSector{NT}(NT(convert(_sectortupletype(NT), args)))
 NamedSector{NT}(args::Vararg{Sector}) where {NT <: NamedSectorTuple} = NamedSector{NT}(NT(args))
 function Base.convert(::Type{NamedSector{NT}}, nt::NamedTuple) where {NT <: NamedSectorTuple}
     return NamedSector{NT}(convert(NT, nt))
@@ -76,19 +77,10 @@ function _size(::SectorValues{NamedSector{NT}}) where {NT <: NamedSectorTuple}
     T = _sectortupletype(NT)
     return map(s -> _length(values(s)), _sectors(T))
 end
-function Base.getindex(P::SectorValues{NamedSector{NT}}, i::Int) where {NT <: NamedSectorTuple}
-    names = _sectornames(NT)
-    T = _sectortupletype(NT)
-    I = manhattan_to_multidimensional_index(i, _size(P))
-    sectors_i = getindex.(values.(_sectors(T)), I)
-    return NamedSector(NamedTuple{names}(sectors_i))
-end
-function findindex(
-        P::SectorValues{NamedSector{NT}},
-        c::NamedSector{NT}
-    ) where {NT <: NamedSectorTuple}
-    T = _sectortupletype(NT)
-    return to_manhattan_index(findindex.(values.(_sectors(T)), Tuple(c.sectors)), _size(P))
+Base.getindex(::SectorValues{I}, i::Int) where {I <: NamedSector} =
+    I(getindex(values(ProductSector{_sectortupletype(I)}), i).sectors)
+function findindex(P::SectorValues{I}, c::I) where {I <: NamedSector}
+    return findindex(values(ProductSector{_sectortupletype(I)}), _to_productsector(c))
 end
 function Base.iterate(P::SectorValues{NamedSector{NT}}, i = 1) where {NT <: NamedSectorTuple}
     Base.IteratorSize(P) != Base.IsInfinite() && i > length(P) && return nothing
