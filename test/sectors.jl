@@ -183,6 +183,13 @@ end
     end
 end
 
+@testsuite "Unitarity of R-move" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        @test R_unitarity_test(a, b; atol = 1.0e-12, rtol = 1.0e-12)
+    end
+end
+
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
@@ -255,7 +262,7 @@ end
     end
 end
 
-# https://quantumkithub.github.io/TensorKit.jl/stable/man/sectors/#Manipulations-on-a-fusion-tree
+# https://quantumkithub.github.io/TensorKit.jl/stable/man/fusiontrees/#Manipulations-on-a-fusion-tree
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), d in smallset(I)
@@ -267,7 +274,7 @@ end
                     Fdabefc = Fsymbol(d, a, b, e, f, c)
                     if FusionStyle(I) isa MultiplicityFreeFusion
                         RFR1 = Rcde * conj(Fdabefc) * conj(Rdaf)
-                        RFR2 = conj(Rdce) * conj(Fdabefc) * Rdaf
+                        RFR2 = conj(Rdce) * conj(Fdabefc) * Radf
                     else
                         @tensor RFR1[ν, μ, λ, σ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
                         @tensor RFR2[ν, μ, λ, σ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]

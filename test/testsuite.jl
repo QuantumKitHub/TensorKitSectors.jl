@@ -21,10 +21,11 @@ Additionally, this test suite exports the following convenience testing utilitie
 * [`smallset`](@ref)
 * [`randsector`](@ref)
 * [`hasfusiontensor`](@ref)
+* [`R_unitarity_test`](@ref)
 """
 module SectorTestSuite
 
-export smallset, randsector, hasfusiontensor, F_unitarity_test
+export smallset, randsector, hasfusiontensor, F_unitarity_test, R_unitarity_test
 
 using Test
 using TestExtras
@@ -120,6 +121,20 @@ function F_unitarity_test(a::I, b::I, c::I; kwargs...) where {I <: Sector}
             F = hvcat(length(fs), Fblocks...)
         end
         isapprox(F' * F, one(F); kwargs...) || return false
+    end
+    return true
+end
+
+"""
+    R_unitarity_test(a::I, b::I; kwargs...) where {I <: Sector}
+
+Tests the unitarity of the R-symbols for the fusion of `a`, `b`, and `c`.
+Returns `true` if the R-symbols are unitary, and `false` otherwise.
+"""
+function R_unitarity_test(a::I, b::I; kwargs...) where {I <: Sector}
+    for c in ⊗(a, b)
+        R = Rsymbol(a, b, c)
+        isapprox(R' * R, one(R); kwargs...) || return false
     end
     return true
 end
