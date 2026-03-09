@@ -193,6 +193,13 @@ end
     end
 end
 
+@testsuite "Unitarity of R-move" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        @test R_unitarity_test(a, b; atol = 1.0e-12, rtol = 1.0e-12)
+    end
+end
+
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
         can_fuse(a, b) || continue
@@ -213,9 +220,100 @@ end
     end
 end
 
+# https://ncatlab.org/nlab/files/DelaneyModularTensorCategories.pdf#page=9
 @testsuite "Hexagon equation" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
         @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+    end
+end
+
+# https://quantumkithub.github.io/TensorKit.jl/stable/appendix/categories/#Braidings-and-twists
+@testsuite "Ribbon condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            R1 = Rsymbol(a, b, c)
+            R2 = Rsymbol(b, a, c)
+            θa, θb, θc = twist.((a, b, c))
+            factor = R1 * θa * θb * R2
+            if FusionStyle(I) isa GenericFusion
+                @test isapprox(θc * LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            else
+                @test isapprox(θc, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
+    end
+end
+
+@testsuite "Braiding self-duality condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I)
+        if a == dual(a)
+            factor = twist(a) * frobenius_schur_phase(a) * Rsymbol(a, a, unit(a))
+            if FusionStyle(I) isa GenericFusion
+                @test isapprox(LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            else
+                @test isapprox(one(eltype(factor)), factor; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
+    end
+end
+
+@testsuite "Symmetric braiding condition" I -> begin
+    BraidingStyle(I) isa SymmetricBraiding || return nothing
+    for a in smallset(I)
+        θa = twist(a)
+        oneT = one(eltype(θa))
+        @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
+            isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
+        for b in smallset(I)
+            for c in ⊗(a, b)
+                R1, R2 = Rsymbol(a, b, c), Rsymbol(b, a, c)
+                if FusionStyle(I) isa GenericFusion
+                    @test isapprox(R1 * R2, LinearAlgebra.I; atol = 1.0e-12, rtol = 1.0e-12)
+                else
+                    @test isapprox(R1 * R2, one(eltype(R1)); atol = 1.0e-12, rtol = 1.0e-12)
+                end
+            end
+        end
+    end
+end
+
+# https://quantumkithub.github.io/TensorKit.jl/stable/man/fusiontrees/#Manipulations-on-a-fusion-tree
+@testsuite "Artin braid equality" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I), d in smallset(I)
+        for f in ⊗(d, a)
+            Rdaf, Radf = Rsymbol(d, a, f), Rsymbol(a, d, f)
+            for c in ⊗(a, b)
+                for e in intersect(⊗(c, d), ⊗(f, b))
+                    Rcde, Rdce = Rsymbol(c, d, e), Rsymbol(d, c, e)
+                    Fdabefc = Fsymbol(d, a, b, e, f, c)
+                    if FusionStyle(I) isa MultiplicityFreeFusion
+                        RFR1 = Rcde * conj(Fdabefc) * conj(Rdaf)
+                        RFR2 = conj(Rdce) * conj(Fdabefc) * Radf
+                    else
+                        @tensor RFR1[ν, μ, λ, σ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
+                        @tensor RFR2[ν, μ, λ, σ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]
+                    end
+                    FRF1, FRF2 = zero(RFR1), zero(RFR2)
+                    for g in ⊗(d, b)
+                        Fabdecg = Fsymbol(a, b, d, e, c, g)
+                        Fadbefg = Fsymbol(a, d, b, e, f, g)
+                        Rbdg, Rdbg = Rsymbol(b, d, g), Rsymbol(d, b, g)
+                        if FusionStyle(I) isa MultiplicityFreeFusion
+                            FRF1 += Fabdecg * Rbdg * conj(Fadbefg)
+                            FRF2 += conj(Fabdecg) * conj(Rdbg) * Fadbefg
+                        else
+                            @tensor FRF1[ν, μ, β, α] += Fabdecg[μ, ν, κ, λ] * Rbdg[κ, θ] * conj(Fadbefg[α, β, θ, λ])
+                            @tensor FRF2[ν, μ, β, α] += conj(Fabdecg[μ, ν, κ, λ]) * conj(Rdbg[κ, θ]) * Fadbefg[α, β, θ, λ]
+                        end
+                    end
+                    @test isapprox(RFR1, FRF1; atol = 1.0e-12, rtol = 1.0e-12)
+                    @test isapprox(RFR2, FRF2; atol = 1.0e-12, rtol = 1.0e-12)
+                end
+            end
+        end
     end
 end
