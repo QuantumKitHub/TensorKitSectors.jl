@@ -20,19 +20,23 @@ SectorTestSuite.test_sector(MySectorType)
 Additionally, this test suite exports the following convenience testing utilities:
 * [`smallset`](@ref)
 * [`randsector`](@ref)
+* [`random_fusion`](@ref)
 * [`hasfusiontensor`](@ref)
+* [`F_unitarity_test`](@ref)
 * [`R_unitarity_test`](@ref)
+* [`can_fuse`](@ref)
 """
 module SectorTestSuite
 
-export smallset, randsector, hasfusiontensor, F_unitarity_test, R_unitarity_test
+export smallset, randsector, random_fusion, hasfusiontensor, can_fuse
+export F_unitarity_test, R_unitarity_test
 
 using Test
 using TestExtras
 using TensorKitSectors
 using TensorKitSectors: type_repr
 using Random
-using Base.Iterators: take, product
+using Base.Iterators: take
 
 const tests = Dict()
 
@@ -86,9 +90,41 @@ function randsector(::Type{I}) where {I <: Sector}
 end
 randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 
+"""
+    can_fuse(a::I, b::I) where {I <: Sector}
+
+Returns a boolean indicating whether the fusion of `a` and `b` is allowed,
+i.e. whether there exists a sector `c` such that `c ∈ ⊗(a, b)`.
+"""
+can_fuse(a::I, b::I) where {I <: Sector} = !isempty(⊗(a, b))
+
+"""
+    random_fusion(I::Type, N::Int)
+
+Returns a vector of `N` random sectors from `I` that have a non-empty coupled sector.
+Compatible with any `Sector` type, including those with `UnitStyle(I) == GenericUnit()`.
+"""
+function random_fusion(I::Type{<:Sector}, N::Int)
+    vec = Vector{I}(undef, N)
+    vec[1] = randsector(I)
+    N == 1 && return vec
+    for i in 2:N
+        s = randsector(I)
+        sprev = vec[i - 1]
+        counter = 0
+        while !can_fuse(sprev, s) && counter < 20
+            counter += 1
+            s = (counter < 20) ? randsector(I) : rightunit(sprev)
+        end
+        vec[i] = s
+    end
+    return vec
+end
+
 function hasfusiontensor(I::Type{<:Sector})
     try
-        fusiontensor(unit(I), unit(I), unit(I))
+        u = first(allunits(I))
+        fusiontensor(u, u, u)
         return true
     catch e
         if e isa MethodError

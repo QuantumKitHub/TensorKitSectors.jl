@@ -3,20 +3,27 @@ using LinearAlgebra
 using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
-    s = (randsector(I), randsector(I), randsector(I))
-    @test @testinferred(hash(s[1])) == hash(deepcopy(s[1]))
-    @test @testinferred(unit(s[1])) == @testinferred(unit(I))
-    @testinferred dual(s[1])
-    @testinferred dim(s[1])
-    @testinferred frobenius_schur_phase(s[1])
-    @testinferred frobenius_schur_indicator(s[1])
-    @testinferred Nsymbol(s...)
-    @testinferred Asymbol(s...)
-    B = @testinferred Bsymbol(s...)
-    F = @testinferred Fsymbol(s..., s...)
+    s = random_fusion(I, 2)
+    sc = @testinferred(first(⊗(s...)))
+    @test @testinferred(hash(sc)) == hash(deepcopy(sc))
+    if UnitStyle(I) isa SimpleUnit
+        @test @testinferred(unit(sc)) == @testinferred(unit(I))
+    end
+    @testinferred dual(sc)
+    @testinferred dim(sc)
+    @testinferred frobenius_schur_phase(sc)
+    @testinferred frobenius_schur_indicator(sc)
+    @testinferred(⊗(s..., s...))
+    @testinferred Nsymbol(s..., sc)
+    @testinferred Asymbol(s..., sc)
+    B = @testinferred Bsymbol(s..., sc)
+    s2 = random_fusion(I, 3)
+    s2c = first(⊗(s2...))
+    e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
+    F = @testinferred Fsymbol(s2..., s2c, e, f)
     @test eltype(F) === @testinferred fusionscalartype(I)
     if BraidingStyle(I) isa HasBraiding
-        R = @testinferred Rsymbol(s...)
+        R = @testinferred Rsymbol(s..., sc)
         @test eltype(R) === @testinferred braidingscalartype(I)
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
@@ -30,8 +37,6 @@ using TensorKitSectors: TensorKitSectors as TKS
             @test eltype(F) <: @testinferred sectorscalartype(I)
         end
     end
-    @testinferred(s[1] ⊗ s[2])
-    @testinferred(⊗(s..., s...))
 end
 
 @testsuite "Show and parse" I -> begin
@@ -48,17 +53,17 @@ end
 
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
-    sprev = unit(I)
-    for (i, s) in enumerate(values(I))
+    sprev, rest = Iterators.peel(values(I))
+    i = 1
+    @test (@testinferred findindex(values(I), sprev)) == i
+    for s in rest
+        i += 1
         @test !isless(s, sprev)
         @test s == @testinferred(values(I)[i])
         @test findindex(values(I), s) == i
         sprev = s
         i >= 10 && break
     end
-    @test unit(I) == first(values(I))
-    @test length(allunits(I)) == 1
-    @test (@testinferred findindex(values(I), unit(I))) == 1
     for s in smallset(I)
         @test (@testinferred values(I)[findindex(values(I), s)]) == s
     end
@@ -66,6 +71,7 @@ end
 
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
         da = dim(a)
         db = dim(b)
         dc = sum(c -> dim(c) * Nsymbol(a, b, c), a ⊗ b)
@@ -178,8 +184,12 @@ end
 end
 
 @testsuite "Unitarity of F-move" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
+        for c in smallset(I)
+            can_fuse(b, c) || continue
+            @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+        end
     end
 end
 
@@ -192,13 +202,21 @@ end
 
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Pentagon equation" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
-        @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
+        for c in smallset(I)
+            can_fuse(b, c) || continue
+            for d in smallset(I)
+                can_fuse(c, d) || continue
+                @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
     end
 end
 
