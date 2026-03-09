@@ -23,17 +23,18 @@ Additionally, this test suite exports the following convenience testing utilitie
 * [`random_fusion`](@ref)
 * [`hasfusiontensor`](@ref)
 * [`F_unitarity_test`](@ref)
+* [`can_fuse`](@ref)
 """
 module SectorTestSuite
 
-export smallset, randsector, random_fusion, hasfusiontensor, F_unitarity_test
+export smallset, randsector, random_fusion, hasfusiontensor, F_unitarity_test, can_fuse
 
 using Test
 using TestExtras
 using TensorKitSectors
 using TensorKitSectors: type_repr
 using Random
-using Base.Iterators: take, product
+using Base.Iterators: take
 
 const tests = Dict()
 
@@ -90,7 +91,8 @@ randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 """
     can_fuse(a::I, b::I) where {I <: Sector}
 
-Returns a boolean indicating whether the fusion of `a` and `b` is allowed, i.e. whether there exists a sector `c` such that `c ∈ ⊗(a, b)`.
+Returns a boolean indicating whether the fusion of `a` and `b` is allowed,
+i.e. whether there exists a sector `c` such that `c ∈ ⊗(a, b)`.
 """
 can_fuse(a::I, b::I) where {I <: Sector} = !isempty(⊗(a, b))
 
