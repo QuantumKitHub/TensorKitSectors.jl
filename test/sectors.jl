@@ -258,11 +258,12 @@ end
 
 @testsuite "Symmetric braiding condition" I -> begin
     BraidingStyle(I) isa SymmetricBraiding || return nothing
+    isfermionic = BraidingStyle(I) isa Fermionic
     for a in smallset(I)
         θa = twist(a)
         oneT = one(θa)
         @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
-            isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
+            (isfermionic && isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12))
         for b in smallset(I)
             for c in ⊗(a, b)
                 RR = Rsymbol(a, b, c) * Rsymbol(b, a, c)
