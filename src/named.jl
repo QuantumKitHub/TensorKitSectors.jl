@@ -7,8 +7,7 @@ const NamedSectorTuple = NamedTuple{<:Any, <:SectorTuple}
     NamedSector((; name₁=s₁, name₂=s₂, ...))
 
 Represents the Deligne tensor product of sectors stored with named components.
-Similar to [`ProductSector`](@ref), but components are accessible by name via
-`s.name`.
+Similar to [`ProductSector`](@ref), but components are accessible by name via `s.name`.
 
 # Examples
 ```julia
@@ -21,6 +20,10 @@ julia> s.charge
 julia> s.spin
 1/2
 ```
+
+!!! warning
+    The sectors are stored internally in the `s.sectors` field, so the named components should
+    not contain the `sectors` as a name.
 """
 struct NamedSector{NT <: NamedSectorTuple} <: Sector
     sectors::NT
