@@ -31,16 +31,19 @@ end
 
 # Construction
 NamedSector(; kwargs...) = NamedSector(values(kwargs))
-NamedSector{NT}(args...) where {NT <: NamedSectorTuple} = NamedSector{NT}(args)
+NamedSector{NT}(arg1, args...) where {NT} = NamedSector{NT}((arg1, args...))
 NamedSector{NT}(args::Tuple) where {NT <: NamedSectorTuple} =
     NamedSector{NT}(NT(convert(_sectortupletype(NT), args)))
-NamedSector{NT}(args::Vararg{Sector}) where {NT <: NamedSectorTuple} = NamedSector{NT}(NT(args))
-function Base.convert(::Type{NamedSector{NT}}, nt::NamedTuple) where {NT <: NamedSectorTuple}
+
+function Base.convert(::Type{NamedSector{NT}}, nt::Union{Tuple, NamedTuple}) where {NT}
     return NamedSector{NT}(convert(NT, nt))
 end
 
 Base.NamedTuple(a::NamedSector) = a.sectors
 Base.Tuple(a::NamedSector) = Tuple(a.sectors)
+
+ProductSector(a::NamedSector) = ProductSector(Tuple(a))
+NamedSector{NT}(a::ProductSector) where {NT <: NamedSectorTuple} = NamedSector{NT}(Tuple(a))
 
 function Base.getproperty(s::NamedSector, name::Symbol)
     name === :sectors && return getfield(s, :sectors)
@@ -60,30 +63,20 @@ _sectornames(::Type{NamedSector{NT}}) where {NT} = _sectornames(NT)
 _sectornames(::Type{NamedTuple{names, T}}) where {names, T} = names
 _sectortupletype(::Type{NamedSector{NT}}) where {NT} = _sectortupletype(NT)
 _sectortupletype(::Type{NamedTuple{names, T}}) where {names, T} = T
-
-function _to_productsector(p::NamedSector{NT}) where {NT <: NamedSectorTuple}
-    return ProductSector{_sectortupletype(NT)}(Tuple(p.sectors))
-end
+_productsectortype(::Type{I}) where {I <: NamedSector} = ProductSector{_sectortupletype(I)}
 
 # SectorValues iteration
-function Base.IteratorSize(::Type{SectorValues{NamedSector{NT}}}) where {NT <: NamedSectorTuple}
-    T = _sectortupletype(NT)
-    return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(T))...))
-end
-function Base.size(::SectorValues{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    T = _sectortupletype(NT)
-    return map(s -> length(values(s)), _sectors(T))
-end
-Base.length(P::SectorValues{<:NamedSector}) = *(size(P)...)
+Base.IteratorSize(::Type{SectorValues{I}}) where {I <: NamedSector} =
+    Base.IteratorSize(values(_productsectortype(I)))
+Base.size(::SectorValues{I}) where {I <: NamedSector} =
+    size(values(_productsectortype(I)))
+Base.length(::SectorValues{I}) where {I <: NamedSector} =
+    length(values(_productsectortype(I)))
 
-function _size(::SectorValues{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    T = _sectortupletype(NT)
-    return map(s -> _length(values(s)), _sectors(T))
-end
 Base.getindex(::SectorValues{I}, i::Int) where {I <: NamedSector} =
-    I(getindex(values(ProductSector{_sectortupletype(I)}), i).sectors)
+    I(getindex(values(_productsectortype(I)), i))
 function findindex(P::SectorValues{I}, c::I) where {I <: NamedSector}
-    return findindex(values(ProductSector{_sectortupletype(I)}), _to_productsector(c))
+    return findindex(values(_productsectortype(I)), ProductSector(c))
 end
 function Base.iterate(P::SectorValues{NamedSector{NT}}, i = 1) where {NT <: NamedSectorTuple}
     Base.IteratorSize(P) != Base.IsInfinite() && i > length(P) && return nothing
@@ -95,85 +88,53 @@ function unit(::Type{T}) where {T <: NamedSector}
     UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
     return only(allunits(T))
 end
-function allunits(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    names = _sectornames(NT)
-    T = _sectortupletype(NT)
-    iterators = map(allunits, _sectors(T))
-    f = t -> NamedSector(NamedTuple{names}(t))
-    return SectorSet{NamedSector{NT}}(f, Base.Iterators.product(iterators...))
-end
-leftunit(a::P) where {P <: NamedSector} = P(map(leftunit, a.sectors))
-rightunit(a::P) where {P <: NamedSector} = P(map(rightunit, a.sectors))
+allunits(::Type{I}) where {I <: NamedSector} = SectorSet{I}(I, allunits(_productsectortype(I)))
+leftunit(a::P) where {P <: NamedSector} = P(leftunit(ProductSector(a)))
+rightunit(a::P) where {P <: NamedSector} = P(rightunit(ProductSector(a)))
 
-# Sector operations — delegate to ProductSector where recursion is needed
-dual(p::NamedSector) = NamedSector(map(dual, p.sectors))
+# Sector operations
+dual(p::P) where {P <: NamedSector} = P(dual(ProductSector(p)))
 
-function ⊗(p1::P, p2::P) where {P <: NamedSector}
-    t1, t2 = Tuple(p1.sectors), Tuple(p2.sectors)
-    names = _sectornames(P)
-    if FusionStyle(P) isa UniqueFusion
-        t = first(product(map(⊗, t1, t2)...))
-        return (P(NamedTuple{names}(t)),)
-    else
-        return SectorSet{P}(t -> P(NamedTuple{names}(t)), product(map(⊗, t1, t2)...))
-    end
-end
+⊗(p1::P, p2::P) where {P <: NamedSector} = SectorSet{P}(P, ProductSector(p1) ⊗ ProductSector(p2))
 
 function Nsymbol(a::P, b::P, c::P) where {P <: NamedSector}
-    return prod(map(Nsymbol, Tuple(a.sectors), Tuple(b.sectors), Tuple(c.sectors)))
+    return Nsymbol(map(ProductSector, (a, b, c))...)
 end
-
 function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: NamedSector}
-    return Fsymbol(map(_to_productsector, (a, b, c, d, e, f))...)
+    return Fsymbol(map(ProductSector, (a, b, c, d, e, f))...)
 end
 function Rsymbol(a::P, b::P, c::P) where {P <: NamedSector}
-    return Rsymbol(map(_to_productsector, (a, b, c))...)
+    return Rsymbol(map(ProductSector, (a, b, c))...)
 end
 function Bsymbol(a::P, b::P, c::P) where {P <: NamedSector}
-    return Bsymbol(map(_to_productsector, (a, b, c))...)
+    return Bsymbol(map(ProductSector, (a, b, c))...)
 end
 function Asymbol(a::P, b::P, c::P) where {P <: NamedSector}
-    return Asymbol(map(_to_productsector, (a, b, c))...)
+    return Asymbol(map(ProductSector, (a, b, c))...)
 end
 function fusiontensor(a::P, b::P, c::P) where {P <: NamedSector}
-    return fusiontensor(map(_to_productsector, (a, b, c))...)
+    return fusiontensor(map(ProductSector, (a, b, c))...)
 end
 
 # Style traits
-FusionStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    FusionStyle(ProductSector{_sectortupletype(NT)})
-fusionscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    fusionscalartype(ProductSector{_sectortupletype(NT)})
-UnitStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    UnitStyle(ProductSector{_sectortupletype(NT)})
-BraidingStyle(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    BraidingStyle(ProductSector{_sectortupletype(NT)})
-braidingscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    braidingscalartype(ProductSector{_sectortupletype(NT)})
-sectorscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    sectorscalartype(ProductSector{_sectortupletype(NT)})
-dimscalartype(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple} =
-    dimscalartype(ProductSector{_sectortupletype(NT)})
+FusionStyle(::Type{I}) where {I <: NamedSector} = FusionStyle(_productsectortype(I))
+fusionscalartype(::Type{I}) where {I <: NamedSector} = fusionscalartype(_productsectortype(I))
+UnitStyle(::Type{I}) where {I <: NamedSector} = UnitStyle(_productsectortype(I))
+BraidingStyle(::Type{I}) where {I <: NamedSector} = BraidingStyle(_productsectortype(I))
+braidingscalartype(::Type{I}) where {I <: NamedSector} = braidingscalartype(_productsectortype(I))
+sectorscalartype(::Type{I}) where {I <: NamedSector} = sectorscalartype(_productsectortype(I))
+dimscalartype(::Type{I}) where {I <: NamedSector} = dimscalartype(_productsectortype(I))
 
-fermionparity(p::NamedSector) = mapreduce(fermionparity, xor, Tuple(p.sectors))
-frobenius_schur_phase(p::NamedSector) = prod(frobenius_schur_phase, Tuple(p.sectors))
-frobenius_schur_indicator(p::NamedSector) = prod(frobenius_schur_indicator, Tuple(p.sectors))
+fermionparity(p::NamedSector) = fermionparity(ProductSector(p))
+frobenius_schur_phase(p::NamedSector) = frobenius_schur_phase(ProductSector(p))
+frobenius_schur_indicator(p::NamedSector) = frobenius_schur_indicator(ProductSector(p))
 
-dim(p::NamedSector) = *(dim.(Tuple(p.sectors))...)
+dim(p::NamedSector) = dim(ProductSector(p))
 
 # Equality, hashing, ordering
 Base.isequal(p1::NamedSector, p2::NamedSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::NamedSector, h::UInt) = hash(p.sectors, h)
-function Base.isless(p1::NamedSector{NT}, p2::NamedSector{NT}) where {NT <: NamedSectorTuple}
-    T = _sectortupletype(NT)
-    I1 = findindex.(values.(_sectors(T)), Tuple(p1.sectors))
-    I2 = findindex.(values.(_sectors(T)), Tuple(p2.sectors))
-    d1 = sum(I1) - length(I1)
-    d2 = sum(I2) - length(I2)
-    d1 < d2 && return true
-    d1 > d2 && return false
-    return isless(I1, I2)
-end
+Base.isless(a::I, b::I) where {I <: NamedSector} = isless(ProductSector(a), ProductSector(b))
 
 # Display
 function Base.show(io::IO, P::NamedSector)
