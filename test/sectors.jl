@@ -251,30 +251,23 @@ end
     for a in smallset(I)
         if a == dual(a)
             factor = twist(a) * frobenius_schur_phase(a) * Rsymbol(a, a, unit(a))
-            if FusionStyle(I) isa GenericFusion
-                @test isapprox(LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
-            else
-                @test isapprox(one(eltype(factor)), factor; atol = 1.0e-12, rtol = 1.0e-12)
-            end
+            @test factor ≈ one(factor) atol = 1.0e-12 rtol = 1.0e-12
         end
     end
 end
 
 @testsuite "Symmetric braiding condition" I -> begin
     BraidingStyle(I) isa SymmetricBraiding || return nothing
+    isfermionic = BraidingStyle(I) isa Fermionic
     for a in smallset(I)
         θa = twist(a)
-        oneT = one(eltype(θa))
+        oneT = one(θa)
         @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
-            isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12)
+            (isfermionic && isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12))
         for b in smallset(I)
             for c in ⊗(a, b)
-                R1, R2 = Rsymbol(a, b, c), Rsymbol(b, a, c)
-                if FusionStyle(I) isa GenericFusion
-                    @test isapprox(R1 * R2, LinearAlgebra.I; atol = 1.0e-12, rtol = 1.0e-12)
-                else
-                    @test isapprox(R1 * R2, one(eltype(R1)); atol = 1.0e-12, rtol = 1.0e-12)
-                end
+                RR = Rsymbol(a, b, c) * Rsymbol(b, a, c)
+                @test RR ≈ one(RR) atol = 1.0e-12 rtol = 1.0e-12
             end
         end
     end
