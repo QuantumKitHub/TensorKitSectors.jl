@@ -63,6 +63,7 @@ _sectornames(::Type{NamedSector{NT}}) where {NT} = _sectornames(NT)
 _sectornames(::Type{NamedTuple{names, T}}) where {names, T} = names
 _sectortupletype(::Type{NamedSector{NT}}) where {NT} = _sectortupletype(NT)
 _sectortupletype(::Type{NamedTuple{names, T}}) where {names, T} = T
+_sectortupletype(::Type) = error("should never be reached") # keeps JET happy
 _productsectortype(::Type{I}) where {I <: NamedSector} = ProductSector{_sectortupletype(I)}
 
 # SectorValues iteration
