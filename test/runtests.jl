@@ -124,7 +124,7 @@ end
     @test s1[1] == U1Irrep(1)
     @test s1[2] == SU2Irrep(1 // 2)
     @test keys(s1) == (:charge, :spin)
-    @test propertynames(s1) == (:charge, :spin)
+    @test propertynames(s1) == (:sectors, :charge, :spin)
 
     @test Tuple(s1) == (U1Irrep(1), SU2Irrep(1 // 2))
     @test NamedTuple(s1) == (; charge = U1Irrep(1), spin = SU2Irrep(1 // 2))

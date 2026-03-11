@@ -33,7 +33,7 @@ end
 NamedSector(; kwargs...) = NamedSector(values(kwargs))
 NamedSector{NT}(arg1, args...) where {NT} = NamedSector{NT}((arg1, args...))
 NamedSector{NT}(args::Tuple) where {NT <: NamedSectorTuple} =
-    NamedSector{NT}(NT(convert(_sectortupletype(NT), args)))
+    NamedSector{NT}(NT(convert(_sectortupletype(NamedSector{NT}), args)))
 
 function Base.convert(::Type{NamedSector{NT}}, nt::Union{Tuple, NamedTuple}) where {NT}
     return NamedSector{NT}(convert(NT, nt))
@@ -49,7 +49,7 @@ function Base.getproperty(s::NamedSector, name::Symbol)
     name === :sectors && return getfield(s, :sectors)
     return getfield(s, :sectors)[name]
 end
-Base.propertynames(s::NamedSector) = keys(s.sectors)
+Base.propertynames(s::NamedSector) = (:sectors, keys(s.sectors)...)
 
 Base.getindex(s::NamedSector, i::Int) = s.sectors[i]
 Base.getindex(s::NamedSector, name::Symbol) = s.sectors[name]
@@ -59,11 +59,10 @@ Base.indexed_iterate(s::NamedSector, args...) = Base.indexed_iterate(s.sectors, 
 Base.keys(s::NamedSector) = keys(s.sectors)
 
 # Type-level helpers
-_sectornames(::Type{NamedSector{NT}}) where {NT} = _sectornames(NT)
-_sectornames(::Type{NamedTuple{names, T}}) where {names, T} = names
-_sectortupletype(::Type{NamedSector{NT}}) where {NT} = _sectortupletype(NT)
-_sectortupletype(::Type{NamedTuple{names, T}}) where {names, T} = T
+_sectornames(::Type{NamedSector{NamedTuple{Names, T}}}) where {Names, T} = Names
+_sectortupletype(::Type{NamedSector{NamedTuple{Names, T}}}) where {Names, T} = T
 _sectortupletype(::Type) = error("should never be reached") # keeps JET happy
+_sectors(::Type{I}) where {I <: NamedSector} = fieldtypes(_sectortupletype(I))
 _productsectortype(::Type{I}) where {I <: NamedSector} = ProductSector{_sectortupletype(I)}
 
 # SectorValues iteration
@@ -162,9 +161,9 @@ function Base.show(io::IO, P::NamedSector)
     return nothing
 end
 
-function type_repr(::Type{NamedSector{NT}}) where {NT <: NamedSectorTuple}
-    names = _sectornames(NT)
-    sectors = _sectors(_sectortupletype(NT))
+function type_repr(::Type{P}) where {P <: NamedSector}
+    names = _sectornames(P)
+    sectors = _sectors(P)
     s = "@NamedSector{"
     for (i, (name, I)) in enumerate(zip(names, sectors))
         i == 1 || (s *= ", ")
