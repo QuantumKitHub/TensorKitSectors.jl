@@ -302,7 +302,7 @@ end
 
 The fusion multiplicity ``N_c^{ab}``, indicating how many times sector `c` appears in the fusion product `a ⊗ b`.
 
-The return type depends on the [`FusionStyle]`(@ref), where [`UniqueFusion`](@ref) and [`SimpleFusion`](@ref) return `Bool` values, while [`GenericFusion`] returns `Int`.
+The return type depends on the [`FusionStyle`](@ref), where [`UniqueFusion`](@ref) and [`SimpleFusion`](@ref) return `Bool` values, while [`GenericFusion`](@ref) returns `Int`.
 
 See also [`⊗`](@ref) to obtain the set of sectors `c` that appear in `a ⊗ b`.
 """
