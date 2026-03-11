@@ -10,8 +10,9 @@ Represents the Deligne tensor product of sectors stored with named components.
 Similar to [`ProductSector`](@ref), but components are accessible by name via `s.name`.
 
 # Examples
+
 ```julia
-julia> s = NamedSector((; charge=U1Irrep(1), spin=SU2Irrep(1//2)))
+julia> s = NamedSector(; charge=U1Irrep(1), spin=SU2Irrep(1//2))
 (charge=1, spin=1/2)
 
 julia> s.charge
@@ -22,8 +23,7 @@ julia> s.spin
 ```
 
 !!! warning
-    The sectors are stored internally in the `s.sectors` field, so the named components should
-    not contain the `sectors` as a name.
+    The sectors are stored internally in the `s.sectors` field, so the named components should not contain the `sectors` as a name.
 """
 struct NamedSector{NT <: NamedSectorTuple} <: Sector
     sectors::NT
