@@ -13,6 +13,7 @@ component sectors. The recommended way to construct a `ProductSector` is using t
 struct ProductSector{T <: SectorTuple} <: Sector
     sectors::T
 end
+ProductSector{T}(args...) where {T <: SectorTuple} = ProductSector{T}(args)
 
 Base.Tuple(a::ProductSector) = a.sectors
 
@@ -21,42 +22,36 @@ Base.length(s::ProductSector) = length(s.sectors)
 Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
-_sectors(::Type{Tuple{}}) = ()
-@assume_effects :foldable function _sectors(::Type{T}) where {T <: Tuple{Sector, Vararg{Sector}}}
-    return (Base.tuple_type_head(T), _sectors(Base.tuple_type_tail(T))...)
-end
+_sectors(::Type{ProductSector{T}}) where {T} = Base.fieldtypes(T)
+_sectors(::Type) = error("should never be reached")
 
-function Base.IteratorSize(::Type{SectorValues{ProductSector{T}}}) where {T <: SectorTuple}
-    return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(T))...))
+function Base.IteratorSize(::Type{SectorValues{I}}) where {I <: ProductSector}
+    return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(I))...))
 end
-function Base.size(::SectorValues{ProductSector{T}}) where {T <: SectorTuple}
-    return map(s -> length(values(s)), _sectors(T))
+function Base.size(::SectorValues{I}) where {I <: ProductSector}
+    return map(s -> length(values(s)), _sectors(I))
 end
 Base.length(P::SectorValues{<:ProductSector}) = *(size(P)...)
 
 function _length(iter::SectorValues{I}) where {I <: Sector}
     return Base.IteratorSize(iter) === Base.IsInfinite() ? typemax(Int) : length(iter)
 end
-function _size(::SectorValues{ProductSector{T}}) where {T <: SectorTuple}
-    return map(s -> _length(values(s)), _sectors(T))
+function _size(::SectorValues{I}) where {I <: ProductSector}
+    return map(s -> _length(values(s)), _sectors(I))
 end
-function Base.getindex(P::SectorValues{ProductSector{T}}, i::Int) where {T <: SectorTuple}
-    I = manhattan_to_multidimensional_index(i, _size(P))
-    return ProductSector{T}(getindex.(values.(_sectors(T)), I))
+function Base.getindex(P::SectorValues{I}, i::Int) where {I <: ProductSector}
+    inds = manhattan_to_multidimensional_index(i, _size(P))
+    return I(getindex.(values.(_sectors(I)), inds))
 end
-function findindex(
-        P::SectorValues{ProductSector{T}},
-        c::ProductSector{T}
-    ) where {T <: SectorTuple}
-    return to_manhattan_index(findindex.(values.(_sectors(T)), c.sectors), _size(P))
+function findindex(P::SectorValues{I}, c::I) where {I <: ProductSector}
+    return to_manhattan_index(findindex.(values.(_sectors(I)), Tuple(c)), _size(P))
 end
 
-function Base.iterate(P::SectorValues{ProductSector{T}}, i = 1) where {T <: SectorTuple}
+function Base.iterate(P::SectorValues{I}, i = 1) where {I <: ProductSector}
     Base.IteratorSize(P) != Base.IsInfinite() && i > length(P) && return nothing
     return getindex(P, i), i + 1
 end
 
-ProductSector{T}(args...) where {T <: SectorTuple} = ProductSector{T}(args)
 function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTuple}
     return ProductSector{T}(convert(T, t))
 end
@@ -65,9 +60,9 @@ function unit(::Type{T}) where {T <: ProductSector}
     UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
     return only(allunits(T))
 end
-function allunits(::Type{ProductSector{T}}) where {T}
-    iterators = map(allunits, _sectors(T))
-    return SectorSet{ProductSector{T}}(Base.Iterators.product(iterators...))
+function allunits(::Type{I}) where {I <: ProductSector}
+    iterators = map(allunits, _sectors(I))
+    return SectorSet{I}(Base.Iterators.product(iterators...))
 end
 function leftunit(a::P) where {P <: ProductSector}
     return P(map(leftunit, a.sectors))
@@ -212,30 +207,30 @@ function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector
     return fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
-function FusionStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(FusionStyle, &, _sectors(T))
+function FusionStyle(::Type{I}) where {I <: ProductSector}
+    return mapreduce(FusionStyle, &, _sectors(I))
 end
-function fusionscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
+function fusionscalartype(::Type{I}) where {I <: ProductSector}
+    return typeof(prod(zero ∘ fusionscalartype, _sectors(I)))
 end
-function UnitStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(UnitStyle, &, _sectors(T))
+function UnitStyle(::Type{I}) where {I <: ProductSector}
+    return mapreduce(UnitStyle, &, _sectors(I))
 end
-function BraidingStyle(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return mapreduce(BraidingStyle, &, _sectors(T))
+function BraidingStyle(::Type{I}) where {I <: ProductSector}
+    return mapreduce(BraidingStyle, &, _sectors(I))
 end
-function braidingscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return typeof(prod(zero ∘ braidingscalartype, _sectors(T)))
+function braidingscalartype(::Type{I}) where {I <: ProductSector}
+    return typeof(prod(zero ∘ braidingscalartype, _sectors(I)))
 end
-function sectorscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return if BraidingStyle(ProductSector{T}) == NoBraiding()
-        typeof(prod(zero ∘ fusionscalartype, _sectors(T)))
+function sectorscalartype(::Type{I}) where {I <: ProductSector}
+    return if BraidingStyle(I) == NoBraiding()
+        typeof(prod(zero ∘ fusionscalartype, _sectors(I)))
     else
-        typeof(prod(zero ∘ sectorscalartype, _sectors(T)))
+        typeof(prod(zero ∘ sectorscalartype, _sectors(I)))
     end
 end
-function dimscalartype(::Type{ProductSector{T}}) where {T <: SectorTuple}
-    return typeof(prod(zero ∘ dimscalartype, _sectors(T)))
+function dimscalartype(::Type{I}) where {I <: ProductSector}
+    return typeof(prod(zero ∘ dimscalartype, _sectors(I)))
 end
 
 fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
@@ -244,9 +239,9 @@ dim(p::ProductSector) = *(dim.(p.sectors)...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
-function Base.isless(p1::ProductSector{T}, p2::ProductSector{T}) where {T <: SectorTuple}
-    I1 = findindex.(values.(_sectors(T)), p1.sectors)
-    I2 = findindex.(values.(_sectors(T)), p2.sectors)
+function Base.isless(p1::I, p2::I) where {I <: ProductSector}
+    I1 = findindex.(values.(_sectors(I)), p1.sectors)
+    I2 = findindex.(values.(_sectors(I)), p2.sectors)
     d1 = sum(I1) - length(I1)
     d2 = sum(I2) - length(I2)
     d1 < d2 && return true
