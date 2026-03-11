@@ -35,6 +35,8 @@ NamedSector{NT}(arg1, args...) where {NT} = NamedSector{NT}((arg1, args...))
 NamedSector{NT}(args::Tuple) where {NT <: NamedSectorTuple} =
     NamedSector{NT}(NT(convert(_sectortupletype(NamedSector{NT}), args)))
 
+⊠(; kwargs...) = NamedSector(; kwargs...)
+
 function Base.convert(::Type{NamedSector{NT}}, nt::Union{Tuple, NamedTuple}) where {NT}
     return NamedSector{NT}(convert(NT, nt))
 end

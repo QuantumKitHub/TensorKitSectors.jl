@@ -646,6 +646,25 @@ Return the twist of a sector `a`.
 twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
+# Operations between sectors of different types
+# ------------------------------------------------------------------------------
+
+"""
+    ⊠(s₁::Sector, s₂::Sector, ...)
+    ⊠(; name₁::Sector=s₁, name₂::Sector=s₂, ...)
+    deligneproduct(s₁::Sector, s₂::Sector, ...)
+    deligneproduct(; name₁::Sector=s₁, name₂::Sector=s₂, ...)
+
+Given two sectors `s₁` and `s₂`, which label an isomorphism class of simple objects in a
+fusion category ``C₁`` and ``C₂``, `s1 ⊠ s2` (obtained as `\\boxtimes+TAB`) labels the
+isomorphism class of simple objects in the Deligne tensor product category ``C₁ ⊠ C₂``.
+
+The Deligne tensor product also works in the type domain and for spaces and tensors. For
+group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G₂]`.
+"""
+⊠(s1, s2, s3, s4...) = ⊠(⊠(s1, s2), s3, s4...)
+const deligneproduct = ⊠
+
 # Triangle equation
 #-------------------------------------------------------------------------------
 # requirement that certain F-moves involving unit objects are trivial
