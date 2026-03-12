@@ -12,7 +12,9 @@ const sectorlist = (
     A4Irrep, SU2Irrep, NewSU2Irrep,
     FibonacciAnyon, IsingAnyon, FermionParity,
     FermionParity ⊠ FermionParity, FibonacciAnyon ⊠ PlanarTrivial,
-    Z3Irrep ⊠ Z4Irrep, FermionParity ⊠ U1Irrep ⊠ SU2Irrep,
+    Z3Irrep ⊠ Z4Irrep,
+    @NamedSector{charge::U1Irrep, spin::SU2Irrep},
+    @NamedSector{parity::FermionParity, charge::U1Irrep, spin::SU2Irrep},
     FermionParity ⊠ SU2Irrep ⊠ SU2Irrep, NewSU2Irrep ⊠ NewSU2Irrep,
     NewSU2Irrep ⊠ SU2Irrep, FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep,
     FibonacciAnyon ⊠ FibonacciAnyon ⊠ Z2Irrep,
@@ -40,7 +42,7 @@ const sectorlist = (
     TimeReversed{Z2Irrep ⊠ FibonacciAnyon ⊠ FibonacciAnyon},
     TimeReversed{NewSU2Irrep ⊠ SU2Irrep},
     TimeReversed{FermionParity ⊠ U1Irrep ⊠ SU2Irrep},
-    TimeReversed{FermionParity ⊠ SU2Irrep ⊠ SU2Irrep},
+    TimeReversed{@NamedSector{parity::FermionParity, charge::U1Irrep, spin::SU2Irrep}},
     TimeReversed{FermionParity ⊠ SU2Irrep ⊠ NewSU2Irrep},
 )
 
@@ -94,6 +96,38 @@ end
     end
     @test @testinferred(Tuple(SU2Irrep(1) ⊠ U1Irrep(0))) == (SU2Irrep(1), U1Irrep(0))
     @test @testinferred(length(FermionParity(1) ⊠ SU2Irrep(1 // 2) ⊠ U1Irrep(1))) == 3
+end
+
+@testset "NamedSector" begin
+    CS = @NamedSector{charge::U1Irrep, spin::SU2Irrep}
+    @test CS === NamedSector{@NamedTuple{charge::U1Irrep, spin::SU2Irrep}}
+    CS2 = @NamedSector begin
+        charge::U1Irrep
+        spin::SU2Irrep
+    end
+    @test CS === CS2
+
+    @test TensorKitSectors.type_repr(CS) == "@NamedSector{charge::Irrep[U₁], spin::Irrep[SU₂]}"
+    @test Base.eval(Main, Meta.parse(TensorKitSectors.type_repr(CS))) === CS
+
+    s1 = CS(U1Irrep(1), SU2Irrep(1 // 2))
+    s2 = NamedSector(; charge = U1Irrep(1), spin = SU2Irrep(1 // 2))
+    s3 = ⊠(; charge = U1Irrep(1), spin = SU2Irrep(1 // 2))
+    s4 = CS((1, 1 // 2))
+    s5 = CS(1, 1 // 2)
+    @test s1 == s2 == s3 == s4 == s5
+    @test typeof(s1) == typeof(s2) == typeof(s3) == typeof(s4) == typeof(s5) == CS
+
+    @test s1.charge == U1Irrep(1)
+    @test s1.spin == SU2Irrep(1 // 2)
+    @test s1[:charge] == U1Irrep(1)
+    @test s1[1] == U1Irrep(1)
+    @test s1[2] == SU2Irrep(1 // 2)
+    @test keys(s1) == (:charge, :spin)
+    @test propertynames(s1) == (:sectors, :charge, :spin)
+
+    @test Tuple(s1) == (U1Irrep(1), SU2Irrep(1 // 2))
+    @test NamedTuple(s1) == (; charge = U1Irrep(1), spin = SU2Irrep(1 // 2))
 end
 
 @testset "Issue that came up in #11" begin
