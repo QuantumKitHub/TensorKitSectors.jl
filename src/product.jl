@@ -23,7 +23,7 @@ Base.iterate(s::ProductSector, args...) = iterate(s.sectors, args...)
 Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors, args...)
 
 _sectors(::Type{ProductSector{T}}) where {T} = Base.fieldtypes(T)
-_sectors(::Type) = error("should never be reached")
+_sectors(::Type) = error("should never be reached") # keeps JET happy
 
 function Base.IteratorSize(::Type{SectorValues{I}}) where {I <: ProductSector}
     return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(I))...))
@@ -56,38 +56,38 @@ function Base.convert(::Type{ProductSector{T}}, t::Tuple) where {T <: SectorTupl
     return ProductSector{T}(convert(T, t))
 end
 
-function unit(::Type{T}) where {T <: ProductSector}
-    UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
-    return only(allunits(T))
+function unit(::Type{I}) where {I <: ProductSector}
+    UnitStyle(I) === GenericUnit() && throw_genericunit_error(I)
+    return only(allunits(I))
 end
 function allunits(::Type{I}) where {I <: ProductSector}
     iterators = map(allunits, _sectors(I))
     return SectorSet{I}(Base.Iterators.product(iterators...))
 end
-function leftunit(a::P) where {P <: ProductSector}
-    return P(map(leftunit, a.sectors))
+function leftunit(a::I) where {I <: ProductSector}
+    return I(map(leftunit, a.sectors))
 end
-function rightunit(a::P) where {P <: ProductSector}
-    return P(map(rightunit, a.sectors))
+function rightunit(a::I) where {I <: ProductSector}
+    return I(map(rightunit, a.sectors))
 end
 
 dual(p::ProductSector) = ProductSector(map(dual, p.sectors))
-function ⊗(p1::P, p2::P) where {P <: ProductSector}
-    if FusionStyle(P) isa UniqueFusion
-        (P(first(product(map(⊗, p1.sectors, p2.sectors)...))),)
+function ⊗(p1::I, p2::I) where {I <: ProductSector}
+    if FusionStyle(I) isa UniqueFusion
+        (I(first(product(map(⊗, p1.sectors, p2.sectors)...))),)
     else
-        return SectorSet{P}(product(map(⊗, p1.sectors, p2.sectors)...))
+        return SectorSet{I}(product(map(⊗, p1.sectors, p2.sectors)...))
     end
 end
 
-function Nsymbol(a::P, b::P, c::P) where {P <: ProductSector}
+function Nsymbol(a::I, b::I, c::I) where {I <: ProductSector}
     return prod(map(Nsymbol, a.sectors, b.sectors, c.sectors))
 end
 
 _firstsector(x::ProductSector) = x.sectors[1]
 _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 
-function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: ProductSector}
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
     heads = map(_firstsector, (a, b, c, d, e, f))
     tails = map(_tailsector, (a, b, c, d, e, f))
     F₁ = Fsymbol(heads...)
@@ -113,12 +113,12 @@ function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: ProductSector}
     end
 end
 function Fsymbol(
-        a::P, b::P, c::P, d::P, e::P, f::P
-    ) where {P <: ProductSector{<:Tuple{Sector}}}
+        a::I, b::I, c::I, d::I, e::I, f::I
+    ) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol(map(_firstsector, (a, b, c, d, e, f))...)
 end
 
-function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector}
+function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
     R₁ = Rsymbol(heads...)
@@ -139,11 +139,11 @@ function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(R₁, R₂)
     end
 end
-function Rsymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
+function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol(map(_firstsector, (a, b, c))...)
 end
 
-function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector}
+function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
     B₁ = Bsymbol(heads...)
@@ -164,11 +164,11 @@ function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(B₁, B₂)
     end
 end
-function Bsymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
+function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol(map(_firstsector, (a, b, c))...)
 end
 
-function Asymbol(a::P, b::P, c::P) where {P <: ProductSector}
+function Asymbol(a::I, b::I, c::I) where {I <: ProductSector}
     heads = map(_firstsector, (a, b, c))
     tails = map(_tailsector, (a, b, c))
     A₁ = Asymbol(heads...)
@@ -189,21 +189,21 @@ function Asymbol(a::P, b::P, c::P) where {P <: ProductSector}
         return _kron(A₁, A₂)
     end
 end
-function Asymbol(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
+function Asymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
 end
 
 frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
 frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
 
-function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector}
+function fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     return _kron(
         fusiontensor(map(_firstsector, (a, b, c))...),
         fusiontensor(map(_tailsector, (a, b, c))...)
     )
 end
 
-function fusiontensor(a::P, b::P, c::P) where {P <: ProductSector{<:Tuple{Sector}}}
+function fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
@@ -233,15 +233,15 @@ function dimscalartype(::Type{I}) where {I <: ProductSector}
     return typeof(prod(zero ∘ dimscalartype, _sectors(I)))
 end
 
-fermionparity(P::ProductSector) = mapreduce(fermionparity, xor, P.sectors)
+fermionparity(p::ProductSector) = mapreduce(fermionparity, xor, p.sectors)
 
 dim(p::ProductSector) = *(dim.(p.sectors)...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
-function Base.isless(p1::I, p2::I) where {I <: ProductSector}
-    I1 = findindex.(values.(_sectors(I)), p1.sectors)
-    I2 = findindex.(values.(_sectors(I)), p2.sectors)
+function Base.isless(a::I, b::I) where {I <: ProductSector}
+    I1 = findindex.(values.(_sectors(I)), a.sectors)
+    I2 = findindex.(values.(_sectors(I)), b.sectors)
     d1 = sum(I1) - length(I1)
     d2 = sum(I2) - length(I2)
     d1 < d2 && return true
@@ -290,8 +290,8 @@ function Base.show(io::IO, P::ProductSector)
     return print(io, ")")
 end
 
-function type_repr(P::Type{<:ProductSector})
-    sectors = P.parameters[1].parameters
+function type_repr(::Type{I}) where {I <: ProductSector}
+    sectors = _sectors(I)
     if length(sectors) == 1
         s = "ProductSector{Tuple{" * type_repr(sectors[1]) * "}}"
     else

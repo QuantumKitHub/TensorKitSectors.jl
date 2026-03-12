@@ -86,35 +86,35 @@ function Base.iterate(P::SectorValues{NamedSector{NT}}, i = 1) where {NT <: Name
 end
 
 # Unit
-function unit(::Type{T}) where {T <: NamedSector}
-    UnitStyle(T) === GenericUnit() && throw_genericunit_error(T)
-    return only(allunits(T))
+function unit(::Type{I}) where {I <: NamedSector}
+    UnitStyle(I) === GenericUnit() && throw_genericunit_error(I)
+    return only(allunits(I))
 end
 allunits(::Type{I}) where {I <: NamedSector} = SectorSet{I}(I, allunits(_productsectortype(I)))
-leftunit(a::P) where {P <: NamedSector} = P(leftunit(ProductSector(a)))
-rightunit(a::P) where {P <: NamedSector} = P(rightunit(ProductSector(a)))
+leftunit(a::I) where {I <: NamedSector} = I(leftunit(ProductSector(a)))
+rightunit(a::I) where {I <: NamedSector} = I(rightunit(ProductSector(a)))
 
 # Sector operations
-dual(p::P) where {P <: NamedSector} = P(dual(ProductSector(p)))
+dual(p::I) where {I <: NamedSector} = I(dual(ProductSector(p)))
 
-⊗(p1::P, p2::P) where {P <: NamedSector} = SectorSet{P}(P, ProductSector(p1) ⊗ ProductSector(p2))
+⊗(p1::I, p2::I) where {I <: NamedSector} = SectorSet{I}(I, ProductSector(p1) ⊗ ProductSector(p2))
 
-function Nsymbol(a::P, b::P, c::P) where {P <: NamedSector}
+function Nsymbol(a::I, b::I, c::I) where {I <: NamedSector}
     return Nsymbol(map(ProductSector, (a, b, c))...)
 end
-function Fsymbol(a::P, b::P, c::P, d::P, e::P, f::P) where {P <: NamedSector}
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: NamedSector}
     return Fsymbol(map(ProductSector, (a, b, c, d, e, f))...)
 end
-function Rsymbol(a::P, b::P, c::P) where {P <: NamedSector}
+function Rsymbol(a::I, b::I, c::I) where {I <: NamedSector}
     return Rsymbol(map(ProductSector, (a, b, c))...)
 end
-function Bsymbol(a::P, b::P, c::P) where {P <: NamedSector}
+function Bsymbol(a::I, b::I, c::I) where {I <: NamedSector}
     return Bsymbol(map(ProductSector, (a, b, c))...)
 end
-function Asymbol(a::P, b::P, c::P) where {P <: NamedSector}
+function Asymbol(a::I, b::I, c::I) where {I <: NamedSector}
     return Asymbol(map(ProductSector, (a, b, c))...)
 end
-function fusiontensor(a::P, b::P, c::P) where {P <: NamedSector}
+function fusiontensor(a::I, b::I, c::I) where {I <: NamedSector}
     return fusiontensor(map(ProductSector, (a, b, c))...)
 end
 
@@ -163,13 +163,13 @@ function Base.show(io::IO, P::NamedSector)
     return nothing
 end
 
-function type_repr(::Type{P}) where {P <: NamedSector}
-    names = _sectornames(P)
-    sectors = _sectors(P)
+function type_repr(::Type{I}) where {I <: NamedSector}
+    names = _sectornames(I)
+    sectors = _sectors(I)
     s = "@NamedSector{"
-    for (i, (name, I)) in enumerate(zip(names, sectors))
+    for (i, (name, If)) in enumerate(zip(names, sectors))
         i == 1 || (s *= ", ")
-        s *= string(name) * "::" * type_repr(I)
+        s *= string(name) * "::" * type_repr(If)
     end
     s *= "}"
     return s
