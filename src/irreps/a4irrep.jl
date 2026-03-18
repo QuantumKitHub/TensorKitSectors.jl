@@ -80,27 +80,8 @@ function Nsymbol(a::A4Irrep, b::A4Irrep, c::A4Irrep)
     return Int((a.n + b.n) % 3 == c.n)
 end
 
-
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: A4Irrep}
-    T = fusionscalartype(I)
-    Nabe = Nsymbol(a, b, e)
-    Necd = Nsymbol(e, c, d)
-    Nbcf = Nsymbol(b, c, f)
-    Nafd = Nsymbol(a, f, d)
-
-    Nabe > 0 && Necd > 0 && Nbcf > 0 && Nafd > 0 ||
-        return zeros(T, Nabe, Necd, Nbcf, Nafd)
-
-    # fallback through fusiontensor for A4Irrep
-    A = fusiontensor(a, b, e)
-    B = fusiontensor(e, c, d)[:, :, 1, :]
-    C = fusiontensor(b, c, f)
-    D = fusiontensor(a, f, d)[:, :, 1, :]
-    @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) *
-        A[1, 2, 3, -1] * B[3, 4, -2]
-
-    return F
-end
+Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: A4Irrep} =
+    Fsymbol_from_fusiontensor(a, b, c, d, e, f)
 
 # bosonic
 function Rsymbol(a::I, b::I, c::I) where {I <: A4Irrep}

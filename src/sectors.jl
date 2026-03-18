@@ -403,6 +403,22 @@ it is a rank 4 array of size
 """
 function Fsymbol end
 
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: Sector}
+    T = fusionscalartype(I)
+    Nabe, Necd, Nbcd, Nafd = Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d)
+    if iszero(Nabe * Necd * Nbcd * Nafd)
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, Nabe, Necd, Nbcd, Nafd)
+    else
+        A = fusiontensor(a, b, e)
+        B = @view fusiontensor(e, c, d)[:, :, 1, :]
+        C = fusiontensor(b, c, f)
+        D = @view fusiontensor(a, f, d)[:, :, 1, :]
+
+        @tensor F[-1, -2, -3, -4] := conj(D[1, 5, -4]) * conj(C[2, 4, 5, -3]) * A[1, 2, 3, -1] * B[3, 4, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(F) : F
+    end
+end
+
 # properties that can be determined in terms of the F symbol
 # TODO: find mechanism for returning these numbers with custom type T <: AbstractFloat
 """
@@ -410,7 +426,9 @@ function Fsymbol end
 
 Return the (quantum) dimension of the sector `a`.
 """
-function dim(a::Sector)
+dim(a::Sector) = dim_from_Fsymbol(a)
+
+function dim_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion
         1
     elseif FusionStyle(a) isa SimpleFusion
@@ -440,7 +458,9 @@ When `a == dual(a)`, it is restricted to ``κₐ ∈ \\{1, -1\\}`` and coincides
 the group-theoretic version [`frobenius_schur_indicator`](@ref).
 When `a != dual(a)`, the value of ``κₐ`` can be gauged to be `1`, though is not required to be.
 """
-function frobenius_schur_phase(a::Sector)
+frobenius_schur_phase(a::Sector) = frobenius_schur_phase_from_Fsymbol(a)
+
+function frobenius_schur_phase_from_Fsymbol(a::Sector)
     return if FusionStyle(a) isa UniqueFusion || FusionStyle(a) isa SimpleFusion
         sign(Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a)))
     else
@@ -462,7 +482,6 @@ function frobenius_schur_indicator(a::Sector)
     return a == conj(a) ? ν : zero(ν)
 end
 
-# Not necessary
 """
     Asymbol(a::I, b::I, c::I) where {I <: Sector}
 
@@ -477,16 +496,31 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the A-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(dual(a), c, b)`.
 """
-function Asymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+Asymbol(a::I, b::I, c::I) where {I <: Sector} = Asymbol_from_Fsymbol(a, b, c)
+
+function Asymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
+    return if FusionStyle(I) isa MultiplicityFreeFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c))
+            conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) *
-                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, leftunit(a), c)),
+                conj(frobenius_schur_phase(a) * Fsymbol(dual(a), a, b, b, rightunit(a), c)),
             (Nsymbol(a, b, c), Nsymbol(dual(a), c, b))
         )
+    end
+end
+function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
+    T = fusionscalartype(I)
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        C1 = view(fusiontensor(a, b, c), :, 1, :, :)
+        C2 = view(fusiontensor(dual(a), c, b), :, :, 1, :)
+        Za = sqrtdim(a) * view(fusiontensor(a, dual(a), leftunit(a)), :, :, 1, 1)
+        @tensor A[-1, -2] := sqrtdim(b) / sqrtdim(c) * conj(Za[1, 2]) * C1[1, 3, -1] * C2[2, 3, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(A) : A
     end
 end
 
@@ -504,14 +538,29 @@ If `FusionStyle(I)` is `UniqueFusion()` or `SimpleFusion()`, the B-symbol is a
 number. Otherwise it is a square matrix with row and column size
 `Nsymbol(a, b, c) == Nsymbol(c, dual(b), a)`.
 """
-function Bsymbol(a::I, b::I, c::I) where {I <: Sector}
-    return if FusionStyle(I) isa UniqueFusion || FusionStyle(I) isa SimpleFusion
+Bsymbol(a::I, b::I, c::I) where {I <: Sector} = Bsymbol_from_Fsymbol(a, b, c)
+
+function Bsymbol_from_Fsymbol(a::I, b::I, c::I) where {I <: Sector}
+    return if FusionStyle(I) isa MultiplicityFreeFusion
         (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a))
     else
         reshape(
             (sqrtdim(a) * sqrtdim(b) * invsqrtdim(c)) * Fsymbol(a, b, dual(b), a, c, rightunit(a)),
             (Nsymbol(a, b, c), Nsymbol(c, dual(b), a))
         )
+    end
+end
+function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
+    T = fusionscalartype(I)
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        C1 = view(fusiontensor(a, b, c), 1, :, :, :)
+        C2 = view(fusiontensor(c, dual(b), a), :, :, 1, :)
+        Zb = sqrtdim(b) * view(fusiontensor(b, dual(b), leftunit(b)), :, :, 1, 1)
+        @tensor B[-1, -2] := sqrtdim(a) / sqrtdim(c) * conj(Zb[1, 2]) * C1[1, 3, -1] * C2[3, 2, -2]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(B) : B
     end
 end
 
@@ -574,6 +623,19 @@ number. Otherwise it is a square matrix with row and column size
 """
 function Rsymbol end
 
+function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: Sector}
+    Nabc = Nsymbol(a, b, c)
+    T = braidingscalartype(I)
+    if Nabc == 0
+        return FusionStyle(I) isa MultiplicityFreeFusion ? zero(T) : zeros(T, 0, 0)
+    else
+        A = view(fusiontensor(a, b, c), :, :, 1, :)
+        B = view(fusiontensor(b, a, c), :, :, 1, :)
+        @tensor R[-1 -2] := conj(B[1 2 -2]) * A[2 1 -1]
+        return FusionStyle(I) isa MultiplicityFreeFusion ? only(R) : R
+    end
+end
+
 # properties that can be determined in terms of the R symbol
 
 """
@@ -581,7 +643,27 @@ function Rsymbol end
 
 Return the twist of a sector `a`.
 """
-twist(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
+twist(a::Sector) = twist_from_Rsymbol(a)
+twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
+
+# Operations between sectors of different types
+# ------------------------------------------------------------------------------
+
+"""
+    ⊠(s₁::Sector, s₂::Sector, ...)
+    ⊠(; name₁::Sector=s₁, name₂::Sector=s₂, ...)
+    deligneproduct(s₁::Sector, s₂::Sector, ...)
+    deligneproduct(; name₁::Sector=s₁, name₂::Sector=s₂, ...)
+
+Given two sectors `s₁` and `s₂`, which label an isomorphism class of simple objects in a
+fusion category ``C₁`` and ``C₂``, `s1 ⊠ s2` (obtained as `\\boxtimes+TAB`) labels the
+isomorphism class of simple objects in the Deligne tensor product category ``C₁ ⊠ C₂``.
+
+The Deligne tensor product also works in the type domain and for spaces and tensors. For
+group representations, we have `Irrep[G₁] ⊠ Irrep[G₂] == Irrep[G₁ × G₂]`.
+"""
+⊠(s1, s2, s3, s4...) = ⊠(⊠(s1, s2), s3, s4...)
+const deligneproduct = ⊠
 
 # Triangle equation
 #-------------------------------------------------------------------------------
@@ -657,34 +739,46 @@ end
 """
     hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector} -> Bool
 
-Check whether the hexagon equation holds for braiding the sector `a` around the fusion
-product of `b` and `c` along the two different paths.
+Check whether the hexagon equations hold for braiding the sector `a` around the fusion
+product of `b` and `c` along the two different paths. There are two hexagon equations,
+one for braiding `a` over `b ⊗ c` and one for braiding `a` under `b ⊗ c`.
 
 If `kwargs` are provided, they are forwarded to `isapprox` when comparing the two sides
-of the hexagon equation.
+of the hexagon equations.
 """
 function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
     BraidingStyle(I) isa NoBraiding &&
-        throw(ArgumentError("Hexagon equation only defined for sectors with braiding"))
-    for e in ⊗(c, a), f in ⊗(c, b)
-        for d in intersect(⊗(e, b), ⊗(a, f))
-            if FusionStyle(I) isa MultiplicityFreeFusion
-                p1 = Rsymbol(c, a, e) * Fsymbol(a, c, b, d, e, f) * Rsymbol(c, b, f)
-                p2 = zero(p1)
-                for g in ⊗(a, b)
-                    p2 += Fsymbol(c, a, b, d, e, g) * Rsymbol(c, g, d) *
-                        Fsymbol(a, b, c, d, g, f)
+        throw(ArgumentError("Hexagon equations only defined for sectors with braiding"))
+    for e in ⊗(c, a)
+        Rcae, Race = Rsymbol(c, a, e), Rsymbol(a, c, e)
+        for f in ⊗(c, b)
+            Rcbf, Rbcf = Rsymbol(c, b, f), Rsymbol(b, c, f)
+            for d in intersect(⊗(e, b), ⊗(a, f))
+                Facbdef = Fsymbol(a, c, b, d, e, f)
+                if FusionStyle(I) isa MultiplicityFreeFusion
+                    RFR1 = Rcae * Facbdef * Rcbf
+                    RFR2 = conj(Race) * Facbdef * conj(Rbcf)
+                else
+                    @tensor RFR1[α, β, μ, ν] := Rcae[α, λ] * Facbdef[λ, β, γ, ν] * Rcbf[γ, μ]
+                    @tensor RFR2[α, β, μ, ν] := conj(Race[α, λ]) * Facbdef[λ, β, γ, ν] * conj(Rbcf[γ, μ])
                 end
-            else
-                @tensor p1[α, β, μ, ν] := Rsymbol(c, a, e)[α, λ] *
-                    Fsymbol(a, c, b, d, e, f)[λ, β, γ, ν] * Rsymbol(c, b, f)[γ, μ]
-                p2 = zero(p1)
+
+                FRF1, FRF2 = zero(RFR1), zero(RFR2)
                 for g in ⊗(a, b)
-                    @tensor p2[α, β, μ, ν] += Fsymbol(c, a, b, d, e, g)[α, β, δ, σ] *
-                        Rsymbol(c, g, d)[σ, ψ] * Fsymbol(a, b, c, d, g, f)[δ, ψ, μ, ν]
+                    Rcgd, Rgcd = Rsymbol(c, g, d), Rsymbol(g, c, d)
+                    Fcabdeg = Fsymbol(c, a, b, d, e, g)
+                    Fabcdgf = Fsymbol(a, b, c, d, g, f)
+                    if FusionStyle(I) isa MultiplicityFreeFusion
+                        FRF1 += Fcabdeg * Rcgd * Fabcdgf
+                        FRF2 += Fcabdeg * conj(Rgcd) * Fabcdgf
+                    else
+                        @tensor FRF1[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * Rcgd[σ, ψ] * Fabcdgf[δ, ψ, μ, ν]
+                        @tensor FRF2[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * conj(Rgcd[σ, ψ]) * Fabcdgf[δ, ψ, μ, ν]
+                    end
                 end
+                isapprox(RFR1, FRF1; kwargs...) || return false
+                isapprox(RFR2, FRF2; kwargs...) || return false
             end
-            isapprox(p1, p2; kwargs...) || return false
         end
     end
     return true

@@ -14,6 +14,7 @@ export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermi
 export UnitStyle, SimpleUnit, GenericUnit
 export SectorSet, SectorValues, findindex
 export unit, rightunit, leftunit, allunits, isunit
+export timereversed
 
 export triangle_equation, pentagon_equation, hexagon_equation
 
@@ -23,7 +24,7 @@ export D3Irrep, D4Irrep, DNIrrep, CU1Irrep
 export A4Irrep
 export SU2Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
-export ProductSector, TimeReversed
+export ProductSector, NamedSector, @NamedSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
 export IsingBimodule
@@ -42,6 +43,14 @@ export fℤ₂, fU₁, fSU₂
 # ------
 @static if VERSION >= v"1.11.0-DEV.469"
     eval(Expr(:public, :type_repr))
+    eval(
+        Expr(
+            :public, :Asymbol_from_Fsymbol, :Bsymbol_from_Fsymbol, :dim_from_Fsymbol,
+            :frobenius_schur_phase_from_Fsymbol, :Fsymbol_from_fusiontensor,
+            :Asymbol_from_fusiontensor, :Bsymbol_from_fusiontensor,
+            :Rsymbol_from_fusiontensor, :twist_from_Rsymbol,
+        )
+    )
 end
 
 # imports
@@ -66,6 +75,7 @@ include("irreps/irreps.jl")    # irreps of symmetry groups, with bosonic braidin
 include("groupelements.jl") # group elements with cocycles, no braiding
 include("timereversed.jl")   # time-reversed sector (conjugate braiding)
 include("product.jl")   # direct product of different sectors
+include("named.jl")     # named tuple product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
 include("multifusion.jl") # multifusion example, namely Rep Z2 ⊕ Rep Z2 ≅ Ising

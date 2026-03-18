@@ -1,24 +1,29 @@
 using TensorOperations
 using LinearAlgebra
+using TensorKitSectors: TensorKitSectors as TKS
 
 @testsuite "Basic properties" I -> begin
-    s = (randsector(I), randsector(I), randsector(I))
-    @test Base.eval(Main, Meta.parse(sprint(show, I))) == I
-    @test Base.eval(Main, Meta.parse(TensorKitSectors.type_repr(I))) == I
-    @test Base.eval(Main, Meta.parse(sprint(show, s[1]))) == s[1]
-    @test @testinferred(hash(s[1])) == hash(deepcopy(s[1]))
-    @test @testinferred(unit(s[1])) == @testinferred(unit(I))
-    @testinferred dual(s[1])
-    @testinferred dim(s[1])
-    @testinferred frobenius_schur_phase(s[1])
-    @testinferred frobenius_schur_indicator(s[1])
-    @testinferred Nsymbol(s...)
-    @testinferred Asymbol(s...)
-    B = @testinferred Bsymbol(s...)
-    F = @testinferred Fsymbol(s..., s...)
+    s = random_fusion(I, 2)
+    sc = @testinferred(first(⊗(s...)))
+    @test @testinferred(hash(sc)) == hash(deepcopy(sc))
+    if UnitStyle(I) isa SimpleUnit
+        @test @testinferred(unit(sc)) == @testinferred(unit(I))
+    end
+    @testinferred dual(sc)
+    @testinferred dim(sc)
+    @testinferred frobenius_schur_phase(sc)
+    @testinferred frobenius_schur_indicator(sc)
+    @testinferred(⊗(s..., s...))
+    @testinferred Nsymbol(s..., sc)
+    @testinferred Asymbol(s..., sc)
+    B = @testinferred Bsymbol(s..., sc)
+    s2 = random_fusion(I, 3)
+    s2c = first(⊗(s2...))
+    e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
+    F = @testinferred Fsymbol(s2..., s2c, e, f)
     @test eltype(F) === @testinferred fusionscalartype(I)
     if BraidingStyle(I) isa HasBraiding
-        R = @testinferred Rsymbol(s...)
+        R = @testinferred Rsymbol(s..., sc)
         @test eltype(R) === @testinferred braidingscalartype(I)
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
@@ -32,23 +37,33 @@ using LinearAlgebra
             @test eltype(F) <: @testinferred sectorscalartype(I)
         end
     end
-    @testinferred(s[1] ⊗ s[2])
-    @testinferred(⊗(s..., s...))
+end
+
+@testsuite "Show and parse" I -> begin
+    # test in the parent module of where the test is defined
+    _module = parentmodule(@__MODULE__)
+    _eval(x) = Base.eval(_module, x)
+    _sprint(x) = sprint(show, x; context = (:module => _module))
+    @test _eval(Meta.parse(_sprint(I))) == I
+    @test _eval(Meta.parse(TKS.type_repr(I))) == I
+    for a in smallset(I)
+        @test _eval(Meta.parse(_sprint(a))) == a
+    end
 end
 
 @testsuite "Value iterator" I -> begin
     @test eltype(values(I)) == I
-    sprev = unit(I)
-    for (i, s) in enumerate(values(I))
+    sprev, rest = Iterators.peel(values(I))
+    i = 1
+    @test (@testinferred findindex(values(I), sprev)) == i
+    for s in rest
+        i += 1
         @test !isless(s, sprev)
         @test s == @testinferred(values(I)[i])
         @test findindex(values(I), s) == i
         sprev = s
         i >= 10 && break
     end
-    @test unit(I) == first(values(I))
-    @test length(allunits(I)) == 1
-    @test (@testinferred findindex(values(I), unit(I))) == 1
     for s in smallset(I)
         @test (@testinferred values(I)[findindex(values(I), s)]) == s
     end
@@ -106,6 +121,7 @@ end
 
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
         da = dim(a)
         db = dim(b)
         dc = sum(c -> dim(c) * Nsymbol(a, b, c), a ⊗ b)
@@ -113,39 +129,88 @@ end
     end
 end
 
-@testsuite "Fusion tensor and F-move" I -> begin
+@testsuite "Fusion tensor and Fsymbol" I -> begin
     hasfusiontensor(I) || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
         for e in ⊗(a, b), f in ⊗(b, c)
             for d in intersect(⊗(e, c), ⊗(a, f))
-                X1 = fusiontensor(a, b, e)
-                X2 = fusiontensor(e, c, d)
-                Y1 = fusiontensor(b, c, f)
-                Y2 = fusiontensor(a, f, d)
-                @tensor f1[-1, -2, -3, -4] := conj(Y2[a, f, d, -4]) *
-                    conj(Y1[b, c, f, -3]) * X1[a, b, e, -1] * X2[e, c, d, -2]
-                if FusionStyle(I) isa MultiplicityFreeFusion
-                    f2 = fill(Fsymbol(a, b, c, d, e, f) * dim(d), (1, 1, 1, 1))
-                else
-                    f2 = Fsymbol(a, b, c, d, e, f) * dim(d)
-                end
-                @test isapprox(f1, f2; atol = 1.0e-12, rtol = 1.0e-12)
+                F1 = Fsymbol(a, b, c, d, e, f)
+                F2 = TKS.Fsymbol_from_fusiontensor(a, b, c, d, e, f)
+                @test F1 ≈ F2 atol = 1.0e-12 rtol = 1.0e-12
             end
         end
     end
 end
 
-@testsuite "Fusion tensor and R-move" I -> begin
+@testsuite "Fsymbol and Asymbol" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            A1 = Asymbol(a, b, c)
+            A2 = TKS.Asymbol_from_Fsymbol(a, b, c)
+            @test A1 ≈ A2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fsymbol and Bsymbol" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            B1 = Bsymbol(a, b, c)
+            B2 = TKS.Bsymbol_from_Fsymbol(a, b, c)
+            @test B1 ≈ B2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fusion tensor and Asymbol" I -> begin
     (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
     for a in smallset(I), b in smallset(I)
         for c in ⊗(a, b)
-            X1 = permutedims(fusiontensor(a, b, c), (2, 1, 3, 4))
-            X2 = fusiontensor(b, a, c)
-            l = dim(a) * dim(b) * dim(c)
-            R = LinearAlgebra.transpose(Rsymbol(a, b, c))
-            sz = (l, convert(Int, Nsymbol(a, b, c)))
-            @test reshape(X1, sz) ≈ reshape(X2, sz) * R
+            A1 = Asymbol(a, b, c)
+            A2 = TKS.Asymbol_from_fusiontensor(a, b, c)
+            @test A1 ≈ A2 atol = 1.0e-12 rtol = 1.0e-12
         end
+    end
+end
+
+@testsuite "Fusion tensor and Bsymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            B1 = Bsymbol(a, b, c)
+            B2 = TKS.Bsymbol_from_fusiontensor(a, b, c)
+            @test B1 ≈ B2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Fsymbol and dim" I -> begin
+    for a in smallset(I)
+        @test dim(a) ≈ TKS.dim_from_Fsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
+    end
+end
+
+@testsuite "Fsymbol and frobenius_schur_phase" I -> begin
+    for a in smallset(I)
+        @test frobenius_schur_phase(a) ≈ TKS.frobenius_schur_phase_from_Fsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
+    end
+end
+
+@testsuite "Fusion tensor and Rsymbol" I -> begin
+    (BraidingStyle(I) isa Bosonic && hasfusiontensor(I)) || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            R1 = Rsymbol(a, b, c)
+            R2 = TKS.Rsymbol_from_fusiontensor(a, b, c)
+            @test R1 ≈ R2 atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Rsymbol and twist" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I)
+        @test twist(a) ≈ TKS.twist_from_Rsymbol(a) atol = 1.0e-12 rtol = 1.0e-12
     end
 end
 
@@ -156,8 +221,8 @@ end
         cgcs = map(c -> fusiontensor(a, b, c), cs)
         for (c, cgc) in zip(cs, cgcs), (c′, cgc′) in zip(cs, cgcs)
             for μ in 1:Nsymbol(a, b, c), ν in 1:Nsymbol(a, b, c′)
-                @tensor overlap[mc mc'] := conj(view(cgc, :, :, :, μ)[ma mb mc]) *
-                    view(cgc′, :, :, :, ν)[ma mb mc']
+                @tensor overlap[mc mc'] := conj(cgc[:, :, :, μ][ma mb mc]) *
+                    cgc′[:, :, :, ν][ma mb mc']
                 if μ == ν && c == c′
                     @test isapprox(overlap, LinearAlgebra.I; atol = 1.0e-12)
                 else
@@ -169,41 +234,129 @@ end
 end
 
 @testsuite "Unitarity of F-move" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        for d in ⊗(a, b, c)
-            es = collect(intersect(⊗(a, b), map(dual, ⊗(c, dual(d)))))
-            fs = collect(intersect(⊗(b, c), map(dual, ⊗(dual(d), a))))
-            if FusionStyle(I) isa MultiplicityFreeFusion
-                @test length(es) == length(fs)
-                F = [Fsymbol(a, b, c, d, e, f) for e in es, f in fs]
-            else
-                Fblocks = Vector{Any}()
-                for e in es, f in fs
-                    Fs = Fsymbol(a, b, c, d, e, f)
-                    push!(Fblocks, reshape(Fs, (size(Fs, 1) * size(Fs, 2), size(Fs, 3) * size(Fs, 4))))
-                end
-                F = hvcat(length(fs), Fblocks...)
-            end
-            @test isapprox(F' * F, one(F); atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
+        for c in smallset(I)
+            can_fuse(b, c) || continue
+            @test F_unitarity_test(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
         end
+    end
+end
+
+@testsuite "Unitarity of R-move" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        @test R_unitarity_test(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Triangle equation" I -> begin
     for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
         @test triangle_equation(a, b; atol = 1.0e-12, rtol = 1.0e-12)
     end
 end
 
 @testsuite "Pentagon equation" I -> begin
-    for a in smallset(I), b in smallset(I), c in smallset(I), d in smallset(I)
-        @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
+        for c in smallset(I)
+            can_fuse(b, c) || continue
+            for d in smallset(I)
+                can_fuse(c, d) || continue
+                @test pentagon_equation(a, b, c, d; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
     end
 end
 
+# https://ncatlab.org/nlab/files/DelaneyModularTensorCategories.pdf#page=9
 @testsuite "Hexagon equation" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), c in smallset(I)
         @test hexagon_equation(a, b, c; atol = 1.0e-12, rtol = 1.0e-12)
+    end
+end
+
+# https://quantumkithub.github.io/TensorKit.jl/stable/appendix/categories/#Braidings-and-twists
+@testsuite "Ribbon condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I)
+        for c in ⊗(a, b)
+            R1 = Rsymbol(a, b, c)
+            R2 = Rsymbol(b, a, c)
+            θa, θb, θc = twist.((a, b, c))
+            factor = R1 * θa * θb * R2
+            if FusionStyle(I) isa GenericFusion
+                @test isapprox(θc * LinearAlgebra.I, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            else
+                @test isapprox(θc, factor; atol = 1.0e-12, rtol = 1.0e-12)
+            end
+        end
+    end
+end
+
+@testsuite "Braiding self-duality condition" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I)
+        if a == dual(a)
+            factor = twist(a) * frobenius_schur_phase(a) * Rsymbol(a, a, unit(a))
+            @test factor ≈ one(factor) atol = 1.0e-12 rtol = 1.0e-12
+        end
+    end
+end
+
+@testsuite "Symmetric braiding condition" I -> begin
+    BraidingStyle(I) isa SymmetricBraiding || return nothing
+    isfermionic = BraidingStyle(I) isa Fermionic
+    for a in smallset(I)
+        θa = twist(a)
+        oneT = one(θa)
+        @test isapprox(θa, oneT; atol = 1.0e-12, rtol = 1.0e-12) ||
+            (isfermionic && isapprox(θa, -oneT; atol = 1.0e-12, rtol = 1.0e-12))
+        for b in smallset(I)
+            for c in ⊗(a, b)
+                RR = Rsymbol(a, b, c) * Rsymbol(b, a, c)
+                @test RR ≈ one(RR) atol = 1.0e-12 rtol = 1.0e-12
+            end
+        end
+    end
+end
+
+# https://quantumkithub.github.io/TensorKit.jl/stable/man/fusiontrees/#Manipulations-on-a-fusion-tree
+@testsuite "Artin braid equality" I -> begin
+    BraidingStyle(I) isa HasBraiding || return nothing
+    for a in smallset(I), b in smallset(I), d in smallset(I)
+        for f in ⊗(d, a)
+            Rdaf, Radf = Rsymbol(d, a, f), Rsymbol(a, d, f)
+            for c in ⊗(a, b)
+                for e in intersect(⊗(c, d), ⊗(f, b))
+                    Rcde, Rdce = Rsymbol(c, d, e), Rsymbol(d, c, e)
+                    Fdabefc = Fsymbol(d, a, b, e, f, c)
+                    if FusionStyle(I) isa MultiplicityFreeFusion
+                        RFR1 = Rcde * conj(Fdabefc) * conj(Rdaf)
+                        RFR2 = conj(Rdce) * conj(Fdabefc) * Radf
+                    else
+                        @tensor RFR1[ν, μ, λ, σ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
+                        @tensor RFR2[ν, μ, λ, σ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]
+                    end
+                    FRF1, FRF2 = zero(RFR1), zero(RFR2)
+                    for g in ⊗(d, b)
+                        Fabdecg = Fsymbol(a, b, d, e, c, g)
+                        Fadbefg = Fsymbol(a, d, b, e, f, g)
+                        Rbdg, Rdbg = Rsymbol(b, d, g), Rsymbol(d, b, g)
+                        if FusionStyle(I) isa MultiplicityFreeFusion
+                            FRF1 += Fabdecg * Rbdg * conj(Fadbefg)
+                            FRF2 += conj(Fabdecg) * conj(Rdbg) * Fadbefg
+                        else
+                            @tensor FRF1[ν, μ, β, α] += Fabdecg[μ, ν, κ, λ] * Rbdg[κ, θ] * conj(Fadbefg[α, β, θ, λ])
+                            @tensor FRF2[ν, μ, β, α] += conj(Fabdecg[μ, ν, κ, λ]) * conj(Rdbg[κ, θ]) * Fadbefg[α, β, θ, λ]
+                        end
+                    end
+                    @test isapprox(RFR1, FRF1; atol = 1.0e-12, rtol = 1.0e-12)
+                    @test isapprox(RFR2, FRF2; atol = 1.0e-12, rtol = 1.0e-12)
+                end
+            end
+        end
     end
 end
