@@ -95,7 +95,7 @@ end
         else
             TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
         end
-        TR_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Rtype : AbstractArray{Rtype, 2} 
+        TR_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Rtype : AbstractArray{Rtype, 2}
         @test TR_actual <: TR_imposed
     end
 
