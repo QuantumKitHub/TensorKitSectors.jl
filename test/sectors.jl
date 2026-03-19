@@ -84,18 +84,19 @@ end
     # shape of data from fusion style
     Ftype = fusionscalartype(I)
     TF_actual = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
-    TF_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : Array{Ftype, 4} # won't work for sparse arrays (CategoryData)
-    @test TF_actual == TF_imposed
+    TF_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : AbstractArray{Ftype, 4}
+    @test TF_actual <: TF_imposed
 
     if BraidingStyle(I) isa HasBraiding
         Rtype = braidingscalartype(I)
-        TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-        TR_imposed = if FusionStyle(I) isa MultiplicityFreeFusion
-            Rtype
+        if I <: TimeReversed
+            _TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
+            TR_actual = Base.promote_op(adjoint, _TR_actual)
         else
-            I <: TimeReversed ? LinearAlgebra.Adjoint{Rtype, Array{Rtype, 2}} : Array{Rtype, 2} # same here
+            TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
         end
-        @test TR_actual == TR_imposed
+        TR_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Rtype : AbstractArray{Rtype, 2} 
+        @test TR_actual <: TR_imposed
     end
 
     # shape of data from multiplicities
