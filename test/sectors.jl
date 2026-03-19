@@ -20,10 +20,21 @@ using TensorKitSectors: TensorKitSectors as TKS
     s2 = random_fusion(I, 3)
     s2c = first(⊗(s2...))
     e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
-    F = @testinferred Fsymbol(s2..., s2c, e, f)
+    @testinferred Fsymbol(s2..., s2c, e, f)
+    if BraidingStyle(I) isa HasBraiding
+        @testinferred Rsymbol(s..., sc)
+    end
+end
+
+@testsuite "Element types of topological data" I -> begin
+    a, b, c = random_fusion(I, 3)
+    d = first(⊗(a, b, c))
+    e, f = first(⊗(a, b)), first(⊗(b, c))
+    F = Fsymbol(a, b, c, d, e, f)
     @test eltype(F) === @testinferred fusionscalartype(I)
     if BraidingStyle(I) isa HasBraiding
-        R = @testinferred Rsymbol(s..., sc)
+        a, b = random_fusion(I, 2)
+        R = Rsymbol(a, b, first(⊗(a, b)))
         @test eltype(R) === @testinferred braidingscalartype(I)
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
