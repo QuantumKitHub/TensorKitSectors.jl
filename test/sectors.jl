@@ -99,18 +99,23 @@ end
     end
 
     # shape of data from multiplicities
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        for e in ⊗(a, b), f in ⊗(b, c)
-            for d in intersect(⊗(e, c), ⊗(a, f))
-                F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))
-                @test size(Fsymbol(a, b, c, d, e, f)) == F_size
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
+        for c in smallset(I)
+            can_fuse(b, c) || continue
+            for e in ⊗(a, b), f in ⊗(b, c)
+                can_fuse(e, c) && can_fuse(a, f) || continue
+                Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
+                for d in ⊗(a, b, c)
+                    F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabe, Nsymbol(e, c, d), Nbcf, Nsymbol(a, f, d))
+                    @test size(Fsymbol(a, b, c, d, e, f)) == F_size
+                end
             end
-        end
 
-        if BraidingStyle(I) isa HasBraiding
-            Nabc = Nsymbol(a, b, c)
-            R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabc, Nabc)
-            @test size(Rsymbol(a, b, c)) == R_size
+            if BraidingStyle(I) isa HasBraiding
+                R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, c), Nsymbol(b, a, c))
+                @test size(Rsymbol(a, b, c)) == R_size
+            end
         end
     end
 end
