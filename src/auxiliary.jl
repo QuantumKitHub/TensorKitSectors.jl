@@ -13,6 +13,41 @@ function _kron(A, B)
     end
     return C
 end
+function _kron_promote(A₁, B₁, sz₁::Function, sz₂::Function)
+    if A₁ isa Number && B₁ isa Number
+        return A₁ * B₁
+    end
+    A₂ = A₁ isa Number ? fill(A₁, sz₁()) : A₁
+    B₂ = B₁ isa Number ? fill(B₁, sz₂()) : B₁
+    return _kron(A₂, B₂)
+end
+
+function _array_size_functions(t₁::NTuple{6, I₁}, t₂::NTuple{6, I₂}) where {I₁ <: Sector, I₂ <: Sector} # for F-symbols
+    size₁ = () -> begin
+        a₁, b₁, c₁, d₁, e₁, f₁ = t₁
+        (Nsymbol(a₁, b₁, e₁), Nsymbol(e₁, c₁, d₁), Nsymbol(b₁, c₁, f₁), Nsymbol(a₁, f₁, d₁))
+    end
+    size₂ = () -> begin
+        a₂, b₂, c₂, d₂, e₂, f₂ = t₂
+        (Nsymbol(a₂, b₂, e₂), Nsymbol(e₂, c₂, d₂), Nsymbol(b₂, c₂, f₂), Nsymbol(a₂, f₂, d₂))
+    end
+    return size₁, size₂
+end
+
+# handles R-, A- and B-symbols correctly because of Frobenius reciprocity
+# i.e. Nsymbol(a, b, c) = Nsymbol(c, dual(b), a) = Nsymbol(dual(a), c, b)
+# and for braided categories Nsymbol(a, b, c) = Nsymbol(b, a, c)
+function _matrix_size_functions(t₁::NTuple{3, I₁}, t₂::NTuple{3, I₂}) where {I₁ <: Sector, I₂ <: Sector}
+    size₁ = () -> begin
+        a₁, b₁, c₁ = t₁
+        (Nsymbol(a₁, b₁, c₁), Nsymbol(a₁, b₁, c₁))
+    end
+    size₂ = () -> begin
+        a₂, b₂, c₂ = t₂
+        (Nsymbol(a₂, b₂, c₂), Nsymbol(a₂, b₂, c₂))
+    end
+    return size₁, size₂
+end
 
 # Manhattan based distance enumeration: I is supposed to be one-based index
 # TODO: is there any way to make this faster?

@@ -92,25 +92,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c, d, e, f))
     F₁ = Fsymbol(heads...)
     F₂ = Fsymbol(tails...)
-    if F₁ isa Number && F₂ isa Number
-        return F₁ * F₂
-    elseif F₁ isa Number
-        a₁, b₁, c₁, d₁, e₁, f₁ = heads
-        sz₁ = (
-            Nsymbol(a₁, b₁, e₁), Nsymbol(e₁, c₁, d₁), Nsymbol(b₁, c₁, f₁), Nsymbol(a₁, f₁, d₁),
-        )
-        F₁′ = fill(F₁, sz₁)
-        return _kron(F₁′, F₂)
-    elseif F₂ isa Number
-        a₂, b₂, c₂, d₂, e₂, f₂ = tails
-        sz₂ = (
-            Nsymbol(a₂, b₂, e₂), Nsymbol(e₂, c₂, d₂), Nsymbol(b₂, c₂, f₂), Nsymbol(a₂, f₂, d₂),
-        )
-        F₂′ = fill(F₂, sz₂)
-        return _kron(F₁, F₂′)
-    else
-        return _kron(F₁, F₂)
-    end
+    return _kron_promote(F₁, F₂, _array_size_functions(heads, tails)...)
 end
 function Fsymbol(
         a::I, b::I, c::I, d::I, e::I, f::I
@@ -122,25 +104,7 @@ function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I 
     tails = map(_tailsector, (a, b, c, d, e, f))
     F₁ = Fsymbol_from_fusiontensor(heads...)
     F₂ = Fsymbol_from_fusiontensor(tails...)
-    if F₁ isa Number && F₂ isa Number
-        return F₁ * F₂
-    elseif F₁ isa Number
-        a₁, b₁, c₁, d₁, e₁, f₁ = heads
-        sz₁ = (
-            Nsymbol(a₁, b₁, e₁), Nsymbol(e₁, c₁, d₁), Nsymbol(b₁, c₁, f₁), Nsymbol(a₁, f₁, d₁),
-        )
-        F₁′ = fill(F₁, sz₁)
-        return _kron(F₁′, F₂)
-    elseif F₂ isa Number
-        a₂, b₂, c₂, d₂, e₂, f₂ = tails
-        sz₂ = (
-            Nsymbol(a₂, b₂, e₂), Nsymbol(e₂, c₂, d₂), Nsymbol(b₂, c₂, f₂), Nsymbol(a₂, f₂, d₂),
-        )
-        F₂′ = fill(F₂, sz₂)
-        return _kron(F₁, F₂′)
-    else
-        return _kron(F₁, F₂)
-    end
+    return _kron_promote(F₁, F₂, _array_size_functions(heads, tails)...)
 end
 function Fsymbol_from_fusiontensor(
         a::I, b::I, c::I, d::I, e::I, f::I
@@ -153,21 +117,7 @@ function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     R₁ = Rsymbol(heads...)
     R₂ = Rsymbol(tails...)
-    if R₁ isa Number && R₂ isa Number
-        R₁ * R₂
-    elseif R₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(b₁, a₁, c₁)) # 0 x 0 or 1 x 1
-        R₁′ = fill(R₁, sz₁)
-        return _kron(R₁′, R₂)
-    elseif R₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(b₂, a₂, c₂)) # 0 x 0 or 1 x 1
-        R₂′ = fill(R₂, sz₂)
-        return _kron(R₁, R₂′)
-    else
-        return _kron(R₁, R₂)
-    end
+    return _kron_promote(R₁, R₂, _matrix_size_functions(heads, tails)...)
 end
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol(map(_firstsector, (a, b, c))...)
@@ -177,21 +127,7 @@ function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     R₁ = Rsymbol_from_fusiontensor(heads...)
     R₂ = Rsymbol_from_fusiontensor(tails...)
-    if R₁ isa Number && R₂ isa Number
-        R₁ * R₂
-    elseif R₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(b₁, a₁, c₁)) # 0 x 0 or 1 x 1
-        R₁′ = fill(R₁, sz₁)
-        return _kron(R₁′, R₂)
-    elseif R₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(b₂, a₂, c₂)) # 0 x 0 or 1 x 1
-        R₂′ = fill(R₂, sz₂)
-        return _kron(R₁, R₂′)
-    else
-        return _kron(R₁, R₂)
-    end
+    return _kron_promote(R₁, R₂, _matrix_size_functions(heads, tails)...)
 end
 function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
@@ -202,21 +138,7 @@ function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     B₁ = Bsymbol(heads...)
     B₂ = Bsymbol(tails...)
-    if B₁ isa Number && B₂ isa Number
-        B₁ * B₂
-    elseif B₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(c₁, dual(b₁), a₁)) # 0 x 0 or 1 x 1
-        B₁′ = fill(B₁, sz₁)
-        return _kron(B₁′, B₂)
-    elseif B₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(c₂, dual(b₂), a₂)) # 0 x 0 or 1 x 1
-        B₂′ = fill(B₂, sz₂)
-        return _kron(B₁, B₂′)
-    else
-        return _kron(B₁, B₂)
-    end
+    return _kron_promote(B₁, B₂, _matrix_size_functions(heads, tails)...)
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol(map(_firstsector, (a, b, c))...)
@@ -226,21 +148,7 @@ function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     B₁ = Bsymbol_from_fusiontensor(heads...)
     B₂ = Bsymbol_from_fusiontensor(tails...)
-    if B₁ isa Number && B₂ isa Number
-        B₁ * B₂
-    elseif B₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(c₁, dual(b₁), a₁)) # 0 x 0 or 1 x 1
-        B₁′ = fill(B₁, sz₁)
-        return _kron(B₁′, B₂)
-    elseif B₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(c₂, dual(b₂), a₂)) # 0 x 0 or 1 x 1
-        B₂′ = fill(B₂, sz₂)
-        return _kron(B₁, B₂′)
-    else
-        return _kron(B₁, B₂)
-    end
+    return _kron_promote(B₁, B₂, _matrix_size_functions(heads, tails)...)
 end
 function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
@@ -251,21 +159,7 @@ function Asymbol(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     A₁ = Asymbol(heads...)
     A₂ = Asymbol(tails...)
-    if A₁ isa Number && A₂ isa Number
-        A₁ * A₂
-    elseif A₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(dual(a₁), c₁, b₁)) # 0 x 0 or 1 x 1
-        A₁′ = fill(A₁, sz₁)
-        return _kron(A₁′, A₂)
-    elseif A₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(dual(a₂), c₂, b₂)) # 0 x 0 or 1 x 1
-        A₂′ = fill(A₂, sz₂)
-        return _kron(A₁, A₂′)
-    else
-        return _kron(A₁, A₂)
-    end
+    return _kron_promote(A₁, A₂, _matrix_size_functions(heads, tails)...)
 end
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
@@ -275,21 +169,7 @@ function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     tails = map(_tailsector, (a, b, c))
     A₁ = Asymbol_from_fusiontensor(heads...)
     A₂ = Asymbol_from_fusiontensor(tails...)
-    if A₁ isa Number && A₂ isa Number
-        A₁ * A₂
-    elseif A₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(dual(a₁), c₁, b₁)) # 0 x 0 or 1 x 1
-        A₁′ = fill(A₁, sz₁)
-        return _kron(A₁′, A₂)
-    elseif A₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(dual(a₂), c₂, b₂)) # 0 x 0 or 1 x 1
-        A₂′ = fill(A₂, sz₂)
-        return _kron(A₁, A₂′)
-    else
-        return _kron(A₁, A₂)
-    end
+    return _kron_promote(A₁, A₂, _matrix_size_functions(heads, tails)...)
 end
 function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)

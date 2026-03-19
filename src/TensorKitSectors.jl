@@ -67,8 +67,8 @@ using WignerSymbols
 
 # includes
 # --------
-include("auxiliary.jl")
 include("sectors.jl")
+include("auxiliary.jl")
 include("trivial.jl")
 include("groups.jl")
 include("irreps/irreps.jl")    # irreps of symmetry groups, with bosonic braiding
