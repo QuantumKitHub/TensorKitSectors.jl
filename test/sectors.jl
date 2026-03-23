@@ -132,6 +132,9 @@ end
         for c in ⊗(a, b) # Frobenius reciprocity
             @test Nsymbol(a, b, c) == Nsymbol(c, dual(b), a) == Nsymbol(dual(c), a, dual(b)) ==
                 Nsymbol(dual(b), dual(a), dual(c)) == Nsymbol(b, dual(c), dual(a)) == Nsymbol(dual(a), c, b)
+            if BraidingStyle(I) isa HasBraiding
+                @test Nsymbol(a, b, c) == Nsymbol(b, a, c)
+            end
         end
     end
 end
