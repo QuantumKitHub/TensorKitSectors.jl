@@ -84,22 +84,18 @@ end
     end
 end
 
-@testsuite "Invalid fusion channel checks" I -> begin
-    for a in smallset(I), b in smallset(I)
-        can_fuse(a, b) || @test_throws ArgumentError Nsymbol(a, b, first(smallset(I)))
-    end
-    for b in smallset(I), c in smallset(I)
-        can_fuse(b, c) || @test_throws ArgumentError Nsymbol(b, c, first(smallset(I)))
-    end
-end
-
 @testsuite "Shapes of topological data" I -> begin
     # shape of data from multiplicities
+    r = randsector(I)
     for a in smallset(I), b in smallset(I)
-        can_fuse(a, b) || continue
+        can_fuse(a, b) || @test_throws ArgumentError Nsymbol(a, b, r)
         for c in smallset(I)
-            can_fuse(b, c) || continue
-            for e in ⊗(a, b), f in ⊗(b, c) # at this point can_fuse(e, c) and can_fuse(a, f) are always true
+            can_fuse(b, c) || @test_throws ArgumentError Nsymbol(b, c, r)
+            for e in smallset(I), f in smallset(I)
+                can_fuse(a, f) || @test_throws ArgumentError Nsymbol(a, f, r)
+                can_fuse(e, c) || @test_throws ArgumentError Nsymbol(e, c, r)
+            end
+            for e in ⊗(a, b), f in ⊗(b, c) # guaranteed can_fuse
                 Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
                 for d in ⊗(a, b, c)
                     F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabe, Nsymbol(e, c, d), Nbcf, Nsymbol(a, f, d))
