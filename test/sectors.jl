@@ -26,20 +26,24 @@ using TensorKitSectors: TensorKitSectors as TKS
     end
 end
 
-@testsuite "Element types of topological data" I -> begin
+@testsuite "Element and data types of topological data" I -> begin
     a, b, c = random_fusion(I, 3)
-    d = first(⊗(a, b, c))
-    e, f = first(⊗(a, b)), first(⊗(b, c))
+    d, e, f = first(⊗(a, b, c)), first(⊗(a, b)), first(⊗(b, c))
     F = Fsymbol(a, b, c, d, e, f)
-    @test eltype(F) === @testinferred fusionscalartype(I)
+    Ftype = @testinferred fusionscalartype(I)
+    @test eltype(F) === Ftype
+    @test F isa (FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : AbstractArray{Ftype, 4})
     if BraidingStyle(I) isa HasBraiding
         a, b = random_fusion(I, 2)
         R = Rsymbol(a, b, first(⊗(a, b)))
-        @test eltype(R) === @testinferred braidingscalartype(I)
+        Rtype = @testinferred braidingscalartype(I)
+        @test eltype(R) === Rtype
         if FusionStyle(I) === SimpleFusion()
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
+            @test R isa Rtype
         else
             @test Base.promote_op(*, eltype(R), eltype(F)) <: @testinferred sectorscalartype(I)
+            @test R isa AbstractArray{Rtype, 2}
         end
     else
         if FusionStyle(I) === SimpleFusion()
@@ -80,31 +84,13 @@ end
     end
 end
 
-@testsuite "Shapes and data types of topological data" I -> begin
-    # shape of data from fusion style
-    Ftype = fusionscalartype(I)
-    TF_actual = Core.Compiler.return_type(Fsymbol, NTuple{6, I})
-    TF_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : AbstractArray{Ftype, 4}
-    @test TF_actual <: TF_imposed
-
-    if BraidingStyle(I) isa HasBraiding
-        Rtype = braidingscalartype(I)
-        if I <: TimeReversed
-            _TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-            TR_actual = Base.promote_op(adjoint, _TR_actual)
-        else
-            TR_actual = Core.Compiler.return_type(Rsymbol, NTuple{3, I})
-        end
-        TR_imposed = FusionStyle(I) isa MultiplicityFreeFusion ? Rtype : AbstractArray{Rtype, 2}
-        @test TR_actual <: TR_imposed
-    end
-
+@testsuite "Shapes of topological data" I -> begin
     # shape of data from multiplicities
     for a in smallset(I), b in smallset(I)
         can_fuse(a, b) || continue
         for c in smallset(I)
             can_fuse(b, c) || continue
-            for e in ⊗(a, b), f in ⊗(b, c)
+            for e in ⊗(a, b), f in ⊗(b, c) #TODO: explicitly check invalid fusion channels where encountered
                 can_fuse(e, c) && can_fuse(a, f) || continue
                 Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
                 for d in ⊗(a, b, c)
@@ -112,11 +98,13 @@ end
                     @test size(Fsymbol(a, b, c, d, e, f)) == F_size
                 end
             end
+        end
+    end
 
-            if BraidingStyle(I) isa HasBraiding
-                R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, c), Nsymbol(b, a, c))
-                @test size(Rsymbol(a, b, c)) == R_size
-            end
+    for a in smallset(I), b in smallset(I), c in smallset(I)
+        if BraidingStyle(I) isa HasBraiding
+            R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, c), Nsymbol(b, a, c))
+            @test size(Rsymbol(a, b, c)) == R_size
         end
     end
 end
