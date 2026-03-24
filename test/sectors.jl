@@ -38,7 +38,7 @@ end
         R = Rsymbol(a, b, first(⊗(a, b)))
         Rtype = @testinferred braidingscalartype(I)
         @test eltype(R) === Rtype
-        if FusionStyle(I) === SimpleFusion()
+        if FusionStyle(I) isa MultiplicityFreeFusion
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
             @test R isa Rtype
         else
@@ -46,7 +46,7 @@ end
             @test R isa AbstractArray{Rtype, 2}
         end
     else
-        if FusionStyle(I) === SimpleFusion()
+        if FusionStyle(I) isa MultiplicityFreeFusion
             @test typeof(F) <: @testinferred sectorscalartype(I)
         else
             @test eltype(F) <: @testinferred sectorscalartype(I)
