@@ -118,12 +118,16 @@ struct ZNElement{N, p} <: AbstractGroupElement{ℤ{N}}
 end
 ZNElement{N}(n::Integer) where {N} = ZNElement{N, 0}(n)
 Base.getindex(::ElementTable, ::Type{ℤ{N}}, p::Int = 0) where {N} = ZNElement{N, mod(p, N)}
-type_repr(::Type{ZNElement{N, p}}) where {N, p} = "GroupElement[ℤ{$N}, $p]"
-
 Base.convert(T::Type{<:ZNElement}, n::Real) = T(n)
 const Z2Element{p} = ZNElement{2, p}
 const Z3Element{p} = ZNElement{3, p}
 const Z4Element{p} = ZNElement{4, p}
+
+type_repr(::Type{ZNElement{N, p}}) where {N, p} = "ℤ$(N)Element[$p]"
+type_repr(::Type{ZNElement{N}}) where {N} = "ℤ$(N)Element[0]"
+type_repr(::Type{Z2Element{p}}) where {p} = "ℤ₂Element[$p]"
+type_repr(::Type{Z3Element{p}}) where {p} = "ℤ₃Element[$p]"
+type_repr(::Type{Z4Element{p}}) where {p} = "ℤ₄Element[$p]"
 
 Base.one(::Type{Z}) where {Z <: ZNElement} = Z(0)
 Base.inv(c::ZNElement) = typeof(c)(-c.n)
