@@ -88,3 +88,9 @@ function manhattan_to_multidimensional_index(index::Int, sz::Dims{N}) where {N}
     index -= offset
     return invertlocaloffset(d, index - 1, sz)
 end
+
+# pretty printing of ZNElement up to N = 4
+function subscript(i::Integer)
+    return i < 0 ? error("$i is negative") :
+        string(Iterators.reverse('₀' + d for d in digits(i))...)
+end

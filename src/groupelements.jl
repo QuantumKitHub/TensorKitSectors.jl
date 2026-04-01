@@ -123,11 +123,14 @@ const Z2Element{p} = ZNElement{2, p}
 const Z3Element{p} = ZNElement{3, p}
 const Z4Element{p} = ZNElement{4, p}
 
-type_repr(::Type{ZNElement{N, p}}) where {N, p} = "ℤ$(N)Element[$p]"
-type_repr(::Type{ZNElement{N}}) where {N} = "ℤ$(N)Element[0]"
-type_repr(::Type{Z2Element{p}}) where {p} = "ℤ₂Element[$p]"
-type_repr(::Type{Z3Element{p}}) where {p} = "ℤ₃Element[$p]"
-type_repr(::Type{Z4Element{p}}) where {p} = "ℤ₄Element[$p]"
+const ℤNElement{N, p} = ZNElement{N, p}
+const ℤ₂Element{p} = ℤNElement{2, p}
+const ℤ₃Element{p} = ℤNElement{3, p}
+const ℤ₄Element{p} = ℤNElement{4, p}
+
+function type_repr(::Type{ZNElement{N, p}}) where {N, p}
+    return N < 5 ? "ℤ$(subscript(N))Element{$p}" : "ℤNElement{$N, $p}"
+end
 
 Base.one(::Type{Z}) where {Z <: ZNElement} = Z(0)
 Base.inv(c::ZNElement) = typeof(c)(-c.n)
