@@ -646,6 +646,26 @@ Return the twist of a sector `a`.
 twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
+"""
+    dim(::Type{I}) where {I <: Sector}
+Return the total quantum dimension of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
+"""
+dim(::Type{I}) where {I <: Sector} = sqrt(sum(dim(b)^2 for b in values(I)))
+
+"""
+    Smatrix(a::Sector, b::Sector)
+
+Return the S-matrix element `S_{ab}` of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
+"""
+Smatrix(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b) / dim(typeof(a))
+Smatrix(::Type{I}) where {I <: Sector} = [Smatrix(a, b) for a in values(I), b in values(I)]
+
+function ismodular(::Type{I}) where {I <: Sector}
+    BraidingStyle(I) isa Anyonic() || return false
+    IsInfinite(I) && return false
+    return isunitary(Smatrix(I))
+end
+
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------
 

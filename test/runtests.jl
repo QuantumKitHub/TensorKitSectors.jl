@@ -191,6 +191,25 @@ end
     end
 end
 
+@testset "S matrix" begin
+    Smatrix(Z2Irrep) ≈ ones(2, 2) / 2
+    Smatrix(Z3Irrep) ≈ ones(3, 3) / 3
+    Smatrix(FermionParity) ≈ ones(2, 2) / 2
+    Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6) / 6
+    φ = (1 + sqrt(5)) / 2
+    Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
+    Smatrix(IsingAnyon) ≈ [1 1 sqrt(2); 1 1 -sqrt(2); sqrt(2) -sqrt(2) 0] / 2
+end
+
+@testset "Modularity" begin
+    @test ismodular(Z2Irrep) == false
+    @test ismodular(Z3Irrep) == false
+    @test ismodular(FermionParity) == false
+    @test ismodular(Z2Irrep ⊠ Z3Irrep) == false
+    @test ismodular(FibonacciAnyon) == true
+    @test ismodular(IsingAnyon) == true
+end
+
 include("multifusion.jl")
 
 @testset "Aqua" begin
