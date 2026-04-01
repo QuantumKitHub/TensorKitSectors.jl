@@ -654,17 +654,17 @@ dim(::Type{I}) where {I <: Sector} = sqrt(sum(dim(b)^2 for b in values(I)))
 
 """
     Smatrix(a::Sector, b::Sector)
-
 Return the S-matrix element `S_{ab}` of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
 """
 Smatrix(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b) / dim(typeof(a))
-Smatrix(::Type{I}) where {I <: Sector} = [Smatrix(a, b) for a in values(I), b in values(I)]
+Smatrix(::Type{I}) where {I <: Sector} = reshape([Smatrix(a, b) for a in values(I), b in values(I)], (length(values(I)), length(values(I))))
 
-function ismodular(::Type{I}) where {I <: Sector}
-    BraidingStyle(I) isa Anyonic() || return false
-    IsInfinite(I) && return false
-    return isunitary(Smatrix(I))
-end
+"""
+    ξ(::Type{I}) where {I <: Sector}
+Return the topological central charge `ξ` of the modular sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I` weighted by their twists, divided by the total quantum dimension of `I`.
+Satisfying the relation `ξ = exp(2πi c / 8)` where `c` is the chiral central charge of the corresponding topological phase.
+"""
+ξ(::Type{I}) where {I <: Sector} = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
 
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------

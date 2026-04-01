@@ -192,22 +192,36 @@ end
 end
 
 @testset "S matrix" begin
-    Smatrix(Z2Irrep) ≈ ones(2, 2) / 2
-    Smatrix(Z3Irrep) ≈ ones(3, 3) / 3
-    Smatrix(FermionParity) ≈ ones(2, 2) / 2
-    Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6) / 6
+    @test Smatrix(Z2Irrep) ≈ ones(2, 2) / sqrt(2)
+    @test Smatrix(Z3Irrep) ≈ ones(3, 3) / sqrt(3)
+    @test Smatrix(FermionParity) ≈ ones(2, 2) / sqrt(2)
+    @test Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6) / sqrt(6)
     φ = (1 + sqrt(5)) / 2
-    Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
-    Smatrix(IsingAnyon) ≈ [1 1 sqrt(2); 1 1 -sqrt(2); sqrt(2) -sqrt(2) 0] / 2
+    @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
+    @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1] / 2
 end
 
-@testset "Modularity" begin
-    @test ismodular(Z2Irrep) == false
-    @test ismodular(Z3Irrep) == false
-    @test ismodular(FermionParity) == false
-    @test ismodular(Z2Irrep ⊠ Z3Irrep) == false
-    @test ismodular(FibonacciAnyon) == true
-    @test ismodular(IsingAnyon) == true
+@testset "Total quantum dimension" begin
+    @test dim(Z2Irrep) ≈ sqrt(2)
+    @test dim(Z3Irrep) ≈ sqrt(3)
+    @test dim(FermionParity) ≈ sqrt(2)
+    @test dim(Z2Irrep ⊠ Z3Irrep) ≈ sqrt(6)
+    φ = (1 + sqrt(5)) / 2
+    @test dim(FibonacciAnyon) ≈ sqrt(2 + φ)
+    @test dim(IsingAnyon) ≈ 2
+    @test dim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ 2 + φ
+    @test dim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 4
+end
+
+@testset "Multiplicative central charge" begin
+    @test ξ(IsingAnyon) ≈ cispi(1 / 8)
+    @test ξ(TimeReversed{IsingAnyon}) ≈ cispi(-1 / 8)
+    @test ξ(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ cispi(0)
+    @test ξ(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
+    @test ξ(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
+    @test ξ(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ cispi(0)
+    @test ξ(FibonacciAnyon ⊠ FibonacciAnyon) ≈ ξ(FibonacciAnyon)^2
+    @test ξ(FibonacciAnyon ⊠ IsingAnyon) ≈ ξ(FibonacciAnyon) * ξ(IsingAnyon)
 end
 
 include("multifusion.jl")
