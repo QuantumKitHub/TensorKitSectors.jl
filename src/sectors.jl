@@ -650,11 +650,11 @@ twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b
     Tvector(::Type{I}) where {I <: Sector}
 Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
 """
-Tvector(::Type{I}) where {I <: Sector} = [twist(a) for a in values(I)]
+Tvector(::Type{I}) where {I <: Sector} = reshape([twist(a) for a in values(I)], (length(values(I)),))
 
 """
     dim(::Type{I}) where {I <: Sector}
-Return the total quantum dimension of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
+Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
 dim(::Type{I}) where {I <: Sector} = sqrt(sum(dim(b)^2 for b in values(I)))
 
