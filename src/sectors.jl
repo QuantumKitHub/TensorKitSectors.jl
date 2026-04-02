@@ -651,7 +651,7 @@ twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b
 Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
 """
 function Tvector(::Type{I}) where {I <: Sector}
-    Base.IteratorSize(values(I)) === Base.HasLength() ||
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return reshape([twist(a) for a in values(I)], (length(values(I)),))
 end
@@ -661,7 +661,7 @@ end
 Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
 function dim(::Type{I}) where {I <: Sector}
-    Base.IteratorSize(values(I)) === Base.HasLength() ||
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return sqrt(sum(dim(b)^2 for b in values(I)))
 end
@@ -677,7 +677,7 @@ hopflink(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a
 Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`, normalized by the total quantum dimension of `I`.
 """
 function Smatrix(::Type{I}) where {I <: Sector}
-    Base.IteratorSize(values(I)) === Base.HasLength() ||
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return reshape([hopflink(a, b) for a in values(I), b in values(I)], (length(values(I)), length(values(I)))) / dim(I)
 end
