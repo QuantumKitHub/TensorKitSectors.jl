@@ -647,17 +647,28 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
+    Tvector(::Type{I}) where {I <: Sector}
+Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
+"""
+Tvector(::Type{I}) where {I <: Sector} = [twist(a) for a in values(I)]
+
+"""
     dim(::Type{I}) where {I <: Sector}
 Return the total quantum dimension of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
 dim(::Type{I}) where {I <: Sector} = sqrt(sum(dim(b)^2 for b in values(I)))
 
 """
-    Smatrix(a::Sector, b::Sector)
-Return the S-matrix element `S_{ab}` of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
+   hopflink(a::Sector, b::Sector)
+Return the hopflink of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
 """
-Smatrix(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b) / dim(typeof(a))
-Smatrix(::Type{I}) where {I <: Sector} = reshape([Smatrix(a, b) for a in values(I), b in values(I)], (length(values(I)), length(values(I))))
+hopflink(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b)
+
+"""
+     Smatrix(::Type{I}) where {I <: Sector}
+Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`, normalized by the total quantum dimension of `I`.
+"""
+Smatrix(::Type{I}) where {I <: Sector} = reshape([hopflink(a, b) for a in values(I), b in values(I)], (length(values(I)), length(values(I)))) / dim(I)
 
 """
     ξ(::Type{I}) where {I <: Sector}
