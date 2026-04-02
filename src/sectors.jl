@@ -656,7 +656,11 @@ Tvector(::Type{I}) where {I <: Sector} = reshape([twist(a) for a in values(I)], 
     dim(::Type{I}) where {I <: Sector}
 Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
-dim(::Type{I}) where {I <: Sector} = sqrt(sum(dim(b)^2 for b in values(I)))
+function dim(::Type{I}) where {I <: Sector}
+    Base.IteratorSize(values(I)) === Base.HasLength() ||
+    throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return sqrt(sum(dim(b)^2 for b in values(I)))
+end
 
 """
    hopflink(a::Sector, b::Sector)
