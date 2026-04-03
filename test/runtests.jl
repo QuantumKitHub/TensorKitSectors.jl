@@ -191,6 +191,31 @@ end
     end
 end
 
+@testset "T vector" begin
+    @test Tvector(Z2Irrep) ≈ [1, 1]
+    @test Tvector(Z3Irrep) ≈ [1, 1, 1]
+    @test Tvector(FermionParity) ≈ [1, -1]
+    @test Tvector(Z2Irrep ⊠ Z3Irrep) ≈ ones(6)
+    @test Tvector(FibonacciAnyon) ≈ [1, cispi(-4 / 5)]
+    @test Tvector(IsingAnyon) ≈ [1, cispi(1 / 8), -1]
+    @test Tvector(TimeReversed{IsingAnyon}) ≈ [1, cispi(-1 / 8), -1]
+    @test Tvector(TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5)]
+
+    @test Tvector(FibonacciAnyon ⊠ FibonacciAnyon) ≈ [1, cispi(-4 / 5), cispi(-4 / 5), cispi(-8 / 5)]
+    @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5), cispi(-4 / 5), 1]
+    @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ [1, cispi(1 / 8), cispi(-4 / 5), -1, cispi(1 / 8 - 4 / 5), - cispi(-4 / 5)]
+    @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ [1, cispi(- 1 / 8), cispi(1 / 8), -1, 1, -1, -cispi(1 / 8), -cispi(-1 / 8), 1]
+end
+
+@testset "Hopf link" begin
+    @test hopflink(Z2Irrep(1), Z2Irrep(1)) ≈ 1
+    @test hopflink(Z3Irrep(1), Z3Irrep(2)) ≈ 1
+    @test hopflink(FermionParity(1), FermionParity(1)) ≈ 1
+    @test hopflink(IsingAnyon(:ψ), IsingAnyon(:ψ)) ≈ 1
+    @test hopflink(IsingAnyon(:σ), IsingAnyon(:σ)) ≈ 0
+    @test hopflink(IsingAnyon(:σ), IsingAnyon(:ψ)) ≈ -sqrt(2)
+    @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
+end
 @testset "S matrix" begin
     @test Smatrix(Z2Irrep) ≈ ones(2, 2) / sqrt(2)
     @test Smatrix(Z3Irrep) ≈ ones(3, 3) / sqrt(3)
@@ -199,6 +224,12 @@ end
     φ = (1 + sqrt(5)) / 2
     @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
     @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1] / 2
+
+    @info "S matrix is symmetric"
+    @test transpose(Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)
+    @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
+    @test transpose(Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})) ≈ Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})
+    @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
 end
 
 @testset "Total quantum dimension" begin

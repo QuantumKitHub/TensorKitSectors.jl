@@ -670,7 +670,7 @@ end
    hopflink(a::Sector, b::Sector)
 Return the hopflink of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
 """
-hopflink(a::Sector, b::Sector) = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b)
+hopflink(a::I, b::I) where {I <: Sector} = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b)
 
 """
      Smatrix(::Type{I}) where {I <: Sector}
