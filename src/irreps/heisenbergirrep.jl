@@ -3,7 +3,7 @@
     HeisenbergIrrep{N}(n::Integer, isodd::Bool=false)
     Irrep[Heisenberg{N}](n::Integer, isodd::Bool=false)
 
-Represents irreps of the finite Heisenberg group ``H_N``.
+Represents irreps of the finite Heisenberg group ``H_N`` for `N` prime.
 There are N² one-dimensional irreps labeled by a pair of integers ``(a, b)`` with ``a, b ∈ ℤ_N``,
 and N - 1 irreps of dimension N labeled by an integer ``k ∈ ℤ_N \\ {0}``.
 These are commonly referred to as the characters ``χₐ,ᵦ`` and the Schrödinger representations ``πₖ``, respectively.
@@ -22,6 +22,7 @@ struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     b::Int
     k::Int
     function HeisenbergIrrep{N}(a::Int, b::Int, k::Int) where {N}
+        #TODO: cheap way to check if N is prime
         if iszero(k) # 1d irreps
             a_mod = mod(a, N)
             b_mod = mod(b, N)
@@ -37,11 +38,11 @@ struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
 end
 # TODO: consider union of 2 kinds of irreps?
 
-FusionStyle(::Type{HeisenbergIrrep{N}}) where {N} = GenericFusion()
-# BraidingStyle(::Type{HeisenbergIrrep{N}}) where {N} = Anyonic() #TODO: make braided again after fusiontensor is fixed + check if symmetric or not
-fusionscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
-# braidingscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
-sectorscalartype(::Type{HeisenbergIrrep{N}}) where {N} = ComplexF64
+FusionStyle(::Type{<:HeisenbergIrrep}) = GenericFusion()
+BraidingStyle(::Type{<:HeisenbergIrrep}) = Anyonic()
+fusionscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
+braidingscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
+sectorscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 
 unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0, 0, 0)
 function dual(a::HeisenbergIrrep{N}) where {N}
@@ -59,7 +60,7 @@ Base.getindex(::IrrepTable, ::Type{Heisenberg{N}}) where {N} = HeisenbergIrrep{N
 
 const Heis3Irrep = HeisenbergIrrep{3}
 
-function Base.show(io::IO, a::HeisenbergIrrep{N}) where {N}
+function Base.show(io::IO, a::HeisenbergIrrep)
     if get(io, :typeinfo, nothing) !== typeof(a)
         print(io, type_repr(typeof(a)))
     end
@@ -76,10 +77,10 @@ function Base.isless(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}) where {N}
         return iszero(b.k) ? false : isless(a.k, b.k)
     end
 end
-Base.IteratorSize(::Type{SectorValues{HeisenbergIrrep{N}}}) where {N} = Base.HasLength()
+Base.IteratorSize(::Type{SectorValues{<:HeisenbergIrrep}}) = Base.HasLength()
 Base.length(::SectorValues{HeisenbergIrrep{N}}) where {N} = N^2 + N - 1
 
-function Base.iterate(v::SectorValues{HeisenbergIrrep{N}}, i = 1) where {N}
+function Base.iterate(v::SectorValues{<:HeisenbergIrrep}, i = 1)
     return i > length(v) ? nothing : (v[i], i + 1)
 end
 
@@ -109,7 +110,7 @@ end
 const HeisenbergIrrepProdIterator{N} = SectorProductIterator{HeisenbergIrrep{N}}
 ⊗(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}) where {N} = SectorProductIterator((a <= b ? (a, b) : (b, a))...)
 
-Base.IteratorSize(::Type{HeisenbergIrrepProdIterator{N}}) where {N} = Base.HasLength()
+Base.IteratorSize(::Type{<:HeisenbergIrrepProdIterator}) = Base.HasLength()
 function Base.length(x::HeisenbergIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
     if !iszero(a.k) && !iszero(b.k) # π ⊗ π
@@ -173,30 +174,10 @@ function Nsymbol(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrre
     end
 end
 
-# function Fsymbol(
-#     a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrrep{N},
-#     d::HeisenbergIrrep{N}, e::HeisenbergIrrep{N}, f::HeisenbergIrrep{N}
-#     ) where {N}
-#     T = fusionscalartype(HeisenbergIrrep{N})
-#     Nabe, Necd, Nbcf, Nafd = Nsymbol
-#     iszero(a.k) && iszero(b.k) && iszero(c.k) && return ones(T, Nabe, Necd, Nbcf, Nafd) # 1d ⊗ 1d ⊗ 1d -> 1d is trivial
-
-#     # most nontrivial case: Schrödinger ⊗ Schröd
-#     iszero(a.k) && iszero(b.k) && iszero(c.k) && return ones(T, Nabe, Necd, Nbcf, Nafd) # 1d ⊗ 1d ⊗ 1d -> 1d is trivial
-
-#     # most nontrivial case: Schrödinger ⊗ Schrödinger ⊗ Schrödinger
-#     if !iszero(a.k) && !iszero(b.k) && !iszero(c.k)
-#         if !iszero(d.k) # fuse to Schrödinger
-#             # TODO: don't be lazy and figure this out
-#         end
-#     end
-#     return F
-# end
-
 Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: HeisenbergIrrep} =
     Fsymbol_from_fusiontensor(a, b, c, d, e, f)
 
-# Rsymbol(a::I, b::I, c::I) where {I <: HeisenbergIrrep} = Rsymbol_from_fusiontensor(a, b, c)
+Rsymbol(a::I, b::I, c::I) where {I <: HeisenbergIrrep} = Rsymbol_from_fusiontensor(a, b, c)
 
 # https://www.rintonpress.com/xxqic8/qic-8-5/0438-0467.pdf eqs 60, 63, 67
 function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::HeisenbergIrrep{N}) where {N}
@@ -206,31 +187,47 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
     C = zeros(T, dx, dy, dz, Nxyz)
     isempty(C) && return C
 
-    if iszero(x.k) && iszero(y.k) && iszero(z.k) # χ ⊗ χ -> χ
-        C[1, 1, 1, 1] = 1
+    if iszero(x.k) && iszero(y.k) # χ ⊗ χ → χ (trivial)
+        C[1, 1, 1, 1] = one(T)
         return C
     end
 
-    if !iszero(x.k) && !iszero(y.k) # π ⊗ π
-        ω = cispi(2 / N)
-        if !iszero(mod(x.k + y.k, N)) # fuse to π
+    ω = cispi(2 / N)
+    if !iszero(x.k) && !iszero(y.k) # π_k ⊗ π_{k'}
+        invsqrtN = T(1 / sqrt(N))
+        K = mod(x.k + y.k, N)
+        if !iszero(K) # → π_K with multiplicity N
+            s = mod(-x.k * invmod(y.k, N), N)
             for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz
-                @assert Nxyz == N && dx == dy == dz == N
-                C[i, j, m, μ] = ω^((μ - 1) * i) * T(mod(i + j, N) == m - 1) / sqrt(N)
+                if iszero(mod(j - m - s * (i - m), N)) # C[i,j,m,μ] = ω^{(μ-1)(i-m)} / √N if j - m = s(i - m) mod N, s = -k / k' mod N
+                    C[i, j, m, μ] = ω^mod((μ - 1) * (i - m), N) * invsqrtN
+                end
             end
-        else # special case
+        else # k + k' = 0: → Σ_{a,b} χ_{a,b}, each with multiplicity 1
+            a, b = z.a, z.b
+            t = mod(invmod(x.k, N) * a, N)
             for i in 1:dx, j in 1:dy
-                C[i, j, 1, 1] = ω^(z.a * i + z.b * j) / N
+                if iszero(mod(j - i + t, N)) # C[i,j,1,1] = ω^{-b(i-1)} / √N if j = i - t mod N, t = a/k mod N
+                    C[i, j, 1, 1] = ω^mod(-b * (i - 1), N) * invsqrtN
+                end
             end
         end
-    else
-        if iszero(x.k) && !iszero(y.k) # χ ⊗ π
-            for j in 1:N, m in 1:N
-                C[1, j, m, 1] = T(j == m)
+    else # exactly one of x, y is χ, the other is π
+        if iszero(x.k) # χ_{a,b} ⊗ π_k → π_k
+            a, b, k = x.a, x.b, y.k
+            s = mod(invmod(k, N) * a, N)
+            for j in 1:dy, m in 1:dz
+                if iszero(mod(j - m + s, N)) # C[1,j,m,1] = ω^{b(m-1)} if j = m - s mod N, s = a/k mod N
+                    C[1, j, m, 1] = ω^mod(b * (m - 1), N)
+                end
             end
-        else # π ⊗ χ
-            for i in 1:N, m in 1:N
-                C[i, 1, m, 1] = T(i == m)
+        else # π_k ⊗ χ_{a,b} → π_k
+            a, b, k = y.a, y.b, x.k
+            s = mod(invmod(k, N) * a, N)
+            for i in 1:dx, m in 1:dz
+                if iszero(mod(i - m + s, N)) # C[i,1,m,1] = ω^{b(m-1)} if i = m - s mod N, s = a/k mod N
+                    C[i, 1, m, 1] = ω^mod(b * (m - 1), N)
+                end
             end
         end
     end

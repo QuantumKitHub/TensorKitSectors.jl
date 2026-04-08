@@ -68,6 +68,7 @@ abstract type SU{N} <: Group end
 
 Type to represent the Heisenberg group of dimension `N`, which is the
 non-Abelian group of 3x3 upper triangular matrices with ones on the diagonal.
+This group is the semi-direct product ℤ{N} ⋊ ℤ{N}^2, and is only defined for `N` prime.
 """
 abstract type Heisenberg{N} <: Group end
 
