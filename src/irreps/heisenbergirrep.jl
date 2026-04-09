@@ -114,7 +114,7 @@ Base.IteratorSize(::Type{<:HeisenbergIrrepProdIterator}) = Base.HasLength()
 function Base.length(x::HeisenbergIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
     if !iszero(a.k) && !iszero(b.k) # π ⊗ π
-        return iszero(mod(a.k + b.k, N)) ? N^2 : N # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps
+        return iszero(mod(a.k + b.k, N)) ? N^2 : 1 # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps but count it once
     else
         return 1
     end
