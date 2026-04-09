@@ -281,6 +281,7 @@ end
 end
 
 # https://quantumkithub.github.io/TensorKit.jl/stable/man/fusiontrees/#Manipulations-on-a-fusion-tree
+# label (α, β) as (σ, λ) and g <-> f in FRF path
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), d in smallset(I)
@@ -294,8 +295,8 @@ end
                         RFR1 = Rcde * conj(Fdabefc) * conj(Rdaf)
                         RFR2 = conj(Rdce) * conj(Fdabefc) * Radf
                     else
-                        @tensor RFR1[ν, μ, λ, σ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
-                        @tensor RFR2[ν, μ, λ, σ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]
+                        @tensor RFR1[μ, ν, σ, λ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
+                        @tensor RFR2[μ, ν, σ, λ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]
                     end
                     FRF1, FRF2 = zero(RFR1), zero(RFR2)
                     for g in ⊗(d, b)
@@ -306,8 +307,8 @@ end
                             FRF1 += Fabdecg * Rbdg * conj(Fadbefg)
                             FRF2 += conj(Fabdecg) * conj(Rdbg) * Fadbefg
                         else
-                            @tensor FRF1[ν, μ, β, α] += Fabdecg[μ, ν, κ, λ] * Rbdg[κ, θ] * conj(Fadbefg[α, β, θ, λ])
-                            @tensor FRF2[ν, μ, β, α] += conj(Fabdecg[μ, ν, κ, λ]) * conj(Rdbg[κ, θ]) * Fadbefg[α, β, θ, λ]
+                            @tensor FRF1[μ, ν, σ, λ] += Fabdecg[μ, ν, κ, ψ] * Rbdg[κ, θ] * conj(Fadbefg[σ, λ, θ, ψ])
+                            @tensor FRF2[μ, ν, σ, λ] += conj(Fabdecg[μ, ν, κ, ψ]) * conj(Rdbg[κ, θ]) * Fadbefg[σ, λ, θ, ψ]
                         end
                     end
                     @test isapprox(RFR1, FRF1; atol = 1.0e-12, rtol = 1.0e-12)
