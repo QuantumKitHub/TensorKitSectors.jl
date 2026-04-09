@@ -1,3 +1,4 @@
+_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
 """
     struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     HeisenbergIrrep{N}(n::Integer, isodd::Bool=false)
@@ -22,7 +23,9 @@ struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     b::Int
     k::Int
     function HeisenbergIrrep{N}(a::Int, b::Int, k::Int) where {N}
-        #TODO: cheap way to check if N is prime
+        if N ∉ _primes
+            throw(ArgumentError("N must be a prime number"))
+        end
         if iszero(k) # 1d irreps
             a_mod = mod(a, N)
             b_mod = mod(b, N)
