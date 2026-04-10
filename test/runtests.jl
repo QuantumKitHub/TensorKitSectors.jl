@@ -247,7 +247,7 @@ end
 @testset "Multiplicative central charge" begin
     @test ξ(IsingAnyon) ≈ cispi(1 / 8)
     @test ξ(TimeReversed{IsingAnyon}) ≈ cispi(-1 / 8)
-    @test ξ(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ cispi(0)
+    @test ξ(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 1
     @test ξ(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
     @test ξ(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
     @test ξ(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ cispi(0)
