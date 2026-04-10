@@ -250,7 +250,7 @@ end
     @test ξ(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 1
     @test ξ(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
     @test ξ(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
-    @test ξ(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ cispi(0)
+    @test ξ(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ 1
     @test ξ(FibonacciAnyon ⊠ FibonacciAnyon) ≈ ξ(FibonacciAnyon)^2
     @test ξ(FibonacciAnyon ⊠ IsingAnyon) ≈ ξ(FibonacciAnyon) * ξ(IsingAnyon)
 end
