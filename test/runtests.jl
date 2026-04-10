@@ -225,7 +225,7 @@ end
     @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
     @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1] / 2
 
-    @info "S matrix is symmetric"
+    # S matrix is symmetric
     @test transpose(Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)
     @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
     @test transpose(Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})) ≈ Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})
