@@ -679,7 +679,8 @@ Return the S-matrix of the sector type `I`, which is a matrix containing the hop
 function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return reshape([hopflink(a, b) for a in values(I), b in values(I)], (length(values(I)), length(values(I)))) / dim(I)
+    vals = values(I)
+    return [hopflink(a, b) for a in vals, b in vals] / dim(I)
 end
 
 """
