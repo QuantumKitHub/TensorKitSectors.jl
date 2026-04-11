@@ -653,7 +653,8 @@ Return the T-vector of the sector type `I`, which is a vector containing the twi
 function Tvector(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return reshape([twist(a) for a in values(I)], (length(values(I)),))
+    vals = values(I)
+    return [twist(a) for a in vals]
 end
 
 """

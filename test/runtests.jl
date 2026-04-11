@@ -205,6 +205,8 @@ end
     @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5), cispi(-4 / 5), 1]
     @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ [1, cispi(1 / 8), cispi(-4 / 5), -1, cispi(1 / 8 - 4 / 5), - cispi(-4 / 5)]
     @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ [1, cispi(- 1 / 8), cispi(1 / 8), -1, 1, -1, -cispi(1 / 8), -cispi(-1 / 8), 1]
+
+    @test Tvector(A4Irrep) ≈ [1, 1, 1, 1]
 end
 
 @testset "Hopf link" begin
@@ -229,7 +231,7 @@ end
     @test transpose(Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)
     @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
     @test transpose(Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})) ≈ Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})
-    @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
+    @test transpose(Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)) ≈ Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)
 end
 
 @testset "Total quantum dimension" begin
