@@ -648,6 +648,7 @@ twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b
 
 """
     Tvector(::Type{I}) where {I <: Sector}
+
 Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
 """
 function Tvector(::Type{I}) where {I <: Sector}
