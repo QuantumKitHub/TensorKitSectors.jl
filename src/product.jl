@@ -25,12 +25,6 @@ Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors
 _sectors(::Type{ProductSector{T}}) where {T} = Base.fieldtypes(T)
 _sectors(::Type) = error("should never be reached") # keeps JET happy
 
-function _kron_iter(::Type{ProductSector{T}}) where {T} # Construct an iterator with the same order as the Kronecker product.
-    tuple_iterators = values.(Base.fieldtypes(T))
-    @assert !any(it -> Base.IteratorSize(it) isa Base.IsInfinite, tuple_iterators) "All sectors need to be finite"
-    return (ProductSector{T}(reverse(x)) for x in Iterators.product(reverse(tuple_iterators)...))
-end
-
 function Base.IteratorSize(::Type{SectorValues{I}}) where {I <: ProductSector}
     return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(I))...))
 end
@@ -46,11 +40,13 @@ function _size(::SectorValues{I}) where {I <: ProductSector}
     return map(s -> _length(values(s)), _sectors(I))
 end
 function Base.getindex(P::SectorValues{I}, i::Int) where {I <: ProductSector}
-    inds = manhattan_to_multidimensional_index(i, _size(P))
+    inds = Base.IteratorSize(P) === Base.IsInfinite() ? manhattan_to_multidimensional_index(i, _size(P)) : reverse(Tuple(CartesianIndices(reverse(_size(P)))[i]))
     return I(getindex.(values.(_sectors(I)), inds))
 end
 function findindex(P::SectorValues{I}, c::I) where {I <: ProductSector}
-    return to_manhattan_index(findindex.(values.(_sectors(I)), Tuple(c)), _size(P))
+    index_tuple = findindex.(values.(_sectors(I)), Tuple(c))
+    ind = Base.IteratorSize(P) === Base.IsInfinite() ? to_manhattan_index(index_tuple, _size(P)) : LinearIndices(reverse(_size(P)))[reverse(index_tuple)...]
+    return ind
 end
 
 function Base.iterate(P::SectorValues{I}, i = 1) where {I <: ProductSector}
@@ -248,11 +244,15 @@ Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
 function Base.isless(a::I, b::I) where {I <: ProductSector}
     I1 = findindex.(values.(_sectors(I)), a.sectors)
     I2 = findindex.(values.(_sectors(I)), b.sectors)
-    d1 = sum(I1) - length(I1)
-    d2 = sum(I2) - length(I2)
-    d1 < d2 && return true
-    d1 > d2 && return false
-    return isless(I1, I2)
+    if Base.IteratorSize(values(I)) === Base.IsInfinite()
+        d1 = sum(I1) - length(I1)
+        d2 = sum(I2) - length(I2)
+        d1 < d2 && return true
+        d1 > d2 && return false
+        return isless(I1, I2)
+    else
+        return isless(I1, I2)
+    end
 end
 
 # Default construction from tensor product of sectors
