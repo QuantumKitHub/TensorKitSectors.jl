@@ -652,16 +652,8 @@ twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b
 Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
 """
 function topological_spin(a::Sector; tol = 1.0e-12)
-    s = angle(twist(a)) / (2π)
-    s = mod(s, 1)
-    if s > 0.5
-        s -= 1
-    end
-
-    if isapprox(abs(s), 0.5; atol = tol)
-        return 1 // 2
-    end
-
+    s = angle(twist(a)) / 2pi
+    isapprox(s, -0.5; atol = tol) && return 1 // 2
     return rationalize(s; tol = tol)
 end
 
@@ -725,15 +717,8 @@ We choose convention by restrict the returning value as rational numbers in (-4,
 """
 function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
-    ϕ = angle(ξ) * 8 / 2pi
-    c_float = mod(ϕ, 8)
-    if c_float > 4
-        c_float -= 8
-    end
-
-    if isapprox(abs(c_float), 4; atol = tol)
-        return 4 // 1
-    end
+    c_float = angle(ξ) * 8 / 2pi
+    isapprox(c_float, -4; atol = tol) && return 4 // 1
     return rationalize(c_float; tol = tol)
 end
 
