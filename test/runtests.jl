@@ -191,6 +191,18 @@ end
     end
 end
 
+@testset "Topological spin" begin
+    @test spin_top(IsingAnyon(:I)) == 0 // 1
+    @test spin_top(IsingAnyon(:σ)) == 1 // 16
+    @test spin_top(IsingAnyon(:ψ)) == 1 // 2
+    @test spin_top(FibonacciAnyon(:τ)) == - 2 // 5
+    @test spin_top(FibonacciAnyon(:I)) == 0 // 1
+    @test spin_top(Z2Irrep(1)) == 0 // 1
+    @test spin_top(TimeReversed{IsingAnyon}(:ψ)) == 1 // 2
+    @test spin_top(TimeReversed{IsingAnyon}(:σ)) == - 1 // 16
+    @test spin_top(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
+end
+
 @testset "T vector" begin
     @test Tvector(Z2Irrep) ≈ [1, 1]
     @test Tvector(Z3Irrep) ≈ [1, 1, 1]
