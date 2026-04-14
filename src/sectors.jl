@@ -709,11 +709,11 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    ξ(::Type{I}) where {I <: Sector}
-Return the topological central charge `ξ` of the modular sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I` weighted by their twists, divided by the total quantum dimension of `I`.
-Satisfying the relation `ξ = exp(2πi c / 8)` where `c` is the chiral central charge of the corresponding topological phase.
+    topological_central_charge(::Type{I}) where {I <: Sector}
+Return the topological central charge of the modular sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I` weighted by their twists, divided by the total quantum dimension of `I`.
+Satisfying the relation `topological_central_charge(I) == exp(2πi c / 8)` where `c` is the chiral central charge mod 8 of the corresponding topological phase.
 """
-ξ(::Type{I}) where {I <: Sector} = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
+topological_central_charge(::Type{I}) where {I <: Sector} = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
 
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------
