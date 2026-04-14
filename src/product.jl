@@ -25,6 +25,13 @@ Base.indexed_iterate(s::ProductSector, args...) = Base.indexed_iterate(s.sectors
 _sectors(::Type{ProductSector{T}}) where {T} = Base.fieldtypes(T)
 _sectors(::Type) = error("should never be reached") # keeps JET happy
 
+function _kron_iter(::Type{ProductSector{T}}) where {T} # Construct an iterator with the same order as the Kronecker product.
+    sector_tuple = Base.fieldtypes(T)
+    tuple_iterators = values.(sector_tuple)
+    @assert !any(it -> Base.IteratorSize(it) isa Base.IsInfinite, tuple_iterators) "All sectors need to be finite"
+    return (ProductSector{T}(reverse(x)) for x in Iterators.product(reverse(tuple_iterators)...))
+end
+
 function Base.IteratorSize(::Type{SectorValues{I}}) where {I <: ProductSector}
     return Base.IteratorSize(Base.Iterators.product(map(values, _sectors(I))...))
 end

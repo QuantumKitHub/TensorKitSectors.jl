@@ -659,11 +659,12 @@ function topological_spin(a::Sector; tol = 1.0e-12)
     end
 
     if isapprox(abs(s), 0.5; atol = tol)
-        return sign(s) * (1 // 2)
+        return 1 // 2
     end
 
     return rationalize(s; tol = tol)
 end
+
 
 """
     Tvector(::Type{I}) where {I <: Sector}
@@ -674,15 +675,10 @@ For ProductSector I ⊠ J, we have Tvector(I ⊠ J) == kron(Tvector(I), Tvector(
 function Tvector(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    vals = values(I)
+    vals = (I <: ProductSector) ? _kron_iter(I) : values(I)
     T = zeros(braidingscalartype(I), length(vals))
     @inbounds for (ia, a) in enumerate(vals)
         T[ia] = twist(a)
-    end
-
-    if I <: ProductSector
-        perm = sortperm(vec(collect(values(I))); by = Tuple) # using Tuple order to restore tensor product basis
-        T = T[perm]
     end
 
     return T
@@ -713,15 +709,10 @@ For ProductSector I ⊠ J, we have Smatrix(I ⊠ J) == kron(Smatrix(I), Smatrix(
 function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    vals = values(I)
+    vals = (I <: ProductSector) ? _kron_iter(I) : values(I)
     S = zeros(braidingscalartype(I), length(vals), length(vals))
     @inbounds for (ib, b) in enumerate(vals), (ia, a) in enumerate(vals)
         S[ia, ib] = hopflink(a, b) # Normalized by total quantum dimension will change the data type of the S-matrix.
-    end
-
-    if I <: ProductSector
-        perm = sortperm(vec(collect(values(I))); by = Tuple) # using Tuple order to restore tensor product basis
-        S = S[perm, perm]
     end
 
     return S
@@ -741,7 +732,7 @@ function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector
     end
 
     if isapprox(abs(c_float), 4; atol = tol)
-        return sign(c_float) * 4 // 1
+        return 4 // 1
     end
     return rationalize(c_float; tol = tol)
 end
