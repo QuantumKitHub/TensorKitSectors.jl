@@ -647,6 +647,25 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
+    spin_top(a::Sector; tol=1e-12)
+
+Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
+"""
+function spin_top(a::Sector; tol = 1.0e-12)
+    s = angle(twist(a)) / (2π)
+    s = mod(s, 1)
+    if s > 0.5
+        s -= 1
+    end
+
+    if isapprox(abs(s), 0.5; atol = tol)
+        return sign(s) * (1 // 2)
+    end
+
+    return rationalize(s; tol = tol)
+end
+
+"""
     Tvector(::Type{I}) where {I <: Sector}
 
 Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
@@ -713,13 +732,18 @@ end
 Return the topological central charge c_top of the modular sector type `I`, where `c_top` is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-function c_top(::Type{I}) where {I <: Sector}
+function c_top(::Type{I}; tol = 1.0e-12) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
-    central_charge_top = imag(log(ξ) * 8 / 2pi)
-    if isapprox(central_charge_top, -4; atol = 1.0e-14)
-        return 4 // 1
+    ϕ = angle(ξ) * 8 / 2pi
+    c_float = mod(ϕ, 8)
+    if c_float > 4
+        c_float -= 8
     end
-    return rationalize(central_charge_top; tol = 1.0e-14)
+
+    if isapprox(abs(c_float), 4; atol = tol)
+        return sign(c_float) * 4 // 1
+    end
+    return rationalize(c_float; tol = tol)
 end
 
 # Operations between sectors of different types
