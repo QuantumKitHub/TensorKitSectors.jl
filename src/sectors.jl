@@ -670,13 +670,13 @@ function Tvector(::Type{I}) where {I <: Sector}
 end
 
 """
-    dim(::Type{I}) where {I <: Sector}
-Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
+    sqDim(::Type{I}) where {I <: Sector}
+Return the square of total quantum dimension D² of the sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
-function dim(::Type{I}) where {I <: Sector}
+function sqDim(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return sqrt(sum(dim(b)^2 for b in values(I)))
+    return sum(dim(b)^2 for b in values(I))
 end
 
 """
