@@ -238,6 +238,7 @@ end
     @test Smatrix(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(FibonacciAnyon), Smatrix(IsingAnyon))
     @test Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Smatrix(IsingAnyon), Smatrix(TimeReversed{IsingAnyon}))
     @test Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon) ≈ kron(Smatrix(TimeReversed{FibonacciAnyon}), Smatrix(IsingAnyon))
+    @test Smatrix(IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(IsingAnyon), Smatrix(IsingAnyon), Smatrix(IsingAnyon))
 end
 
 @testset "Total quantum dimension" begin
@@ -253,14 +254,15 @@ end
 end
 
 @testset "Topological central charge" begin
-    @test topological_central_charge(IsingAnyon) ≈ cispi(1 / 8)
-    @test topological_central_charge(TimeReversed{IsingAnyon}) ≈ cispi(-1 / 8)
-    @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 1
-    @test topological_central_charge(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
-    @test topological_central_charge(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
-    @test topological_central_charge(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ 1
-    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) ≈ topological_central_charge(FibonacciAnyon)^2
-    @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) ≈ topological_central_charge(FibonacciAnyon) * topological_central_charge(IsingAnyon)
+    @test topological_central_charge(IsingAnyon) == 1 // 2
+    @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
+    @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
+    @test topological_central_charge(FibonacciAnyon) == - 14 // 5
+    @test topological_central_charge(TimeReversed{FibonacciAnyon}) == 14 // 5
+    @test topological_central_charge(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) == 0 // 1
+    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon ⊠ FibonacciAnyon) == mod(- 3 * 14 // 5 + 4, 8) - 4
+    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) == mod(2 * topological_central_charge(FibonacciAnyon) + 4, 8) - 4
+    @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) == mod(topological_central_charge(FibonacciAnyon) + topological_central_charge(IsingAnyon) + 4, 8) - 4
 end
 
 include("multifusion.jl")

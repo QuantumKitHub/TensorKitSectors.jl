@@ -710,10 +710,17 @@ end
 
 """
     topological_central_charge(::Type{I}) where {I <: Sector}
-Return the topological central charge of the modular sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I` weighted by their twists, divided by the total quantum dimension of `I`.
-Satisfying the relation `topological_central_charge(I) == exp(2πi c / 8)` where `c` is the chiral central charge mod 8 of the corresponding topological phase.
+Return the topological central charge c of the modular sector type `I`, where `c` is determined mod 8.
+We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-topological_central_charge(::Type{I}) where {I <: Sector} = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
+function topological_central_charge(::Type{I}) where {I <: Sector}
+    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
+    c_top = imag(log(ξ) * 8 / 2pi)
+    if isapprox(c_top, -4; atol = 1.0e-14)
+        return 4 // 1
+    end
+    return rationalize(c_top; tol = 1.0e-14)
+end
 
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------
