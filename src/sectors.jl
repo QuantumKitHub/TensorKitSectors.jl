@@ -647,11 +647,11 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
-    spin_top(a::Sector; tol=1e-12)
+    topological_spin(a::Sector; tol=1e-12)
 
 Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
 """
-function spin_top(a::Sector; tol = 1.0e-12)
+function topological_spin(a::Sector; tol = 1.0e-12)
     s = angle(twist(a)) / (2π)
     s = mod(s, 1)
     if s > 0.5
@@ -728,11 +728,11 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    c_top(::Type{I}) where {I <: Sector}
-Return the topological central charge c_top of the modular sector type `I`, where `c_top` is determined mod 8.
+    topological_central_charge(::Type{I}) where {I <: Sector}
+Return the topological central charge topological_central_charge of the modular sector type `I`, where `topological_central_charge` is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-function c_top(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
     ϕ = angle(ξ) * 8 / 2pi
     c_float = mod(ϕ, 8)
