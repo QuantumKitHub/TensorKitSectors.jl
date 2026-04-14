@@ -681,7 +681,12 @@ function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     vals = values(I)
-    return [hopflink(a, b) for a in vals, b in vals] / dim(I)
+    S = zeros(braidingscalartype(I), length(vals), length(vals))
+    d = dim(I)
+    @inbounds for (ib, b) in enumerate(vals), (ia, a) in enumerate(vals)
+        S[ia, ib] = hopflink(a, b) / d
+    end
+    return S
 end
 
 """
