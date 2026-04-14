@@ -709,17 +709,17 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    topological_central_charge(::Type{I}) where {I <: Sector}
-Return the topological central charge c of the modular sector type `I`, where `c` is determined mod 8.
+    c_top(::Type{I}) where {I <: Sector}
+Return the topological central charge c_top of the modular sector type `I`, where `c_top` is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-function topological_central_charge(::Type{I}) where {I <: Sector}
+function c_top(::Type{I}) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
-    c_top = imag(log(ξ) * 8 / 2pi)
-    if isapprox(c_top, -4; atol = 1.0e-14)
+    central_charge_top = imag(log(ξ) * 8 / 2pi)
+    if isapprox(central_charge_top, -4; atol = 1.0e-14)
         return 4 // 1
     end
-    return rationalize(c_top; tol = 1.0e-14)
+    return rationalize(central_charge_top; tol = 1.0e-14)
 end
 
 # Operations between sectors of different types

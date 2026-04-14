@@ -254,15 +254,15 @@ end
 end
 
 @testset "Topological central charge" begin
-    @test topological_central_charge(IsingAnyon) == 1 // 2
-    @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
-    @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
-    @test topological_central_charge(FibonacciAnyon) == - 14 // 5
-    @test topological_central_charge(TimeReversed{FibonacciAnyon}) == 14 // 5
-    @test topological_central_charge(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) == 0 // 1
-    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon ⊠ FibonacciAnyon) == mod(- 3 * 14 // 5 + 4, 8) - 4
-    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) == mod(2 * topological_central_charge(FibonacciAnyon) + 4, 8) - 4
-    @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) == mod(topological_central_charge(FibonacciAnyon) + topological_central_charge(IsingAnyon) + 4, 8) - 4
+    @test c_top(IsingAnyon) == 1 // 2
+    @test c_top(TimeReversed{IsingAnyon}) == - 1 // 2
+    @test c_top(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
+    @test c_top(FibonacciAnyon) == - 14 // 5
+    @test c_top(TimeReversed{FibonacciAnyon}) == 14 // 5
+    @test c_top(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) == 0 // 1
+    @test c_top(FibonacciAnyon ⊠ FibonacciAnyon ⊠ FibonacciAnyon) == mod(- 3 * 14 // 5 + 4, 8) - 4
+    @test c_top(FibonacciAnyon ⊠ FibonacciAnyon) == mod(2 * c_top(FibonacciAnyon) + 4, 8) - 4
+    @test c_top(FibonacciAnyon ⊠ IsingAnyon) == mod(c_top(FibonacciAnyon) + c_top(IsingAnyon) + 4, 8) - 4
 end
 
 include("multifusion.jl")
