@@ -201,10 +201,10 @@ end
     @test Tvector(TimeReversed{IsingAnyon}) ≈ [1, cispi(-1 / 8), -1]
     @test Tvector(TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5)]
 
-    @test Tvector(FibonacciAnyon ⊠ FibonacciAnyon) ≈ [1, cispi(-4 / 5), cispi(-4 / 5), cispi(-8 / 5)]
-    @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5), cispi(-4 / 5), 1]
-    @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ [1, cispi(1 / 8), cispi(-4 / 5), -1, cispi(1 / 8 - 4 / 5), - cispi(-4 / 5)]
-    @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ [1, cispi(- 1 / 8), cispi(1 / 8), -1, 1, -1, -cispi(1 / 8), -cispi(-1 / 8), 1]
+    @test Tvector(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Tvector(FibonacciAnyon), Tvector(FibonacciAnyon))
+    @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ kron(Tvector(FibonacciAnyon), Tvector(TimeReversed{FibonacciAnyon}))
+    @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tvector(FibonacciAnyon), Tvector(IsingAnyon))
+    @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Tvector(IsingAnyon), Tvector(TimeReversed{IsingAnyon}))
 
     @test Tvector(A4Irrep) ≈ [1, 1, 1, 1]
 end
@@ -219,42 +219,48 @@ end
     @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
 end
 @testset "S matrix" begin
-    @test Smatrix(Z2Irrep) ≈ ones(2, 2) / sqrt(2)
-    @test Smatrix(Z3Irrep) ≈ ones(3, 3) / sqrt(3)
-    @test Smatrix(FermionParity) ≈ ones(2, 2) / sqrt(2)
-    @test Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6) / sqrt(6)
+    @test Smatrix(Z2Irrep) ≈ ones(2, 2)
+    @test Smatrix(Z3Irrep) ≈ ones(3, 3)
+    @test Smatrix(FermionParity) ≈ ones(2, 2)
+    @test Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6)
     φ = (1 + sqrt(5)) / 2
-    @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1] / sqrt(2 + φ)
-    @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1] / 2
+    @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1]
+    @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1]
 
     # S matrix is symmetric
     @test transpose(Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)
     @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
     @test transpose(Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})) ≈ Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})
     @test transpose(Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)) ≈ Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)
+
+    # S matrix is tensor producted when sectors are Deligne tensor producted
+    @test Smatrix(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Smatrix(FibonacciAnyon), Smatrix(FibonacciAnyon))
+    @test Smatrix(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(FibonacciAnyon), Smatrix(IsingAnyon))
+    @test Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Smatrix(IsingAnyon), Smatrix(TimeReversed{IsingAnyon}))
+    @test Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon) ≈ kron(Smatrix(TimeReversed{FibonacciAnyon}), Smatrix(IsingAnyon))
 end
 
 @testset "Total quantum dimension" begin
-    @test dim(Z2Irrep) ≈ sqrt(2)
-    @test dim(Z3Irrep) ≈ sqrt(3)
-    @test dim(FermionParity) ≈ sqrt(2)
-    @test dim(Z2Irrep ⊠ Z3Irrep) ≈ sqrt(6)
+    @test sqDim(Z2Irrep) ≈ 2
+    @test sqDim(Z3Irrep) ≈ 3
+    @test sqDim(FermionParity) ≈ 2
+    @test sqDim(Z2Irrep ⊠ Z3Irrep) ≈ 6
     φ = (1 + sqrt(5)) / 2
-    @test dim(FibonacciAnyon) ≈ sqrt(2 + φ)
-    @test dim(IsingAnyon) ≈ 2
-    @test dim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ 2 + φ
-    @test dim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 4
+    @test sqDim(FibonacciAnyon) ≈ 2 + φ
+    @test sqDim(IsingAnyon) ≈ 4
+    @test sqDim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ (2 + φ)^2
+    @test sqDim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 16
 end
 
-@testset "Multiplicative central charge" begin
-    @test ξ(IsingAnyon) ≈ cispi(1 / 8)
-    @test ξ(TimeReversed{IsingAnyon}) ≈ cispi(-1 / 8)
-    @test ξ(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 1
-    @test ξ(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
-    @test ξ(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
-    @test ξ(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ 1
-    @test ξ(FibonacciAnyon ⊠ FibonacciAnyon) ≈ ξ(FibonacciAnyon)^2
-    @test ξ(FibonacciAnyon ⊠ IsingAnyon) ≈ ξ(FibonacciAnyon) * ξ(IsingAnyon)
+@testset "Topological central charge" begin
+    @test topological_central_charge(IsingAnyon) ≈ cispi(1 / 8)
+    @test topological_central_charge(TimeReversed{IsingAnyon}) ≈ cispi(-1 / 8)
+    @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 1
+    @test topological_central_charge(FibonacciAnyon) ≈ cispi(- 7 / 5 / 2)
+    @test topological_central_charge(TimeReversed{FibonacciAnyon}) ≈ cispi(7 / 5 / 2)
+    @test topological_central_charge(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ 1
+    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) ≈ topological_central_charge(FibonacciAnyon)^2
+    @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) ≈ topological_central_charge(FibonacciAnyon) * topological_central_charge(IsingAnyon)
 end
 
 include("multifusion.jl")

@@ -650,12 +650,23 @@ twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b
     Tvector(::Type{I}) where {I <: Sector}
 
 Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
+For ProductSector I ⊠ J, we have Tvector(I ⊠ J) == kron(Tvector(I), Tvector(J))
 """
 function Tvector(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     vals = values(I)
-    return [twist(a) for a in vals]
+    T = zeros(braidingscalartype(I), length(vals))
+    @inbounds for (ia, a) in enumerate(vals)
+        T[ia] = twist(a)
+    end
+
+    if I <: ProductSector
+        perm = sortperm(vec(collect(values(I))); by = Tuple) # using Tuple order to restore tensor product basis
+        T = T[perm]
+    end
+
+    return T
 end
 
 """
@@ -676,17 +687,24 @@ hopflink(a::I, b::I) where {I <: Sector} = sum(dim(c) * tr(Rsymbol(a, b, c) * Rs
 
 """
      Smatrix(::Type{I}) where {I <: Sector}
-Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`, normalized by the total quantum dimension of `I`.
+Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`.
+The S-matrix is not normalized by the total quantum dimension here.
+For ProductSector I ⊠ J, we have Smatrix(I ⊠ J) == kron(Smatrix(I), Smatrix(J))
 """
 function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     vals = values(I)
     S = zeros(braidingscalartype(I), length(vals), length(vals))
-    d = dim(I)
     @inbounds for (ib, b) in enumerate(vals), (ia, a) in enumerate(vals)
-        S[ia, ib] = hopflink(a, b) / d
+        S[ia, ib] = hopflink(a, b) # Normalized by total quantum dimension will change the data type of the S-matrix.
     end
+
+    if I <: ProductSector
+        perm = sortperm(vec(collect(values(I))); by = Tuple) # using Tuple order to restore tensor product basis
+        S = S[perm, perm]
+    end
+
     return S
 end
 
