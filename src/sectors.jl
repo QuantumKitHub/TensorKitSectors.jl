@@ -662,6 +662,8 @@ function anyonbasis(::Type{I}, i::Int) where {I <: Sector}
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return values(I)[i]
 end
+    return [anyonbasis(I, i) for i in 1:length(values(I))]
+end
 
 function anyonindex(a::I) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
@@ -682,10 +684,9 @@ function Tmatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    sqDim(::Type{I}) where {I <: Sector}
 Return the square of total quantum dimension D² of the sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
-function sqDim(::Type{I}) where {I <: Sector}
+function sqdim(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return sum(dim(b)^2 for b in values(I))
@@ -715,7 +716,7 @@ Return the topological central charge topological_central_charge of the modular 
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
 function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
-    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqDim(I))
+    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqdim(I))
     c_float = angle(ξ) * 8 / 2pi
     isapprox(c_float, -4; atol = tol) && return 4 // 1
     return rationalize(c_float; tol = tol)

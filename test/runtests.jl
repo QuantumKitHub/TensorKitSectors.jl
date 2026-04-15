@@ -258,15 +258,15 @@ end
 end
 
 @testset "Total quantum dimension" begin
-    @test sqDim(Z2Irrep) ≈ 2
-    @test sqDim(Z3Irrep) ≈ 3
-    @test sqDim(FermionParity) ≈ 2
-    @test sqDim(Z2Irrep ⊠ Z3Irrep) ≈ 6
+    @test sqdim(Z2Irrep) ≈ 2
+    @test sqdim(Z3Irrep) ≈ 3
+    @test sqdim(FermionParity) ≈ 2
+    @test sqdim(Z2Irrep ⊠ Z3Irrep) ≈ 6
     φ = (1 + sqrt(5)) / 2
-    @test sqDim(FibonacciAnyon) ≈ 2 + φ
-    @test sqDim(IsingAnyon) ≈ 4
-    @test sqDim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ (2 + φ)^2
-    @test sqDim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 16
+    @test sqdim(FibonacciAnyon) ≈ 2 + φ
+    @test sqdim(IsingAnyon) ≈ 4
+    @test sqdim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ (2 + φ)^2
+    @test sqdim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 16
 end
 
 @testset "Topological central charge" begin
