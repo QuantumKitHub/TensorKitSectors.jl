@@ -206,12 +206,12 @@ function anyonbasis(::Type{ProductSector{T}}, i::Int) where {T}
     return ProductSector{T}(anyontuple...)
 end
 
-function anyonindex(::Type{ProductSector{T}}, a::ProductSector{T}) where {T}
+function anyonindex(a::ProductSector{T}) where {T}
     Base.IteratorSize(values(ProductSector{T})) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     sectortuple = Base.fieldtypes(T)
     sizetuple = map(s -> _length(values(s)), sectortuple)
-    index_tuple = map(x -> anyonindex(x...), zip(sectortuple, Tuple(a)))
+    index_tuple = map(anyonindex, Tuple(a))
     return LinearIndices(reverse(sizetuple))[reverse(index_tuple)...]
 end
 
