@@ -667,13 +667,17 @@ For ProductSector I ⊠ J, we have Tvector(I ⊠ J) == kron(Tvector(I), Tvector(
 function Tvector(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    vals = (I <: ProductSector) ? _kron_iter(I) : values(I)
+    vals = values(I)
     T = zeros(braidingscalartype(I), length(vals))
     @inbounds for (ia, a) in enumerate(vals)
         T[ia] = twist(a)
     end
 
     return T
+end
+function Tvector(::Type{ProductSector{T}}) where {T}
+    sector_tuple = Base.fieldtypes(T)
+    return kron(map(Tvector, sector_tuple)...)
 end
 
 """
@@ -701,13 +705,17 @@ For ProductSector I ⊠ J, we have Smatrix(I ⊠ J) == kron(Smatrix(I), Smatrix(
 function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    vals = (I <: ProductSector) ? _kron_iter(I) : values(I)
+    vals = values(I)
     S = zeros(braidingscalartype(I), length(vals), length(vals))
     @inbounds for (ib, b) in enumerate(vals), (ia, a) in enumerate(vals)
         S[ia, ib] = hopflink(a, b) # Normalized by total quantum dimension will change the data type of the S-matrix.
     end
 
     return S
+end
+function Smatrix(::Type{ProductSector{T}}) where {T}
+    sector_tuple = Base.fieldtypes(T)
+    return kron(map(Smatrix, sector_tuple)...)
 end
 
 """
