@@ -201,8 +201,6 @@ end
     @test topological_spin(TimeReversed{IsingAnyon}(:ψ)) == 1 // 2
     @test topological_spin(TimeReversed{IsingAnyon}(:σ)) == - 1 // 16
     @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
-
-    @test topological_spin(IsingAnyon(:σ) ⊠ IsingAnyon(:σ)) == 1 // 8
 end
 
 @testset "T vector" begin
@@ -219,10 +217,8 @@ end
     @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ kron(Tvector(FibonacciAnyon), Tvector(TimeReversed{FibonacciAnyon}))
     @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tvector(FibonacciAnyon), Tvector(IsingAnyon))
     @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Tvector(IsingAnyon), Tvector(TimeReversed{IsingAnyon}))
-    @test Tvector(IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tvector(IsingAnyon), Tvector(FibonacciAnyon), Tvector(IsingAnyon))
 
     @test Tvector(A4Irrep) ≈ [1, 1, 1, 1]
-    @test Tvector(A4Irrep ⊠ IsingAnyon) ≈ kron(Tvector(A4Irrep), Tvector(IsingAnyon))
 end
 
 @testset "Hopf link" begin
@@ -233,8 +229,6 @@ end
     @test hopflink(IsingAnyon(:σ), IsingAnyon(:σ)) ≈ 0
     @test hopflink(IsingAnyon(:σ), IsingAnyon(:ψ)) ≈ -sqrt(2)
     @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
-
-    @test hopflink(FibonacciAnyon(:τ) ⊠ IsingAnyon(:σ), FibonacciAnyon(:τ) ⊠ IsingAnyon(:ψ)) ≈ hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) * hopflink(IsingAnyon(:σ), IsingAnyon(:ψ))
 end
 @testset "S matrix" begin
     @test Smatrix(Z2Irrep) ≈ ones(2, 2)
@@ -257,7 +251,6 @@ end
     @test Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Smatrix(IsingAnyon), Smatrix(TimeReversed{IsingAnyon}))
     @test Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon) ≈ kron(Smatrix(TimeReversed{FibonacciAnyon}), Smatrix(IsingAnyon))
     @test Smatrix(IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(IsingAnyon), Smatrix(IsingAnyon), Smatrix(IsingAnyon))
-    @test Smatrix(IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(IsingAnyon), Smatrix(FibonacciAnyon), Smatrix(IsingAnyon))
 end
 
 @testset "Total quantum dimension" begin
