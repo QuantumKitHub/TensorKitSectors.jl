@@ -657,6 +657,17 @@ function topological_spin(a::Sector; tol = 1.0e-12)
     return rationalize(s; tol = tol)
 end
 
+function anyonbasis(::Type{I}, i::Int) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return values(I)[i]
+end
+
+function anyonindex(::Type{I}, a::I) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return findindex(values(I), a)
+end
 
 """
     Tvector(::Type{I}) where {I <: Sector}
@@ -674,10 +685,6 @@ function Tvector(::Type{I}) where {I <: Sector}
     end
 
     return T
-end
-function Tvector(::Type{ProductSector{T}}) where {T}
-    sector_tuple = Base.fieldtypes(T)
-    return kron(map(Tvector, sector_tuple)...)
 end
 
 """
@@ -710,12 +717,7 @@ function Smatrix(::Type{I}) where {I <: Sector}
     @inbounds for (ib, b) in enumerate(vals), (ia, a) in enumerate(vals)
         S[ia, ib] = hopflink(a, b) # Normalized by total quantum dimension will change the data type of the S-matrix.
     end
-
     return S
-end
-function Smatrix(::Type{ProductSector{T}}) where {T}
-    sector_tuple = Base.fieldtypes(T)
-    return kron(map(Smatrix, sector_tuple)...)
 end
 
 """
