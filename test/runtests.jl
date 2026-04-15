@@ -1,6 +1,7 @@
 using Test
 using TestExtras
 using TensorKitSectors
+using LinearAlgebra: Diagonal
 
 include("newsectors.jl")
 using .NewSectors
@@ -203,22 +204,25 @@ end
     @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
 end
 
-@testset "T vector" begin
-    @test Tvector(Z2Irrep) ≈ [1, 1]
-    @test Tvector(Z3Irrep) ≈ [1, 1, 1]
-    @test Tvector(FermionParity) ≈ [1, -1]
-    @test Tvector(Z2Irrep ⊠ Z3Irrep) ≈ ones(6)
-    @test Tvector(FibonacciAnyon) ≈ [1, cispi(-4 / 5)]
-    @test Tvector(IsingAnyon) ≈ [1, cispi(1 / 8), -1]
-    @test Tvector(TimeReversed{IsingAnyon}) ≈ [1, cispi(-1 / 8), -1]
-    @test Tvector(TimeReversed{FibonacciAnyon}) ≈ [1, cispi(4 / 5)]
+@testset "T matrix" begin
+    @test Tmatrix(Z2Irrep) ≈ Diagonal([1, 1])
+    @test Tmatrix(Z3Irrep) ≈ Diagonal([1, 1, 1])
+    @test Tmatrix(FermionParity) ≈ Diagonal([1, -1])
+    @test Tmatrix(Z2Irrep ⊠ Z3Irrep) ≈ Diagonal(ones(6))
+    @test Tmatrix(FibonacciAnyon) ≈ Diagonal([1, cispi(-4 / 5)])
+    @test Tmatrix(IsingAnyon) ≈ Diagonal([1, cispi(1 / 8), -1])
+    @test Tmatrix(TimeReversed{IsingAnyon}) ≈ Diagonal([1, cispi(-1 / 8), -1])
+    @test Tmatrix(TimeReversed{FibonacciAnyon}) ≈ Diagonal([1, cispi(4 / 5)])
 
-    @test Tvector(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Tvector(FibonacciAnyon), Tvector(FibonacciAnyon))
-    @test Tvector(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ kron(Tvector(FibonacciAnyon), Tvector(TimeReversed{FibonacciAnyon}))
-    @test Tvector(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tvector(FibonacciAnyon), Tvector(IsingAnyon))
-    @test Tvector(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Tvector(IsingAnyon), Tvector(TimeReversed{IsingAnyon}))
+    @test Tmatrix(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(FibonacciAnyon))
+    @test Tmatrix(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(TimeReversed{FibonacciAnyon}))
+    @test Tmatrix(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(IsingAnyon))
+    @test Tmatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Tmatrix(IsingAnyon), Tmatrix(TimeReversed{IsingAnyon}))
 
-    @test Tvector(A4Irrep) ≈ [1, 1, 1, 1]
+    @test Tmatrix(A4Irrep) ≈ Diagonal([1, 1, 1, 1])
+
+    @test Diagonal(twist.(anyonbasis(IsingAnyon ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}))) ≈ Tmatrix(IsingAnyon ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon})
+    @test Diagonal(twist.(anyonbasis(FibonacciAnyon ⊠ IsingAnyon))) ≈ Tmatrix(FibonacciAnyon ⊠ IsingAnyon)
 end
 
 @testset "Hopf link" begin

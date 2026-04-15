@@ -670,15 +670,15 @@ function anyonindex(a::I) where {I <: Sector}
 end
 
 """
-    Tvector(::Type{I}) where {I <: Sector}
+    Tmatrix(::Type{I}) where {I <: Sector}
 
-Return the T-vector of the sector type `I`, which is a vector containing the twists of all sectors of type `I`.
-For ProductSector I ⊠ J, we have Tvector(I ⊠ J) == kron(Tvector(I), Tvector(J))
+Return the T-matrix of the sector type `I`, which is a diagonal matrix containing the twists of all sectors of type `I`.
+For ProductSector I ⊠ J, we have Tmatrix(I ⊠ J) == kron(Tmatrix(I), Tmatrix(J))
 """
-function Tvector(::Type{I}) where {I <: Sector}
+function Tmatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return twist.(values(I))
+    return Diagonal(twist.(values(I)))
 end
 
 """

@@ -215,9 +215,9 @@ function anyonindex(a::ProductSector{T}) where {T}
     return LinearIndices(reverse(sizetuple))[reverse(index_tuple)...]
 end
 
-function Tvector(::Type{ProductSector{T}}) where {T}
+function Tmatrix(::Type{ProductSector{T}}) where {T}
     sector_tuple = Base.fieldtypes(T)
-    return kron(map(Tvector, sector_tuple)...)
+    return kron(map(Tmatrix, sector_tuple)...)
 end
 
 function Smatrix(::Type{ProductSector{T}}) where {T}

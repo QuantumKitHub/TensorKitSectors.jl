@@ -7,7 +7,7 @@ export Irrep, GroupElement
 
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype, fusionscalartype, braidingscalartype, dimscalartype
-export dim, sqrtdim, invsqrtdim, frobenius_schur_indicator, frobenius_schur_phase, twist, topological_spin, hopflink, Tvector, Smatrix, anyonbasis, anyonindex, topological_central_charge, sqDim, fusiontensor, dual
+export dim, sqrtdim, invsqrtdim, frobenius_schur_indicator, frobenius_schur_phase, twist, topological_spin, hopflink, Tmatrix, Smatrix, anyonbasis, anyonindex, topological_central_charge, sqdim, fusiontensor, dual
 export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion, MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic
@@ -60,7 +60,7 @@ using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
 using Base: @assume_effects
 
-using LinearAlgebra: tr
+using LinearAlgebra: tr, Diagonal
 using TensorOperations
 using HalfIntegers
 using WignerSymbols
