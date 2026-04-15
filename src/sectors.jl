@@ -647,7 +647,7 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
-    topological_spin(a::Sector; tol=1e-12)
+    topological_spin(a::Sector; tol=1.0e-12)
 
 Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
 """
@@ -662,6 +662,7 @@ function anyonbasis(::Type{I}, i::Int) where {I <: Sector}
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     return values(I)[i]
 end
+function anyonbasis(::Type{I}) where {I <: Sector}
     return [anyonbasis(I, i) for i in 1:length(values(I))]
 end
 
@@ -684,6 +685,7 @@ function Tmatrix(::Type{I}) where {I <: Sector}
 end
 
 """
+    sqdim(::Type{I}) where {I <: Sector}
 Return the square of total quantum dimension D² of the sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I`.
 """
 function sqdim(::Type{I}) where {I <: Sector}
@@ -711,12 +713,13 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    topological_central_charge(::Type{I}) where {I <: Sector}
-Return the topological central charge topological_central_charge of the modular sector type `I`, where `topological_central_charge` is determined mod 8.
+    topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
 function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqdim(I))
+    @assert isapprox(abs(ξ), 1; atol = tol) "Sector $I is not modular"
     c_float = angle(ξ) * 8 / 2pi
     isapprox(c_float, -4; atol = tol) && return 4 // 1
     return rationalize(c_float; tol = tol)
