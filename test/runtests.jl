@@ -233,6 +233,7 @@ end
     @test hopflink(IsingAnyon(:σ), IsingAnyon(:σ)) ≈ 0
     @test hopflink(IsingAnyon(:σ), IsingAnyon(:ψ)) ≈ -sqrt(2)
     @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
+    @test hopflink(IsingAnyon(:ψ) ⊠ FibonacciAnyon(:τ), IsingAnyon(:σ) ⊠ FibonacciAnyon(:τ)) ≈ hopflink(IsingAnyon(:ψ), IsingAnyon(:σ)) * hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ))
 end
 @testset "S matrix" begin
     @test Smatrix(Z2Irrep) ≈ ones(2, 2)

@@ -227,17 +227,24 @@ function sqdim(::Type{I}) where {I <: ProductSector}
     return *(sqdim.(_sectors(I))...)
 end
 
-function topological_central_charge(::Type{I}) where {I <: ProductSector}
-    c_tot = mod(sum(topological_central_charge.(_sectors(I))) + 4, 8) - 4
+function topological_spin(p::ProductSector; tol = 1.0e-12)
+    tot_spin = mod(sum(map(x -> topological_spin(x; tol = tol), p.sectors)) + 1 // 2, 1) - 1 // 2
+    if tot_spin == -1 // 2
+        return 1 // 2
+    end
+    return tot_spin
+end
+
+function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: ProductSector}
+    c_tot = mod(sum(map(x -> topological_central_charge(x; tol = tol), _sectors(I))) + 4, 8) - 4
     if c_tot == -4 // 1
         return 4 // 1
     end
     return c_tot
 end
 
-function ismodular(::Type{I}) where {I <: ProductSector}
-    return all(ismodular, _sectors(I))
-end
+ismodular(::Type{I}; tol = 1.0e-12) where {I <: ProductSector} = all(P -> ismodular(P; tol = tol), _sectors(I))
+istransparent(p::ProductSector; tol = 1.0e-12) = all(a -> istransparent(a; tol = tol), p.sectors)
 
 function fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     return _kron(
@@ -279,6 +286,8 @@ end
 fermionparity(p::ProductSector) = mapreduce(fermionparity, xor, p.sectors)
 
 dim(p::ProductSector) = *(dim.(p.sectors)...)
+twist(p::ProductSector) = *(twist.(p.sectors)...)
+hopflink(p::I, q::I) where {I <: ProductSector} = *(map(x -> hopflink(x...), zip(p.sectors, q.sectors))...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
