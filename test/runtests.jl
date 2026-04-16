@@ -257,6 +257,25 @@ end
     @test Smatrix(IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(IsingAnyon), Smatrix(IsingAnyon), Smatrix(IsingAnyon))
 end
 
+@testset "Ismodular" begin
+    @test !ismodular(Z2Irrep)
+    @test !ismodular(Z3Irrep)
+    @test !ismodular(FermionParity)
+    @test !ismodular(A4Irrep)
+    @test !ismodular(IsingAnyon ⊠ Z2Irrep)
+    @test ismodular(IsingAnyon)
+    @test ismodular(FibonacciAnyon)
+    @test ismodular(TimeReversed{IsingAnyon})
+    @test ismodular(IsingAnyon ⊠ TimeReversed{IsingAnyon})
+end
+
+@testset "Müger center" begin
+    @test mugercenter(Z2Irrep) == [Z2Irrep(0), Z2Irrep(1)]
+    @test mugercenter(FermionParity) == [FermionParity(0), FermionParity(1)]
+    @test mugercenter(IsingAnyon) == [IsingAnyon(:I)]
+    @test mugercenter(FibonacciAnyon) == [FibonacciAnyon(:I)]
+end
+
 @testset "Total quantum dimension" begin
     @test sqdim(Z2Irrep) ≈ 2
     @test sqdim(Z3Irrep) ≈ 3

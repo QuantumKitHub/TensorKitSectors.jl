@@ -713,6 +713,35 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
+    ismodular(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+Check whether a sector `I` is modular.
+"""
+function ismodular(::Type{II}; tol = 1.0e-12) where {II <: Sector}
+    s = Smatrix(II)
+    return isapprox(s' * s, sqdim(II) * I(size(s)[1]); atol = tol)
+end
+
+"""
+    istransparent(a::I; tol = 1.0e-12) where {I <: Sector}
+Check whether the object `a` is in the Müger center of sector `I`.
+"""
+function istransparent(a::I; tol = 1.0e-12) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); atol = tol), values(I))
+end
+
+"""
+    mugercenter(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+Return a vector containing all simple objects in the Müger center of the sector `I`.
+"""
+function mugercenter(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return collect(filter(a -> is_mugercentral(a; tol = tol), anyonbasis(I)))
+end
+
+"""
     topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
 Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].

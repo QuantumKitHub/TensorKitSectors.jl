@@ -225,6 +225,22 @@ function Smatrix(::Type{ProductSector{T}}) where {T}
     return kron(map(Smatrix, sector_tuple)...)
 end
 
+function sqdim(::Type{ProductSector{T}}) where {T}
+    return *(sqdim.(Base.fieldtypes(T))...)
+end
+
+function topological_central_charge(::Type{ProductSector{T}}) where {T}
+    c_tot = mod(sum(topological_central_charge.(Base.fieldtypes(T))) + 4, 8) - 4
+    if c_tot == -4 // 1
+        return 4 // 1
+    end
+    return c_tot
+end
+
+function ismodular(::Type{ProductSector{T}}) where {T}
+    return all(ismodular, Base.fieldtypes(T))
+end
+
 function fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
     return _kron(
         fusiontensor(map(_firstsector, (a, b, c))...),
