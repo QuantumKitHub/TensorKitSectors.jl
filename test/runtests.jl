@@ -202,6 +202,10 @@ end
     @test topological_spin(TimeReversed{IsingAnyon}(:ψ)) == 1 // 2
     @test topological_spin(TimeReversed{IsingAnyon}(:σ)) == - 1 // 16
     @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
+    @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ FibonacciAnyon)) == [0 // 1, -2 // 5, -2 // 5, 1 // 5]
+    @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon})) == [0 // 1, 2 // 5, -2 // 5, 0 // 1]
+    @test topological_spin.(anyonbasis(IsingAnyon ⊠ TimeReversed{IsingAnyon})) == [0 // 1, -1 // 16, 1 // 2, 1 // 16, 0 // 1, - 7 // 16, 1 // 2, 7 // 16, 0 // 1]
+    @test topological_spin.(anyonbasis(IsingAnyon ⊠ IsingAnyon)) == [0 // 1, 1 // 16, 1 // 2, 1 // 16, 1 // 8, - 7 // 16, 1 // 2, -7 // 16, 0 // 1]
 end
 
 @testset "T matrix" begin
@@ -275,6 +279,9 @@ end
     @test transparent_anyons(FermionParity) == [FermionParity(0), FermionParity(1)]
     @test transparent_anyons(IsingAnyon) == [IsingAnyon(:I)]
     @test transparent_anyons(FibonacciAnyon) == [FibonacciAnyon(:I)]
+    @test transparent_anyons(FibonacciAnyon ⊠ IsingAnyon) == [FibonacciAnyon(:I) ⊠ IsingAnyon(:I)]
+    @test transparent_anyons(Z2Irrep ⊠ FibonacciAnyon) == [Z2Irrep(0) ⊠ FibonacciAnyon(:I), Z2Irrep(1) ⊠ FibonacciAnyon(:I)]
+    @test transparent_anyons(FibonacciAnyon ⊠ Z3Irrep) == [FibonacciAnyon(:I) ⊠ Z3Irrep(0), FibonacciAnyon(:I) ⊠ Z3Irrep(1), FibonacciAnyon(:I) ⊠ Z3Irrep(2)]
 end
 
 @testset "Total quantum dimension" begin
@@ -299,6 +306,7 @@ end
     @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon ⊠ FibonacciAnyon) == mod(- 3 * 14 // 5 + 4, 8) - 4
     @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) == mod(2 * topological_central_charge(FibonacciAnyon) + 4, 8) - 4
     @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) == mod(topological_central_charge(FibonacciAnyon) + topological_central_charge(IsingAnyon) + 4, 8) - 4
+    @test topological_central_charge(⊠(fill(TimeReversed{IsingAnyon}, 8)...)) == 4 // 1
 end
 
 include("multifusion.jl")
