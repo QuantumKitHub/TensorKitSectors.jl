@@ -703,7 +703,7 @@ end
 """
     ismodular(::Type{I}; tol = 1.0e-12) where {I <: Sector}
 
-Check whether a sector `I` is modular.
+Check whether a sector type `I` is modular.
 """
 function ismodular(::Type{II}; tol = 1.0e-12) where {II <: Sector}
     s = Smatrix(II)
