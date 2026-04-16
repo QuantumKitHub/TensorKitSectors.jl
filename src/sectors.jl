@@ -705,9 +705,9 @@ end
 
 Check whether a sector type `I` is modular.
 """
-function ismodular(::Type{II}; tol = 1.0e-12) where {II <: Sector}
+function ismodular(::Type{II}; kwargs...) where {II <: Sector}
     s = Smatrix(II)
-    return isapprox(s' * s, sqdim(II) * I(size(s)[1]); atol = tol)
+    return isapprox(s' * s, sqdim(II) * I(size(s)[1]); kwargs...)
 end
 
 """
