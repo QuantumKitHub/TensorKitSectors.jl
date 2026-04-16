@@ -2,6 +2,7 @@ using Test
 using TestExtras
 using TensorKitSectors
 using LinearAlgebra: Diagonal
+using LinearAlgebra: I as identity_matrix
 
 include("newsectors.jl")
 using .NewSectors
@@ -204,29 +205,8 @@ end
     @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
     @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ FibonacciAnyon)) == [0 // 1, -2 // 5, -2 // 5, 1 // 5]
     @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon})) == [0 // 1, 2 // 5, -2 // 5, 0 // 1]
-    @test topological_spin.(anyonbasis(IsingAnyon ⊠ TimeReversed{IsingAnyon})) == [0 // 1, -1 // 16, 1 // 2, 1 // 16, 0 // 1, - 7 // 16, 1 // 2, 7 // 16, 0 // 1]
-    @test topological_spin.(anyonbasis(IsingAnyon ⊠ IsingAnyon)) == [0 // 1, 1 // 16, 1 // 2, 1 // 16, 1 // 8, - 7 // 16, 1 // 2, -7 // 16, 0 // 1]
-end
-
-@testset "T matrix" begin
-    @test Tmatrix(Z2Irrep) ≈ Diagonal([1, 1])
-    @test Tmatrix(Z3Irrep) ≈ Diagonal([1, 1, 1])
-    @test Tmatrix(FermionParity) ≈ Diagonal([1, -1])
-    @test Tmatrix(Z2Irrep ⊠ Z3Irrep) ≈ Diagonal(ones(6))
-    @test Tmatrix(FibonacciAnyon) ≈ Diagonal([1, cispi(-4 / 5)])
-    @test Tmatrix(IsingAnyon) ≈ Diagonal([1, cispi(1 / 8), -1])
-    @test Tmatrix(TimeReversed{IsingAnyon}) ≈ Diagonal([1, cispi(-1 / 8), -1])
-    @test Tmatrix(TimeReversed{FibonacciAnyon}) ≈ Diagonal([1, cispi(4 / 5)])
-
-    @test Tmatrix(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(FibonacciAnyon))
-    @test Tmatrix(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(TimeReversed{FibonacciAnyon}))
-    @test Tmatrix(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Tmatrix(FibonacciAnyon), Tmatrix(IsingAnyon))
-    @test Tmatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Tmatrix(IsingAnyon), Tmatrix(TimeReversed{IsingAnyon}))
-
-    @test Tmatrix(A4Irrep) ≈ Diagonal([1, 1, 1, 1])
-
-    @test Diagonal(twist.(anyonbasis(IsingAnyon ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}))) ≈ Tmatrix(IsingAnyon ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon})
-    @test Diagonal(twist.(anyonbasis(FibonacciAnyon ⊠ IsingAnyon))) ≈ Tmatrix(FibonacciAnyon ⊠ IsingAnyon)
+    @test topological_spin.(anyonbasis(IsingAnyon ⊠ TimeReversed{IsingAnyon})) == [0 // 1, -1 // 16, 1 // 16, 1 // 2, 0, 1 // 2, -7 // 16, 7 // 16, 0 // 1]
+    @test topological_spin.(anyonbasis(IsingAnyon ⊠ IsingAnyon)) == [0 // 1, 1 // 16, 1 // 16, 1 // 2, 1 // 8, 1 // 2, -7 // 16, -7 // 16, 0 // 1]
 end
 
 @testset "Hopf link" begin
@@ -239,27 +219,42 @@ end
     @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
     @test hopflink(IsingAnyon(:ψ) ⊠ FibonacciAnyon(:τ), IsingAnyon(:σ) ⊠ FibonacciAnyon(:τ)) ≈ hopflink(IsingAnyon(:ψ), IsingAnyon(:σ)) * hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ))
 end
-@testset "S matrix" begin
+@testset "S matrix, T matrix" begin
     @test Smatrix(Z2Irrep) ≈ ones(2, 2)
     @test Smatrix(Z3Irrep) ≈ ones(3, 3)
+    @test Smatrix(A4Irrep) ≈ [1, 1, 1, 3] * [1, 1, 1, 3]'
     @test Smatrix(FermionParity) ≈ ones(2, 2)
     @test Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6)
     φ = (1 + sqrt(5)) / 2
     @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1]
     @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1]
 
-    # S matrix is symmetric
-    @test transpose(Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ FibonacciAnyon)
-    @test transpose(Smatrix(FibonacciAnyon ⊠ IsingAnyon)) ≈ Smatrix(FibonacciAnyon ⊠ IsingAnyon)
-    @test transpose(Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})) ≈ Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon})
-    @test transpose(Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)) ≈ Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon)
+    @test Tmatrix(Z2Irrep) ≈ Diagonal([1, 1])
+    @test Tmatrix(Z3Irrep) ≈ Diagonal([1, 1, 1])
+    @test Tmatrix(A4Irrep) ≈ Diagonal([1, 1, 1, 1])
+    @test Tmatrix(FermionParity) ≈ Diagonal([1, -1])
+    @test Tmatrix(Z2Irrep ⊠ Z3Irrep) ≈ Diagonal(ones(6))
+    @test Tmatrix(FibonacciAnyon) ≈ Diagonal([1, cispi(-4 / 5)])
+    @test Tmatrix(IsingAnyon) ≈ Diagonal([1, cispi(1 / 8), -1])
+    @test Tmatrix(TimeReversed{IsingAnyon}) ≈ Diagonal([1, cispi(-1 / 8), -1])
+    @test Tmatrix(TimeReversed{FibonacciAnyon}) ≈ Diagonal([1, cispi(4 / 5)])
 
-    # S matrix is tensor producted when sectors are Deligne tensor producted
-    @test Smatrix(FibonacciAnyon ⊠ FibonacciAnyon) ≈ kron(Smatrix(FibonacciAnyon), Smatrix(FibonacciAnyon))
-    @test Smatrix(FibonacciAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(FibonacciAnyon), Smatrix(IsingAnyon))
-    @test Smatrix(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ kron(Smatrix(IsingAnyon), Smatrix(TimeReversed{IsingAnyon}))
-    @test Smatrix(TimeReversed{FibonacciAnyon} ⊠ IsingAnyon) ≈ kron(Smatrix(TimeReversed{FibonacciAnyon}), Smatrix(IsingAnyon))
-    @test Smatrix(IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon) ≈ kron(Smatrix(IsingAnyon), Smatrix(IsingAnyon), Smatrix(IsingAnyon))
+    umtc_list = [
+        FibonacciAnyon ⊠ FibonacciAnyon, FibonacciAnyon ⊠ IsingAnyon, IsingAnyon ⊠ TimeReversed{IsingAnyon},
+        TimeReversed{FibonacciAnyon} ⊠ IsingAnyon, IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon,
+        IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
+    ]
+    for sector in umtc_list
+        @test anyonbasis(sector) == vec(collect(values(sector)))
+        vals = values(sector)
+        l = length(vals)
+        Smat = Smatrix(sector)
+        Tmat = Tmatrix(sector)
+        @test Smat ≈ reshape([hopflink(a, b) for a in vals, b in vals], (l, l))
+        @test Tmat ≈ Diagonal(vec(twist.(vals)))
+        @test transpose(Smat) ≈ Smat
+        @test Smat' * Smat ≈ identity_matrix(l) * sqdim(sector)
+    end
 end
 
 @testset "Ismodular" begin

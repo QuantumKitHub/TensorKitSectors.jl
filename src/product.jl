@@ -196,31 +196,35 @@ end
 frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
 frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
 
-function anyonbasis(::Type{I}, i::Int) where {I <: ProductSector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    sectortuple = _sectors(I)
-    sizetuple = map(s -> _length(values(s)), sectortuple)
-    indextuple = reverse(Tuple(CartesianIndices(reverse(sizetuple))[i]))
-    anyontuple = map(x -> anyonbasis(x...), zip(sectortuple, indextuple))
-    return I(anyontuple...)
-end
-
-function anyonindex(a::I) where {I <: ProductSector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    sectortuple = _sectors(I)
-    sizetuple = map(s -> _length(values(s)), sectortuple)
-    index_tuple = map(anyonindex, Tuple(a))
-    return LinearIndices(reverse(sizetuple))[reverse(index_tuple)...]
-end
-
 function Tmatrix(::Type{I}) where {I <: ProductSector}
-    return kron(map(Tmatrix, _sectors(I))...)
+    sector_tuple = _sectors(I)
+    matrices = Tmatrix.(sector_tuple)
+    Tvector = ones(braidingscalartype(I), length(values(I)))
+    for (ia, a) in enumerate(values(I))
+        for (i_anyon_component, anyon_component) in enumerate(a)
+            matrix_component = matrices[i_anyon_component]
+            sector_component = sector_tuple[i_anyon_component]
+            index_component = findindex(values(sector_component), anyon_component)
+            Tvector[ia] *= matrix_component[index_component, index_component]
+        end
+    end
+    return Diagonal(Tvector)
 end
 
 function Smatrix(::Type{I}) where {I <: ProductSector}
-    return kron(map(Smatrix, _sectors(I))...)
+    sector_tuple = _sectors(I)
+    matrices = Smatrix.(sector_tuple)
+    S_matrix = ones(braidingscalartype(I), length(values(I)), length(values(I)))
+    for (ia, a) in enumerate(values(I)), (ib, b) in enumerate(values(I))
+        for (i_anyon_component, (a_anyon_component, b_anyon_component)) in enumerate(zip(a, b))
+            matrix_component = matrices[i_anyon_component]
+            sector_this_component = sector_tuple[i_anyon_component]
+            index_a_component = findindex(values(sector_this_component), a_anyon_component)
+            index_b_component = findindex(values(sector_this_component), b_anyon_component)
+            S_matrix[ia, ib] *= matrix_component[index_a_component, index_b_component]
+        end
+    end
+    return S_matrix
 end
 
 function sqdim(::Type{I}) where {I <: ProductSector}

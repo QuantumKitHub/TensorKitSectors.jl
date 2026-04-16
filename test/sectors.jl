@@ -69,19 +69,6 @@ end
     end
 end
 
-@testsuite "Anyonbasis and anyonindex" I -> begin
-    if !(Base.IteratorSize(values(I)) isa Base.IsInfinite)
-        for a in values(I)
-            ind = anyonindex(a)
-            @test a == anyonbasis(I, ind)
-        end
-        for i in 1:length(values(I))
-            a = anyonbasis(I, i)
-            @test i == anyonindex(a)
-        end
-    end
-end
-
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
         can_fuse(a, b) || continue

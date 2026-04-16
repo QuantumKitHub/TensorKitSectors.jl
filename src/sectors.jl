@@ -657,20 +657,7 @@ function topological_spin(a::Sector; tol = 1.0e-12)
     return rationalize(s; tol = tol)
 end
 
-function anyonbasis(::Type{I}, i::Int) where {I <: Sector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return values(I)[i]
-end
-function anyonbasis(::Type{I}) where {I <: Sector}
-    return [anyonbasis(I, i) for i in 1:length(values(I))]
-end
-
-function anyonindex(a::I) where {I <: Sector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return findindex(values(I), a)
-end
+anyonbasis(::Type{I}) where {I <: Sector} = vec(collect(values(I)))
 
 """
     Tmatrix(::Type{I}) where {I <: Sector}
