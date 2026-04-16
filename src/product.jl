@@ -196,49 +196,47 @@ end
 frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
 frobenius_schur_indicator(p::ProductSector) = prod(frobenius_schur_indicator, p.sectors)
 
-function anyonbasis(::Type{ProductSector{T}}, i::Int) where {T}
-    Base.IteratorSize(values(ProductSector{T})) isa Base.IsInfinite &&
+function anyonbasis(::Type{I}, i::Int) where {I <: ProductSector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    sectortuple = Base.fieldtypes(T)
+    sectortuple = _sectors(I)
     sizetuple = map(s -> _length(values(s)), sectortuple)
     indextuple = reverse(Tuple(CartesianIndices(reverse(sizetuple))[i]))
     anyontuple = map(x -> anyonbasis(x...), zip(sectortuple, indextuple))
-    return ProductSector{T}(anyontuple...)
+    return I(anyontuple...)
 end
 
-function anyonindex(a::ProductSector{T}) where {T}
-    Base.IteratorSize(values(ProductSector{T})) isa Base.IsInfinite &&
+function anyonindex(a::I) where {I <: ProductSector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    sectortuple = Base.fieldtypes(T)
+    sectortuple = _sectors(I)
     sizetuple = map(s -> _length(values(s)), sectortuple)
     index_tuple = map(anyonindex, Tuple(a))
     return LinearIndices(reverse(sizetuple))[reverse(index_tuple)...]
 end
 
-function Tmatrix(::Type{ProductSector{T}}) where {T}
-    sector_tuple = Base.fieldtypes(T)
-    return kron(map(Tmatrix, sector_tuple)...)
+function Tmatrix(::Type{I}) where {I <: ProductSector}
+    return kron(map(Tmatrix, _sectors(I))...)
 end
 
-function Smatrix(::Type{ProductSector{T}}) where {T}
-    sector_tuple = Base.fieldtypes(T)
-    return kron(map(Smatrix, sector_tuple)...)
+function Smatrix(::Type{I}) where {I <: ProductSector}
+    return kron(map(Smatrix, _sectors(I))...)
 end
 
-function sqdim(::Type{ProductSector{T}}) where {T}
-    return *(sqdim.(Base.fieldtypes(T))...)
+function sqdim(::Type{I}) where {I <: ProductSector}
+    return *(sqdim.(_sectors(I))...)
 end
 
-function topological_central_charge(::Type{ProductSector{T}}) where {T}
-    c_tot = mod(sum(topological_central_charge.(Base.fieldtypes(T))) + 4, 8) - 4
+function topological_central_charge(::Type{I}) where {I <: ProductSector}
+    c_tot = mod(sum(topological_central_charge.(_sectors(I))) + 4, 8) - 4
     if c_tot == -4 // 1
         return 4 // 1
     end
     return c_tot
 end
 
-function ismodular(::Type{ProductSector{T}}) where {T}
-    return all(ismodular, Base.fieldtypes(T))
+function ismodular(::Type{I}) where {I <: ProductSector}
+    return all(ismodular, _sectors(I))
 end
 
 function fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
