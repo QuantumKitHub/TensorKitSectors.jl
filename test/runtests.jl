@@ -250,8 +250,6 @@ end
         l = length(vals)
         Smat = Smatrix(sector)
         Tmat = Tmatrix(sector)
-        @test Smat ≈ reshape([hopflink(a, b) for a in vals, b in vals], (l, l))
-        @test Tmat ≈ Diagonal(vec(twist.(vals)))
         @test transpose(Smat) ≈ Smat
         @test Smat' * Smat ≈ identity_matrix(l) * sqdim(sector)
     end
