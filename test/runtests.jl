@@ -240,6 +240,7 @@ end
     @test Tmatrix(TimeReversed{FibonacciAnyon}) ≈ Diagonal([1, cispi(4 / 5)])
 
     umtc_list = [
+        IsingAnyon, FibonacciAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
         FibonacciAnyon ⊠ FibonacciAnyon, FibonacciAnyon ⊠ IsingAnyon, IsingAnyon ⊠ TimeReversed{IsingAnyon},
         TimeReversed{FibonacciAnyon} ⊠ IsingAnyon, IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon,
         IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
@@ -248,9 +249,13 @@ end
         vals = values(sector)
         l = length(vals)
         Smat = Smatrix(sector)
+        smat = Smat / dim(sector)
         Tmat = Tmatrix(sector)
-        @test transpose(Smat) ≈ Smat
-        @test Smat' * Smat ≈ identity_matrix(l) * dim(sector)^2
+        c = topological_central_charge(sector)
+        @test transpose(Smat) ≈ Smat # S matrix is symmetric
+        @test (smat * Tmat)^3 ≈ cispi(2 * c / 8) * smat^2 # projective rep of modular group
+        @test smat^4 ≈ identity_matrix(l)
+        @test smat' * smat ≈ identity_matrix(l) # S matrix is unitary
     end
 end
 
