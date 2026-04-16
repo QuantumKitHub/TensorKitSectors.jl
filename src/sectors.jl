@@ -668,7 +668,7 @@ For ProductSector I ⊠ J, we have Tmatrix(I ⊠ J) == kron(Tmatrix(I), Tmatrix(
 function Tmatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return Diagonal(twist.(values(I)))
+    return Diagonal(vec(twist.(values(I))))
 end
 
 """
@@ -696,7 +696,12 @@ For ProductSector I ⊠ J, we have Smatrix(I ⊠ J) == kron(Smatrix(I), Smatrix(
 function Smatrix(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return [hopflink(a, b) for a in values(I), b in values(I)]
+    val = values(I)
+    S = zeros(braidingscalartype(I), length(val), length(val))
+    for (ia, a) in enumerate(val), (ib, b) in enumerate(val)
+        S[ia, ib] = hopflink(a, b)
+    end
+    return S
 end
 
 """
