@@ -732,13 +732,13 @@ function istransparent(a::I; tol = 1.0e-12) where {I <: Sector}
 end
 
 """
-    mugercenter(::Type{I}; tol = 1.0e-12) where {I <: Sector}
-Return a vector containing all simple objects in the Müger center of the sector `I`.
+    transparent_anyons(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+Return a vector containing all transparent anyons of the sector `I`.
 """
-function mugercenter(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+function transparent_anyons(::Type{I}; tol = 1.0e-12) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return collect(filter(a -> is_mugercentral(a; tol = tol), anyonbasis(I)))
+    return collect(filter(a -> istransparent(a; tol = tol), anyonbasis(I)))
 end
 
 """

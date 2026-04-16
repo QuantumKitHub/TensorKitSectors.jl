@@ -270,10 +270,10 @@ end
 end
 
 @testset "Müger center" begin
-    @test mugercenter(Z2Irrep) == [Z2Irrep(0), Z2Irrep(1)]
-    @test mugercenter(FermionParity) == [FermionParity(0), FermionParity(1)]
-    @test mugercenter(IsingAnyon) == [IsingAnyon(:I)]
-    @test mugercenter(FibonacciAnyon) == [FibonacciAnyon(:I)]
+    @test transparent_anyons(Z2Irrep) == [Z2Irrep(0), Z2Irrep(1)]
+    @test transparent_anyons(FermionParity) == [FermionParity(0), FermionParity(1)]
+    @test transparent_anyons(IsingAnyon) == [IsingAnyon(:I)]
+    @test transparent_anyons(FibonacciAnyon) == [FibonacciAnyon(:I)]
 end
 
 @testset "Total quantum dimension" begin
