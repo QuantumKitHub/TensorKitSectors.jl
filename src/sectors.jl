@@ -657,8 +657,6 @@ function topological_spin(a::Sector; tol = 1.0e-12)
     return rationalize(s; tol = tol)
 end
 
-anyonbasis(::Type{I}) where {I <: Sector} = vec(collect(values(I)))
-
 """
     Tmatrix(::Type{I}) where {I <: Sector}
 
