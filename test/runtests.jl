@@ -203,10 +203,10 @@ end
     @test topological_spin(TimeReversed{IsingAnyon}(:ψ)) == 1 // 2
     @test topological_spin(TimeReversed{IsingAnyon}(:σ)) == - 1 // 16
     @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
-    @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ FibonacciAnyon)) == [0 // 1, -2 // 5, -2 // 5, 1 // 5]
-    @test topological_spin.(anyonbasis(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon})) == [0 // 1, 2 // 5, -2 // 5, 0 // 1]
-    @test topological_spin.(anyonbasis(IsingAnyon ⊠ TimeReversed{IsingAnyon})) == [0 // 1, -1 // 16, 1 // 16, 1 // 2, 0, 1 // 2, -7 // 16, 7 // 16, 0 // 1]
-    @test topological_spin.(anyonbasis(IsingAnyon ⊠ IsingAnyon)) == [0 // 1, 1 // 16, 1 // 16, 1 // 2, 1 // 8, 1 // 2, -7 // 16, -7 // 16, 0 // 1]
+    @test vec(topological_spin.(values(FibonacciAnyon ⊠ FibonacciAnyon))) == [0 // 1, -2 // 5, -2 // 5, 1 // 5]
+    @test vec(topological_spin.(values(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}))) == [0 // 1, 2 // 5, -2 // 5, 0 // 1]
+    @test vec(topological_spin.(values(IsingAnyon ⊠ TimeReversed{IsingAnyon}))) == [0 // 1, -1 // 16, 1 // 16, 1 // 2, 0, 1 // 2, -7 // 16, 7 // 16, 0 // 1]
+    @test vec(topological_spin.(values(IsingAnyon ⊠ IsingAnyon))) == [0 // 1, 1 // 16, 1 // 16, 1 // 2, 1 // 8, 1 // 2, -7 // 16, -7 // 16, 0 // 1]
 end
 
 @testset "Hopf link" begin
@@ -245,13 +245,12 @@ end
         IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
     ]
     for sector in umtc_list
-        @test anyonbasis(sector) == vec(collect(values(sector)))
         vals = values(sector)
         l = length(vals)
         Smat = Smatrix(sector)
         Tmat = Tmatrix(sector)
         @test transpose(Smat) ≈ Smat
-        @test Smat' * Smat ≈ identity_matrix(l) * sqdim(sector)
+        @test Smat' * Smat ≈ identity_matrix(l) * dim(sector)^2
     end
 end
 
@@ -267,26 +266,16 @@ end
     @test ismodular(IsingAnyon ⊠ TimeReversed{IsingAnyon})
 end
 
-@testset "Müger center" begin
-    @test transparent_anyons(Z2Irrep) == [Z2Irrep(0), Z2Irrep(1)]
-    @test transparent_anyons(FermionParity) == [FermionParity(0), FermionParity(1)]
-    @test transparent_anyons(IsingAnyon) == [IsingAnyon(:I)]
-    @test transparent_anyons(FibonacciAnyon) == [FibonacciAnyon(:I)]
-    @test transparent_anyons(FibonacciAnyon ⊠ IsingAnyon) == [FibonacciAnyon(:I) ⊠ IsingAnyon(:I)]
-    @test transparent_anyons(Z2Irrep ⊠ FibonacciAnyon) == [Z2Irrep(0) ⊠ FibonacciAnyon(:I), Z2Irrep(1) ⊠ FibonacciAnyon(:I)]
-    @test transparent_anyons(FibonacciAnyon ⊠ Z3Irrep) == [FibonacciAnyon(:I) ⊠ Z3Irrep(0), FibonacciAnyon(:I) ⊠ Z3Irrep(1), FibonacciAnyon(:I) ⊠ Z3Irrep(2)]
-end
-
 @testset "Total quantum dimension" begin
-    @test sqdim(Z2Irrep) ≈ 2
-    @test sqdim(Z3Irrep) ≈ 3
-    @test sqdim(FermionParity) ≈ 2
-    @test sqdim(Z2Irrep ⊠ Z3Irrep) ≈ 6
+    @test dim(Z2Irrep)^2 ≈ 2
+    @test dim(Z3Irrep)^2 ≈ 3
+    @test dim(FermionParity)^2 ≈ 2
+    @test dim(Z2Irrep ⊠ Z3Irrep)^2 ≈ 6
     φ = (1 + sqrt(5)) / 2
-    @test sqdim(FibonacciAnyon) ≈ 2 + φ
-    @test sqdim(IsingAnyon) ≈ 4
-    @test sqdim(FibonacciAnyon ⊠ FibonacciAnyon) ≈ (2 + φ)^2
-    @test sqdim(IsingAnyon ⊠ TimeReversed{IsingAnyon}) ≈ 16
+    @test dim(FibonacciAnyon)^2 ≈ 2 + φ
+    @test dim(IsingAnyon)^2 ≈ 4
+    @test dim(FibonacciAnyon ⊠ FibonacciAnyon)^2 ≈ (2 + φ)^2
+    @test dim(IsingAnyon ⊠ TimeReversed{IsingAnyon})^2 ≈ 16
 end
 
 @testset "Topological central charge" begin

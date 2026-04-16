@@ -647,14 +647,19 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
-    topological_spin(a::Sector; tol=1.0e-12)
+    topological_spin(a::Sector; tol = nothing)
 
 Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
 """
-function topological_spin(a::Sector; tol = 1.0e-12)
+function topological_spin(a::Sector; tol = nothing)
     s = angle(twist(a)) / 2pi
-    isapprox(s, -0.5; atol = tol) && return 1 // 2
-    return rationalize(s; tol = tol)
+    isapprox(s, -0.5) && return 1 // 2
+
+    if tol === nothing
+        T = real(typeof(s))
+        tol = sqrt(eps(T))
+    end
+    return rationalize(s; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
 end
 
 """
@@ -669,14 +674,15 @@ function Tmatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    sqdim(::Type{I}) where {I <: Sector}
+    dim(::Type{I}) where {I <: Sector}
 
-Return the square of total quantum dimension D² of the sector type `I`, which is defined as the sum of the squares of the quantum dimensions of all sectors of type `I`.
+Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
+Or D = √∑d^2.
 """
-function sqdim(::Type{I}) where {I <: Sector}
+function dim(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return sum(dim(b)^2 for b in values(I))
+    return sqrt(sum(dim(b)^2 for b in values(I)))
 end
 
 """
@@ -701,49 +707,34 @@ function Smatrix(::Type{I}) where {I <: Sector}
 end
 
 """
-    ismodular(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+    ismodular(::Type{I}; kwargs...) where {I <: Sector}
 
 Check whether a sector type `I` is modular.
 """
 function ismodular(::Type{II}; kwargs...) where {II <: Sector}
     s = Smatrix(II)
-    return isapprox(s' * s, sqdim(II) * I(size(s)[1]); kwargs...)
+    return isapprox(s' * s, dim(II)^2 * I(size(s)[1]); kwargs...)
 end
 
 """
-    istransparent(a::I; tol = 1.0e-12) where {I <: Sector}
-
-Check whether the object `a` is in the Müger center of sector `I`.
-"""
-function istransparent(a::I; tol = 1.0e-12) where {I <: Sector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); atol = tol), values(I))
-end
-
-"""
-    transparent_anyons(::Type{I}; tol = 1.0e-12) where {I <: Sector}
-
-Return a vector containing all transparent anyons of the sector `I`, or all simple objects of the Müger center of the sector `I`.
-"""
-function transparent_anyons(::Type{I}; tol = 1.0e-12) where {I <: Sector}
-    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
-        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
-    return collect(filter(a -> istransparent(a; tol = tol), anyonbasis(I)))
-end
-
-"""
-    topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
+    topological_central_charge(::Type{I}; tol = nothing) where {I <: Sector}
 
 Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-function topological_central_charge(::Type{I}; tol = 1.0e-12) where {I <: Sector}
-    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / sqrt(sqdim(I))
-    @assert isapprox(abs(ξ), 1; atol = tol) "Sector $I is not modular"
-    c_float = angle(ξ) * 8 / 2pi
-    isapprox(c_float, -4; atol = tol) && return 4 // 1
-    return rationalize(c_float; tol = tol)
+function topological_central_charge(::Type{I}; tol = nothing) where {I <: Sector}
+    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
+    @assert isapprox(abs(ξ), 1) "Sector $I is not modular"
+    c_float = angle(ξ) * 8 / (2π)
+
+    isapprox(c_float, -4) && return 4 // 1
+
+    if tol === nothing
+        T = real(typeof(c_float))
+        tol = sqrt(eps(T))
+    end
+
+    return rationalize(c_float; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
 end
 
 # Operations between sectors of different types
