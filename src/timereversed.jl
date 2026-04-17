@@ -31,6 +31,8 @@ If `a` is already a time-reversed sector, return the original sector.
 timereversed(a::Sector) = BraidingStyle(typeof(a)) isa SymmetricBraiding ? a : TimeReversed(a)
 timereversed(a::TimeReversed) = a.a
 
+Base.convert(::Type{TimeReversed{I}}, a) where {I} = TimeReversed{I}(convert(I, a))
+
 FusionStyle(::Type{TimeReversed{I}}) where {I <: Sector} = FusionStyle(I)
 BraidingStyle(::Type{TimeReversed{I}}) where {I <: Sector} = BraidingStyle(I)
 
