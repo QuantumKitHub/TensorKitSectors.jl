@@ -193,6 +193,12 @@ end
     end
 end
 
+@testset "Converter constructions" begin
+    @test IsingAnyon(:ψ) isa IsingAnyon
+    @test (IsingAnyon ⊠ IsingAnyon)(:ψ, :σ) isa (IsingAnyon ⊠ IsingAnyon)
+    @test (IsingAnyon ⊠ TimeReversed{IsingAnyon})(:ψ, :σ) isa (IsingAnyon ⊠ TimeReversed{IsingAnyon})
+end
+
 @testset "Topological spin" begin
     @test topological_spin(IsingAnyon(:I)) == 0 // 1
     @test topological_spin(IsingAnyon(:σ)) == 1 // 16
