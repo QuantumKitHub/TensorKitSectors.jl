@@ -673,8 +673,7 @@ end
 """
     dim(::Type{I}) where {I <: Sector}
 
-Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`.
-Or D = √∑d^2.
+Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`, i.e. D = √(∑ₐ dₐ²).
 """
 function dim(::Type{I}) where {I <: Sector}
     Base.IteratorSize(values(I)) isa Base.IsInfinite &&
