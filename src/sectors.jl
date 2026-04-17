@@ -647,18 +647,15 @@ twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
 """
-    topological_spin(a::Sector; tol = nothing)
+    topological_spin(a::Sector)
 
 Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
 """
-function topological_spin(a::Sector; tol = nothing)
+function topological_spin(a::Sector)
     s = angle(twist(a)) / 2pi
     isapprox(s, -0.5) && return 1 // 2
-
-    if tol === nothing
-        T = real(typeof(s))
-        tol = sqrt(eps(T))
-    end
+    T = real(typeof(s))
+    tol = sqrt(eps(T))
     return rationalize(s; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
 end
 
@@ -717,22 +714,20 @@ function ismodular(::Type{II}; kwargs...) where {II <: Sector}
 end
 
 """
-    topological_central_charge(::Type{I}; tol = nothing) where {I <: Sector}
+    topological_central_charge(::Type{I}) where {I <: Sector}
 
 Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
-function topological_central_charge(::Type{I}; tol = nothing) where {I <: Sector}
+function topological_central_charge(::Type{I}) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
     @assert isapprox(abs(ξ), 1) "Sector $I is not modular"
     c_float = angle(ξ) * 8 / (2π)
 
     isapprox(c_float, -4) && return 4 // 1
 
-    if tol === nothing
-        T = real(typeof(c_float))
-        tol = sqrt(eps(T))
-    end
+    T = real(typeof(c_float))
+    tol = sqrt(eps(T))
 
     return rationalize(c_float; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
 end
