@@ -683,7 +683,7 @@ function dim(::Type{I}) where {I <: Sector}
 end
 
 """
-   hopflink(a::Sector, b::Sector)
+   hopflink(a::I, b::I) where {I <: Sector}
 
 Return the hopflink of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
 """
