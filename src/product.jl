@@ -236,6 +236,8 @@ end
 fermionparity(p::ProductSector) = mapreduce(fermionparity, xor, p.sectors)
 
 dim(p::ProductSector) = *(dim.(p.sectors)...)
+twist(p::ProductSector) = *(twist.(p.sectors)...)
+hopflink(p::I, q::I) where {I <: ProductSector} = *(hopflink.(p.sectors, q.sectors)...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)

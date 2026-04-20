@@ -1,6 +1,8 @@
 using Test
 using TestExtras
 using TensorKitSectors
+using LinearAlgebra: Diagonal
+using LinearAlgebra: I as identity_matrix
 
 include("newsectors.jl")
 using .NewSectors
@@ -189,6 +191,115 @@ end
         @test charge(dual(a)) == mod(-charge(a), N)
         @test charge(only(a ⊗ a)) == mod(charge(a) + charge(a), N)
     end
+end
+
+@testset "Converter constructions" begin
+    @test IsingAnyon(:ψ) isa IsingAnyon
+    @test (IsingAnyon ⊠ IsingAnyon)(:ψ, :σ) isa (IsingAnyon ⊠ IsingAnyon)
+    @test (IsingAnyon ⊠ TimeReversed{IsingAnyon})(:ψ, :σ) isa (IsingAnyon ⊠ TimeReversed{IsingAnyon})
+end
+
+@testset "Topological spin" begin
+    @test topological_spin(IsingAnyon(:I)) == 0 // 1
+    @test topological_spin(IsingAnyon(:σ)) == 1 // 16
+    @test topological_spin(IsingAnyon(:ψ)) == 1 // 2
+    @test topological_spin(FibonacciAnyon(:τ)) == - 2 // 5
+    @test topological_spin(FibonacciAnyon(:I)) == 0 // 1
+    @test topological_spin(Z2Irrep(1)) == 0 // 1
+    @test topological_spin(TimeReversed{IsingAnyon}(:ψ)) == 1 // 2
+    @test topological_spin(TimeReversed{IsingAnyon}(:σ)) == - 1 // 16
+    @test topological_spin(TimeReversed{FibonacciAnyon}(:τ)) == 2 // 5
+    @test vec(topological_spin.(values(FibonacciAnyon ⊠ FibonacciAnyon))) == [0 // 1, -2 // 5, -2 // 5, 1 // 5]
+    @test vec(topological_spin.(values(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}))) == [0 // 1, 2 // 5, -2 // 5, 0 // 1]
+    @test vec(topological_spin.(values(IsingAnyon ⊠ TimeReversed{IsingAnyon}))) == [0 // 1, -1 // 16, 1 // 16, 1 // 2, 0, 1 // 2, -7 // 16, 7 // 16, 0 // 1]
+    @test vec(topological_spin.(values(IsingAnyon ⊠ IsingAnyon))) == [0 // 1, 1 // 16, 1 // 16, 1 // 2, 1 // 8, 1 // 2, -7 // 16, -7 // 16, 0 // 1]
+end
+
+@testset "Hopf link" begin
+    @test hopflink(Z2Irrep(1), Z2Irrep(1)) ≈ 1
+    @test hopflink(Z3Irrep(1), Z3Irrep(2)) ≈ 1
+    @test hopflink(FermionParity(1), FermionParity(1)) ≈ 1
+    @test hopflink(IsingAnyon(:ψ), IsingAnyon(:ψ)) ≈ 1
+    @test hopflink(IsingAnyon(:σ), IsingAnyon(:σ)) ≈ 0
+    @test hopflink(IsingAnyon(:σ), IsingAnyon(:ψ)) ≈ -sqrt(2)
+    @test hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ)) ≈ -1
+    @test hopflink(IsingAnyon(:ψ) ⊠ FibonacciAnyon(:τ), IsingAnyon(:σ) ⊠ FibonacciAnyon(:τ)) ≈ hopflink(IsingAnyon(:ψ), IsingAnyon(:σ)) * hopflink(FibonacciAnyon(:τ), FibonacciAnyon(:τ))
+end
+@testset "S matrix, T matrix" begin
+    @test Smatrix(Z2Irrep) ≈ ones(2, 2)
+    @test Smatrix(Z3Irrep) ≈ ones(3, 3)
+    @test Smatrix(A4Irrep) ≈ [1, 1, 1, 3] * [1, 1, 1, 3]'
+    @test Smatrix(FermionParity) ≈ ones(2, 2)
+    @test Smatrix(Z2Irrep ⊠ Z3Irrep) ≈ ones(6, 6)
+    φ = (1 + sqrt(5)) / 2
+    @test Smatrix(FibonacciAnyon) ≈ [1 φ; φ -1]
+    @test Smatrix(IsingAnyon) ≈ [1 sqrt(2) 1; sqrt(2) 0 -sqrt(2); 1 -sqrt(2) 1]
+
+    @test Tmatrix(Z2Irrep) ≈ Diagonal([1, 1])
+    @test Tmatrix(Z3Irrep) ≈ Diagonal([1, 1, 1])
+    @test Tmatrix(A4Irrep) ≈ Diagonal([1, 1, 1, 1])
+    @test Tmatrix(FermionParity) ≈ Diagonal([1, -1])
+    @test Tmatrix(Z2Irrep ⊠ Z3Irrep) ≈ Diagonal(ones(6))
+    @test Tmatrix(FibonacciAnyon) ≈ Diagonal([1, cispi(-4 / 5)])
+    @test Tmatrix(IsingAnyon) ≈ Diagonal([1, cispi(1 / 8), -1])
+    @test Tmatrix(TimeReversed{IsingAnyon}) ≈ Diagonal([1, cispi(-1 / 8), -1])
+    @test Tmatrix(TimeReversed{FibonacciAnyon}) ≈ Diagonal([1, cispi(4 / 5)])
+
+    umtc_list = [
+        IsingAnyon, FibonacciAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
+        FibonacciAnyon ⊠ FibonacciAnyon, FibonacciAnyon ⊠ IsingAnyon, IsingAnyon ⊠ TimeReversed{IsingAnyon},
+        TimeReversed{FibonacciAnyon} ⊠ IsingAnyon, IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon,
+        IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
+    ]
+    for sector in umtc_list
+        vals = values(sector)
+        l = length(vals)
+        Smat = Smatrix(sector)
+        smat = Smat / dim(sector)
+        Tmat = Tmatrix(sector)
+        c = topological_central_charge(sector)
+        @test transpose(Smat) ≈ Smat # S matrix is symmetric
+        @test (smat * Tmat)^3 ≈ cispi(2 * c / 8) * smat^2 # projective rep of modular group
+        @test smat^4 ≈ identity_matrix(l)
+        @test smat' * smat ≈ identity_matrix(l) # S matrix is unitary
+    end
+end
+
+@testset "Ismodular" begin
+    @test !ismodular(Z2Irrep)
+    @test !ismodular(Z3Irrep)
+    @test !ismodular(FermionParity)
+    @test !ismodular(A4Irrep)
+    @test !ismodular(IsingAnyon ⊠ Z2Irrep)
+    @test ismodular(IsingAnyon)
+    @test ismodular(FibonacciAnyon)
+    @test ismodular(TimeReversed{IsingAnyon})
+    @test ismodular(IsingAnyon ⊠ TimeReversed{IsingAnyon})
+end
+
+@testset "Total quantum dimension" begin
+    @test dim(Z2Irrep)^2 ≈ 2
+    @test dim(Z3Irrep)^2 ≈ 3
+    @test dim(FermionParity)^2 ≈ 2
+    @test dim(Z2Irrep ⊠ Z3Irrep)^2 ≈ 6
+    φ = (1 + sqrt(5)) / 2
+    @test dim(FibonacciAnyon)^2 ≈ 2 + φ
+    @test dim(IsingAnyon)^2 ≈ 4
+    @test dim(FibonacciAnyon ⊠ FibonacciAnyon)^2 ≈ (2 + φ)^2
+    @test dim(IsingAnyon ⊠ TimeReversed{IsingAnyon})^2 ≈ 16
+end
+
+@testset "Topological central charge" begin
+    @test topological_central_charge(IsingAnyon) == 1 // 2
+    @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
+    @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
+    @test topological_central_charge(FibonacciAnyon) == - 14 // 5
+    @test topological_central_charge(TimeReversed{FibonacciAnyon}) == 14 // 5
+    @test topological_central_charge(FibonacciAnyon ⊠ TimeReversed{FibonacciAnyon}) == 0 // 1
+    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon ⊠ FibonacciAnyon) == mod(- 3 * 14 // 5 + 4, 8) - 4
+    @test topological_central_charge(FibonacciAnyon ⊠ FibonacciAnyon) == mod(2 * topological_central_charge(FibonacciAnyon) + 4, 8) - 4
+    @test topological_central_charge(FibonacciAnyon ⊠ IsingAnyon) == mod(topological_central_charge(FibonacciAnyon) + topological_central_charge(IsingAnyon) + 4, 8) - 4
+    @test topological_central_charge(⊠(fill(TimeReversed{IsingAnyon}, 8)...)) == 4 // 1
 end
 
 include("multifusion.jl")

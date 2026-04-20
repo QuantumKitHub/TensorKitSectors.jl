@@ -646,6 +646,91 @@ Return the twist of a sector `a`.
 twist(a::Sector) = twist_from_Rsymbol(a)
 twist_from_Rsymbol(a::Sector) = sum(dim(b) / dim(a) * tr(Rsymbol(a, a, b)) for b in a ⊗ a)
 
+"""
+    topological_spin(a::Sector)
+
+Return the topological spin of a sector `a`. Here we assume the range of the output as rational numbers within (-1 / 2, 1 / 2].
+"""
+function topological_spin(a::Sector)
+    s = angle(twist(a)) / 2pi
+    isapprox(s, -0.5) && return 1 // 2
+    T = real(typeof(s))
+    tol = sqrt(eps(T))
+    return rationalize(s; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
+end
+
+"""
+    Tmatrix(::Type{I}) where {I <: Sector}
+
+Return the T-matrix of the sector type `I`, which is a diagonal matrix containing the twists of all sectors of type `I`.
+"""
+function Tmatrix(::Type{I}) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return Diagonal(vec(twist.(values(I))))
+end
+
+"""
+    dim(::Type{I}) where {I <: Sector}
+
+Return the total quantum dimension D of the sector type `I`, which is defined as the square root of the sum of the squares of the quantum dimensions of all sectors of type `I`, i.e. D = √(∑ₐ dₐ²).
+"""
+function dim(::Type{I}) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    return sqrt(sum(dim(b)^2 for b in values(I)))
+end
+
+"""
+   hopflink(a::I, b::I) where {I <: Sector}
+
+Return the hopflink of sectors `a` and `b`, which is defined as the trace of the double braiding between `a` and `b`.
+"""
+hopflink(a::I, b::I) where {I <: Sector} = sum(dim(c) * tr(Rsymbol(a, b, c) * Rsymbol(b, a, c)) for c in a ⊗ b)
+
+"""
+     Smatrix(::Type{I}) where {I <: Sector}
+
+Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`.
+The S-matrix is not normalized by the total quantum dimension here.
+"""
+function Smatrix(::Type{I}) where {I <: Sector}
+    Base.IteratorSize(values(I)) isa Base.IsInfinite &&
+        throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
+    vals = values(I)
+    l = length(vals)
+    return reshape([hopflink(a, b) for a in vals, b in vals], (l, l))
+end
+
+"""
+    ismodular(::Type{I}; kwargs...) where {I <: Sector}
+
+Check whether a sector type `I` is modular.
+"""
+function ismodular(::Type{II}; kwargs...) where {II <: Sector}
+    s = Smatrix(II)
+    return isapprox(s' * s, dim(II)^2 * I(size(s)[1]); kwargs...)
+end
+
+"""
+    topological_central_charge(::Type{I}) where {I <: Sector}
+
+Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
+We choose convention by restrict the returning value as rational numbers in (-4, 4].
+"""
+function topological_central_charge(::Type{I}) where {I <: Sector}
+    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
+    @assert isapprox(abs(ξ), 1) "Sector $I is not modular"
+    c_float = angle(ξ) * 8 / (2π)
+
+    isapprox(c_float, -4) && return 4 // 1
+
+    T = real(typeof(c_float))
+    tol = sqrt(eps(T))
+
+    return rationalize(c_float; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
+end
+
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------
 
