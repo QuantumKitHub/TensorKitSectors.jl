@@ -715,12 +715,12 @@ end
 """
     topological_central_charge(::Type{I}) where {I <: Sector}
 
-Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
+Return the topological central charge c of the braided sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
 function topological_central_charge(::Type{I}) where {I <: Sector}
     ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
-    @assert isapprox(abs(ξ), 1) "Sector $I is not modular"
+    isapprox(abs(ξ), 0) && return missing # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
     c_float = angle(ξ) * 8 / (2π)
 
     isapprox(c_float, -4) && return 4 // 1
