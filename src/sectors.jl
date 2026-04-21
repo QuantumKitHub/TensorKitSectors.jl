@@ -691,7 +691,7 @@ hopflink(a::I, b::I) where {I <: Sector} = sum(dim(c) * tr(Rsymbol(a, b, c) * Rs
 """
      Smatrix(::Type{I}) where {I <: Sector}
 
-Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`.
+Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`, with the second sector being taken dual.
 The S-matrix is not normalized by the total quantum dimension here.
 """
 function Smatrix(::Type{I}) where {I <: Sector}
@@ -699,7 +699,7 @@ function Smatrix(::Type{I}) where {I <: Sector}
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     vals = values(I)
     l = length(vals)
-    return reshape([hopflink(a, b) for a in vals, b in vals], (l, l))
+    return reshape([hopflink(a, dual(b)) for a in vals, b in vals], (l, l))
 end
 
 """
