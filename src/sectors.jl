@@ -713,6 +713,31 @@ function ismodular(::Type{II}; kwargs...) where {II <: Sector}
 end
 
 """
+    issymmetric(::Type{I}; kwargs...) where {I <: Sector}
+
+Check whether a sector type `I` is symmetric, i.e. the S-matrix is fully degenerate.
+"""
+function issymmetric(::Type{I}; kwargs...) where {I <: Sector}
+    s = Smatrix(I)
+    dims = vec(dim.(values(I)))
+    return isapprox(s, dims * dims'; kwargs...)
+end
+
+"""
+    istransparent(a::I; kwargs...) where {I <: Sector}
+
+Check whether a sector `a` in sector type `I` braids trivially with other sectors in `I`.    
+"""
+istransparent(a::I; kwargs...) where {I <: Sector} = all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); kwargs...), values(I))
+
+"""
+    Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector}
+"""
+Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector} = vec(collect(filter(obj -> istransparent(obj; kwargs...), values(I))))
+
+const Müger_centralizier = Muger_centralizier
+
+"""
     topological_central_charge(::Type{I}) where {I <: Sector}
 
 Return the topological central charge c of the braided sector type `I`, where c is determined mod 8.
