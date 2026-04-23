@@ -39,7 +39,6 @@ export ⊠, ⊗, ×
 export Cyclic, ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, Dihedral, D₃, D₄, CU₁
 export Alternating, A₄
 export fℤ₂, fU₁, fSU₂
-export Müger_centralizier
 
 # public
 # ------
