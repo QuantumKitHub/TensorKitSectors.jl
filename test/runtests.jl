@@ -51,11 +51,11 @@ const sectorlist = (
 include("testsuite.jl")
 using .SectorTestSuite
 
-# @testset "Sector test suite" verbose = true begin
-#     for sectortype in sectorlist
-#         @time SectorTestSuite.test_sector(sectortype)
-#     end
-# end
+@testset "Sector test suite" verbose = true begin
+    for sectortype in sectorlist
+        @time SectorTestSuite.test_sector(sectortype)
+    end
+end
 
 @testset "Intertwiner relation for A4Irrep" begin
     ω = cis(2π / 3)
@@ -304,6 +304,10 @@ end
 @testset "Topological central charge" begin
     @test topological_central_charge(FermionParity) === missing
     @test topological_central_charge(FermionParity ⊠ Z2Irrep) === missing
+    @test topological_central_charge(Z2Irrep) == 0 // 1
+    @test topological_central_charge(A4Irrep) == 0 // 1
+    @test topological_central_charge(Z2Irrep ⊠ IsingAnyon) == 1 // 2
+    @test topological_central_charge(FibonacciAnyon ⊠ D4Irrep) == - 14 // 5
     @test topological_central_charge(IsingAnyon) == 1 // 2
     @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
     @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
