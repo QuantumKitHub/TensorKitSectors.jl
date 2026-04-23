@@ -20,18 +20,33 @@ using TensorKitSectors: TensorKitSectors as TKS
     s2 = random_fusion(I, 3)
     s2c = first(⊗(s2...))
     e, f = first(⊗(s2[1], s2[2])), first(⊗(s2[2], s2[3]))
-    F = @testinferred Fsymbol(s2..., s2c, e, f)
-    @test eltype(F) === @testinferred fusionscalartype(I)
+    @testinferred Fsymbol(s2..., s2c, e, f)
     if BraidingStyle(I) isa HasBraiding
-        R = @testinferred Rsymbol(s..., sc)
-        @test eltype(R) === @testinferred braidingscalartype(I)
-        if FusionStyle(I) === SimpleFusion()
+        @testinferred Rsymbol(s..., sc)
+    end
+end
+
+@testsuite "Element and data types of topological data" I -> begin
+    a, b, c = random_fusion(I, 3)
+    d, e, f = first(⊗(a, b, c)), first(⊗(a, b)), first(⊗(b, c))
+    F = Fsymbol(a, b, c, d, e, f)
+    Ftype = @testinferred fusionscalartype(I)
+    @test eltype(F) === Ftype
+    @test F isa (FusionStyle(I) isa MultiplicityFreeFusion ? Ftype : AbstractArray{Ftype, 4})
+    if BraidingStyle(I) isa HasBraiding
+        a, b = random_fusion(I, 2)
+        R = Rsymbol(a, b, first(⊗(a, b)))
+        Rtype = @testinferred braidingscalartype(I)
+        @test eltype(R) === Rtype
+        if FusionStyle(I) isa MultiplicityFreeFusion
             @test typeof(R * F) <: @testinferred sectorscalartype(I)
+            @test R isa Rtype
         else
             @test Base.promote_op(*, eltype(R), eltype(F)) <: @testinferred sectorscalartype(I)
+            @test R isa AbstractArray{Rtype, 2}
         end
     else
-        if FusionStyle(I) === SimpleFusion()
+        if FusionStyle(I) isa MultiplicityFreeFusion
             @test typeof(F) <: @testinferred sectorscalartype(I)
         else
             @test eltype(F) <: @testinferred sectorscalartype(I)
@@ -66,6 +81,53 @@ end
     end
     for s in smallset(I)
         @test (@testinferred values(I)[findindex(values(I), s)]) == s
+    end
+end
+
+@testsuite "Shapes of topological data" I -> begin
+    # shape of data from multiplicities
+    r = randsector(I)
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || @test_throws ArgumentError Nsymbol(a, b, r)
+        for c in smallset(I)
+            can_fuse(b, c) || @test_throws ArgumentError Nsymbol(b, c, r)
+            for e in smallset(I), f in smallset(I)
+                can_fuse(a, f) || @test_throws ArgumentError Nsymbol(a, f, r)
+                can_fuse(e, c) || @test_throws ArgumentError Nsymbol(e, c, r)
+            end
+            for e in ⊗(a, b), f in ⊗(b, c) # guaranteed can_fuse
+                Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
+                for d in ⊗(a, b, c)
+                    F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabe, Nsymbol(e, c, d), Nbcf, Nsymbol(a, f, d))
+                    @test size(Fsymbol(a, b, c, d, e, f)) == F_size
+                end
+            end
+        end
+    end
+
+    for a in smallset(I), b in smallset(I), c in smallset(I)
+        if BraidingStyle(I) isa HasBraiding
+            R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, c), Nsymbol(b, a, c))
+            @test size(Rsymbol(a, b, c)) == R_size
+        end
+    end
+end
+
+# https://arxiv.org/pdf/2507.07023v2#=&page=9
+@testsuite "Fusion ring properties" I -> begin
+    for a in smallset(I), b in smallset(I)
+        for c in smallset(I), d in smallset(I) # associativity
+            L = sum(e -> Nsymbol(a, b, e) * Nsymbol(e, c, d), intersect(⊗(a, b), ⊗(d, dual(c))); init = zero(Int))
+            R = sum(f -> Nsymbol(b, c, f) * Nsymbol(a, f, d), intersect(⊗(b, c), ⊗(dual(a), d)); init = zero(Int))
+            @test L == R
+        end
+        for c in ⊗(a, b) # Frobenius reciprocity
+            @test Nsymbol(a, b, c) == Nsymbol(c, dual(b), a) == Nsymbol(dual(c), a, dual(b)) ==
+                Nsymbol(dual(b), dual(a), dual(c)) == Nsymbol(b, dual(c), dual(a)) == Nsymbol(dual(a), c, b)
+            if BraidingStyle(I) isa HasBraiding
+                @test Nsymbol(a, b, c) == Nsymbol(b, a, c)
+            end
+        end
     end
 end
 
