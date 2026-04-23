@@ -713,13 +713,6 @@ function ismodular(::Type{II}; kwargs...) where {II <: Sector}
 end
 
 """
-    istransparent(a::I; kwargs...) where {I <: Sector}
-
-Check whether a sector `a` in sector type `I` braids trivially with other sectors in `I`.    
-"""
-istransparent(a::I; kwargs...) where {I <: Sector} = all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); kwargs...), values(I))
-
-"""
     topological_central_charge(::Type{I}) where {I <: Sector}
 
 Return the topological central charge c of the braided sector type `I`, where c is determined mod 8.
