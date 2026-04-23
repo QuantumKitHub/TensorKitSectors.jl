@@ -282,7 +282,7 @@ end
         for charge in values(sect)
             @test istransparent(charge)
         end
-        @test Müger_centralizier(sect) == vec(collect(values(sect)))
+        @test centralizier(sect) == vec(collect(values(sect)))
     end
 
     for sect in UMTC_list
@@ -292,14 +292,14 @@ end
             anyon == unit(sect) && continue
             @test !istransparent(anyon)
         end
-        @test Müger_centralizier(sect) == [unit(sect)]
+        @test centralizier(sect) == [unit(sect)]
     end
 
     for sect in UMTC_over_RepG_list
         charge_part = (TensorKitSectors._sectors)(sect)[1]
         @test !ismodular(sect)
         @test !issymmetric(sect)
-        @test map(x -> x[1], Müger_centralizier(sect)) == collect(values(charge_part))
+        @test map(x -> x[1], centralizier(sect)) == collect(values(charge_part))
     end
 
 end

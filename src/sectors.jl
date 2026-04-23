@@ -713,29 +713,32 @@ function ismodular(::Type{II}; kwargs...) where {II <: Sector}
 end
 
 """
-    issymmetric(::Type{I}; kwargs...) where {I <: Sector}
+    hassymmetricbraiding(::Type{I}; kwargs...) where {I <: Sector}
 
 Check whether a sector type `I` is symmetric, i.e. the S-matrix is fully degenerate.
 """
-function issymmetric(::Type{I}; kwargs...) where {I <: Sector}
-    s = Smatrix(I)
-    dims = vec(dim.(values(I)))
-    return isapprox(s, dims * dims'; kwargs...)
+function hassymmetricbraiding(::Type{I}; kwargs...) where {I <: Sector}
+    @assert BraidingStyle(I) isa HasBraiding "The sector type $I is not braided"
+    if BraidingStyle(I) isa SymmetricBraiding
+        return true
+    else
+        return all(a -> istransparent(a; kwargs...), values(I))
+    end
 end
 
 """
     istransparent(a::I; kwargs...) where {I <: Sector}
 
-Check whether a sector `a` in sector type `I` braids trivially with other sectors in `I`.    
+Check whether a sector `a` in the sector type `I` braids trivially with other sectors in `I`.    
 """
 istransparent(a::I; kwargs...) where {I <: Sector} = all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); kwargs...), values(I))
 
 """
-    Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector}
-"""
-Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector} = vec(collect(filter(obj -> istransparent(obj; kwargs...), values(I))))
+    centralizer(::Type{I}; kwargs...) where {I <: Sector}
 
-const Müger_centralizier = Muger_centralizier
+Collect all transparent sectors in the sector type `I`.
+"""
+centralizer(::Type{I}; kwargs...) where {I <: Sector} = vec(collect(filter(obj -> istransparent(obj; kwargs...), values(I))))
 
 """
     topological_central_charge(::Type{I}) where {I <: Sector}
