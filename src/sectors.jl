@@ -721,7 +721,7 @@ We choose convention by restrict the returning value as rational numbers in (-4,
 function topological_central_charge(::Type{I}) where {I <: Sector}
     gauss_sum = sum(dim(a)^2 * twist(a) for a in values(I))
     Θ = abs(gauss_sum)
-    abs(gauss_sum) < sqrt(eps(float(Θ))) && return missing # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
+    Θ < sqrt(eps(float(Θ))) && return missing # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
     c_float = angle(gauss_sum) * 8 / (2π)
 
     isapprox(c_float, -4) && return 4 // 1
