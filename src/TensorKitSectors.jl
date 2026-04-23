@@ -8,7 +8,7 @@ export Irrep, GroupElement
 export Nsymbol, Fsymbol, Rsymbol, Asymbol, Bsymbol
 export sectorscalartype, fusionscalartype, braidingscalartype, dimscalartype
 export dim, sqrtdim, invsqrtdim, frobenius_schur_indicator, frobenius_schur_phase, twist, fusiontensor, dual
-export topological_spin, hopflink, Tmatrix, Smatrix, ismodular, topological_central_charge
+export topological_spin, hopflink, Tmatrix, Smatrix, ismodular, hassymmetricbraiding, istransparent, centralizer, topological_central_charge
 export otimes, deligneproduct, times
 export FusionStyle, UniqueFusion, MultipleFusion, SimpleFusion, GenericFusion, MultiplicityFreeFusion
 export BraidingStyle, NoBraiding, HasBraiding, SymmetricBraiding, Bosonic, Fermionic, Anyonic

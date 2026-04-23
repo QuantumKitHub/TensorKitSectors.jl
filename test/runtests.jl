@@ -265,16 +265,43 @@ end
     end
 end
 
-@testset "Ismodular" begin
-    @test !ismodular(Z2Irrep)
-    @test !ismodular(Z3Irrep)
-    @test !ismodular(FermionParity)
-    @test !ismodular(A4Irrep)
-    @test !ismodular(IsingAnyon ⊠ Z2Irrep)
-    @test ismodular(IsingAnyon)
-    @test ismodular(FibonacciAnyon)
-    @test ismodular(TimeReversed{IsingAnyon})
-    @test ismodular(IsingAnyon ⊠ TimeReversed{IsingAnyon})
+@testset "Ismodular, issymmetric, istransparent and Müger_centralizier" begin
+    Tannakian_list = [Z2Irrep, Z3Irrep, FermionParity, A4Irrep, D3Irrep, D4Irrep, Z2Irrep ⊠ D4Irrep, D3Irrep ⊠ A4Irrep]
+    Super_Tannakian_list = [FermionParity, FermionParity ⊠ A4Irrep, FermionParity ⊠ Z3Irrep, D4Irrep ⊠ FermionParity]
+    UMTC_list = [
+        IsingAnyon, FibonacciAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
+        FibonacciAnyon ⊠ FibonacciAnyon, FibonacciAnyon ⊠ IsingAnyon, IsingAnyon ⊠ TimeReversed{IsingAnyon},
+        TimeReversed{FibonacciAnyon} ⊠ IsingAnyon, IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon,
+        IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
+    ]
+    UMTC_over_RepG_list = [Z2Irrep ⊠ IsingAnyon, Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon}, A4Irrep ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}]
+
+    for sect in [Tannakian_list..., Super_Tannakian_list...]
+        @test !ismodular(sect)
+        @test issymmetric(sect)
+        for charge in values(sect)
+            @test istransparent(charge)
+        end
+        @test centralizier(sect) == vec(collect(values(sect)))
+    end
+
+    for sect in UMTC_list
+        @test ismodular(sect)
+        @test !issymmetric(sect)
+        for anyon in values(sect)
+            anyon == unit(sect) && continue
+            @test !istransparent(anyon)
+        end
+        @test centralizier(sect) == [unit(sect)]
+    end
+
+    for sect in UMTC_over_RepG_list
+        charge_part = (TensorKitSectors._sectors)(sect)[1]
+        @test !ismodular(sect)
+        @test !issymmetric(sect)
+        @test map(x -> x[1], centralizier(sect)) == collect(values(charge_part))
+    end
+
 end
 
 @testset "Total quantum dimension" begin
