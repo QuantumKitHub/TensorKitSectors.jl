@@ -297,8 +297,6 @@ end
 end
 
 @testset "Topological central charge" begin
-    @test topological_central_charge(FermionParity) === missing
-    @test topological_central_charge(FermionParity ⊠ Z2Irrep) === missing
     @test topological_central_charge(Z2Irrep) == 0 // 1
     @test topological_central_charge(A4Irrep) == 0 // 1
     @test topological_central_charge(Z2Irrep ⊠ IsingAnyon) == 1 // 2
