@@ -266,7 +266,7 @@ end
 end
 
 @testset "Ismodular" begin
-    Tannakian_list = [Z2Irrep, Z3Irrep, FermionParity, A4Irrep, D3Irrep, D4Irrep, Z2Irrep ⊠ D4Irrep, D3Irrep ⊠ A4Irrep]
+    Tannakian_list = [Z2Irrep, Z3Irrep, A4Irrep, D3Irrep, D4Irrep, Z2Irrep ⊠ D4Irrep, D3Irrep ⊠ A4Irrep]
     Super_Tannakian_list = [FermionParity, FermionParity ⊠ A4Irrep, FermionParity ⊠ Z3Irrep, D4Irrep ⊠ FermionParity]
     UMTC_list = [
         IsingAnyon, FibonacciAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
@@ -275,8 +275,8 @@ end
         IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
     ]
     UMTC_over_RepG_list = [Z2Irrep ⊠ IsingAnyon, Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon}, A4Irrep ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}]
-
-    for sect in [Tannakian_list..., Super_Tannakian_list..., UMTC_over_RepG_list...]
+    UMTC_over_sRepG_list = [Z2Irrep ⊠ FermionParity ⊠ IsingAnyon, FermionParity ⊠ Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon} ⊠ FermionParity, A4Irrep ⊠ FibonacciAnyon ⊠ FermionParity ⊠ TimeReversed{IsingAnyon}]
+    for sect in [Tannakian_list..., Super_Tannakian_list..., UMTC_over_RepG_list..., UMTC_over_sRepG_list...]
         @test !ismodular(sect)
     end
     for sect in UMTC_list
