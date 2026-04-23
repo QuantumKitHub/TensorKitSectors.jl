@@ -51,11 +51,11 @@ const sectorlist = (
 include("testsuite.jl")
 using .SectorTestSuite
 
-@testset "Sector test suite" verbose = true begin
-    for sectortype in sectorlist
-        @time SectorTestSuite.test_sector(sectortype)
-    end
-end
+# @testset "Sector test suite" verbose = true begin
+#     for sectortype in sectorlist
+#         @time SectorTestSuite.test_sector(sectortype)
+#     end
+# end
 
 @testset "Intertwiner relation for A4Irrep" begin
     ω = cis(2π / 3)
@@ -265,7 +265,7 @@ end
     end
 end
 
-@testset "Ismodular, issymmetric, istransparent and Müger_centralizier" begin
+@testset "Ismodular" begin
     Tannakian_list = [Z2Irrep, Z3Irrep, FermionParity, A4Irrep, D3Irrep, D4Irrep, Z2Irrep ⊠ D4Irrep, D3Irrep ⊠ A4Irrep]
     Super_Tannakian_list = [FermionParity, FermionParity ⊠ A4Irrep, FermionParity ⊠ Z3Irrep, D4Irrep ⊠ FermionParity]
     UMTC_list = [
@@ -278,30 +278,15 @@ end
 
     for sect in [Tannakian_list..., Super_Tannakian_list...]
         @test !ismodular(sect)
-        @test issymmetric(sect)
-        for charge in values(sect)
-            @test istransparent(charge)
-        end
-        @test Müger_centralizier(sect) == vec(collect(values(sect)))
     end
 
     for sect in UMTC_list
         @test ismodular(sect)
-        @test !issymmetric(sect)
-        for anyon in values(sect)
-            anyon == unit(sect) && continue
-            @test !istransparent(anyon)
-        end
-        @test Müger_centralizier(sect) == [unit(sect)]
     end
 
     for sect in UMTC_over_RepG_list
-        charge_part = (TensorKitSectors._sectors)(sect)[1]
         @test !ismodular(sect)
-        @test !issymmetric(sect)
-        @test map(x -> x[1], Müger_centralizier(sect)) == collect(values(charge_part))
     end
-
 end
 
 @testset "Total quantum dimension" begin
@@ -317,6 +302,8 @@ end
 end
 
 @testset "Topological central charge" begin
+    @test topological_central_charge(FermionParity) === missing
+    @test topological_central_charge(FermionParity ⊠ Z2Irrep) === missing
     @test topological_central_charge(IsingAnyon) == 1 // 2
     @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
     @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1

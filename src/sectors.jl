@@ -713,29 +713,11 @@ function ismodular(::Type{II}; kwargs...) where {II <: Sector}
 end
 
 """
-    issymmetric(::Type{I}; kwargs...) where {I <: Sector}
-
-Check whether a sector type `I` is symmetric, i.e. the S-matrix is fully degenerate.
-"""
-function issymmetric(::Type{I}; kwargs...) where {I <: Sector}
-    s = Smatrix(I)
-    dims = vec(dim.(values(I)))
-    return isapprox(s, dims * dims'; kwargs...)
-end
-
-"""
     istransparent(a::I; kwargs...) where {I <: Sector}
 
 Check whether a sector `a` in sector type `I` braids trivially with other sectors in `I`.    
 """
 istransparent(a::I; kwargs...) where {I <: Sector} = all(b -> isapprox(hopflink(a, b), dim(a) * dim(b); kwargs...), values(I))
-
-"""
-    Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector}
-"""
-Muger_centralizier(::Type{I}; kwargs...) where {I <: Sector} = vec(collect(filter(obj -> istransparent(obj; kwargs...), values(I))))
-
-const Müger_centralizier = Muger_centralizier
 
 """
     topological_central_charge(::Type{I}) where {I <: Sector}
@@ -744,9 +726,10 @@ Return the topological central charge c of the braided sector type `I`, where c 
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
 function topological_central_charge(::Type{I}) where {I <: Sector}
-    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
-    isapprox(abs(ξ), 0) && return missing # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
-    c_float = angle(ξ) * 8 / (2π)
+    gauss_sum = sum(dim(a)^2 * twist(a) for a in values(I))
+    Θ = abs(gauss_sum)
+    abs(gauss_sum) < sqrt(eps(float(Θ))) && return missing # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
+    c_float = angle(gauss_sum) * 8 / (2π)
 
     isapprox(c_float, -4) && return 4 // 1
 
