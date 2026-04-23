@@ -266,15 +266,22 @@ end
 end
 
 @testset "Ismodular" begin
-    @test !ismodular(Z2Irrep)
-    @test !ismodular(Z3Irrep)
-    @test !ismodular(FermionParity)
-    @test !ismodular(A4Irrep)
-    @test !ismodular(IsingAnyon ⊠ Z2Irrep)
-    @test ismodular(IsingAnyon)
-    @test ismodular(FibonacciAnyon)
-    @test ismodular(TimeReversed{IsingAnyon})
-    @test ismodular(IsingAnyon ⊠ TimeReversed{IsingAnyon})
+    Tannakian_list = [Z2Irrep, Z3Irrep, A4Irrep, D3Irrep, D4Irrep, Z2Irrep ⊠ D4Irrep, D3Irrep ⊠ A4Irrep]
+    Super_Tannakian_list = [FermionParity, FermionParity ⊠ A4Irrep, FermionParity ⊠ Z3Irrep, D4Irrep ⊠ FermionParity]
+    UMTC_list = [
+        IsingAnyon, FibonacciAnyon, TimeReversed{IsingAnyon}, TimeReversed{FibonacciAnyon},
+        FibonacciAnyon ⊠ FibonacciAnyon, FibonacciAnyon ⊠ IsingAnyon, IsingAnyon ⊠ TimeReversed{IsingAnyon},
+        TimeReversed{FibonacciAnyon} ⊠ IsingAnyon, IsingAnyon ⊠ IsingAnyon ⊠ IsingAnyon,
+        IsingAnyon ⊠ FibonacciAnyon ⊠ IsingAnyon ⊠ TimeReversed{IsingAnyon} ⊠ TimeReversed{FibonacciAnyon},
+    ]
+    UMTC_over_RepG_list = [Z2Irrep ⊠ IsingAnyon, Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon}, A4Irrep ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}]
+    UMTC_over_sRepG_list = [Z2Irrep ⊠ FermionParity ⊠ IsingAnyon, FermionParity ⊠ Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon} ⊠ FermionParity, A4Irrep ⊠ FibonacciAnyon ⊠ FermionParity ⊠ TimeReversed{IsingAnyon}]
+    for sect in [Tannakian_list..., Super_Tannakian_list..., UMTC_over_RepG_list..., UMTC_over_sRepG_list...]
+        @test !ismodular(sect)
+    end
+    for sect in UMTC_list
+        @test ismodular(sect)
+    end
 end
 
 @testset "Total quantum dimension" begin
@@ -290,6 +297,10 @@ end
 end
 
 @testset "Topological central charge" begin
+    @test topological_central_charge(Z2Irrep) == 0 // 1
+    @test topological_central_charge(A4Irrep) == 0 // 1
+    @test topological_central_charge(Z2Irrep ⊠ IsingAnyon) == 1 // 2
+    @test topological_central_charge(FibonacciAnyon ⊠ D4Irrep) == - 14 // 5
     @test topological_central_charge(IsingAnyon) == 1 // 2
     @test topological_central_charge(TimeReversed{IsingAnyon}) == - 1 // 2
     @test topological_central_charge(IsingAnyon ⊠ TimeReversed{IsingAnyon}) == 0 // 1
