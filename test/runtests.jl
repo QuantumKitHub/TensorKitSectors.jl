@@ -276,16 +276,11 @@ end
     ]
     UMTC_over_RepG_list = [Z2Irrep ⊠ IsingAnyon, Z3Irrep ⊠ FibonacciAnyon, D3Irrep ⊠ TimeReversed{IsingAnyon}, A4Irrep ⊠ FibonacciAnyon ⊠ TimeReversed{IsingAnyon}]
 
-    for sect in [Tannakian_list..., Super_Tannakian_list...]
+    for sect in [Tannakian_list..., Super_Tannakian_list..., UMTC_over_RepG_list...]
         @test !ismodular(sect)
     end
-
     for sect in UMTC_list
         @test ismodular(sect)
-    end
-
-    for sect in UMTC_over_RepG_list
-        @test !ismodular(sect)
     end
 end
 
