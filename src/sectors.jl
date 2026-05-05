@@ -691,7 +691,7 @@ hopflink(a::I, b::I) where {I <: Sector} = sum(dim(c) * tr(Rsymbol(a, b, c) * Rs
 """
      Smatrix(::Type{I}) where {I <: Sector}
 
-Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`.
+Return the S-matrix of the sector type `I`, which is a matrix containing the hopflinks of all pairs of sectors of type `I`, with the second sector being taken dual.
 The S-matrix is not normalized by the total quantum dimension here.
 """
 function Smatrix(::Type{I}) where {I <: Sector}
@@ -699,7 +699,7 @@ function Smatrix(::Type{I}) where {I <: Sector}
         throw(ArgumentError("Only defined for sectors with a finite number of simple objects"))
     vals = values(I)
     l = length(vals)
-    return reshape([hopflink(a, b) for a in vals, b in vals], (l, l))
+    return reshape([hopflink(a, dual(b)) for a in vals, b in vals], (l, l))
 end
 
 """
@@ -715,13 +715,14 @@ end
 """
     topological_central_charge(::Type{I}) where {I <: Sector}
 
-Return the topological central charge c of the modular sector type `I`, where c is determined mod 8.
+Return the topological central charge c of the braided sector type `I`, where c is determined mod 8.
 We choose convention by restrict the returning value as rational numbers in (-4, 4].
 """
 function topological_central_charge(::Type{I}) where {I <: Sector}
-    ξ = sum(dim(a)^2 * twist(a) for a in values(I)) / dim(I)
-    @assert isapprox(abs(ξ), 1) "Sector $I is not modular"
-    c_float = angle(ξ) * 8 / (2π)
+    gauss_sum = sum(dim(a)^2 * twist(a) for a in values(I))
+    Θ = abs(gauss_sum)
+    @assert Θ > sqrt(eps(float(Θ))) "Topological central charge is not defined for sector type $I" # For non-modular categories, central charge is also meaningful. See https://arxiv.org/pdf/1602.05946. For super modular category, Gauss sum vanishes, and its central charge needs to be defined in another manner: https://arxiv.org/pdf/1603.09294.
+    c_float = angle(gauss_sum) * 8 / (2π)
 
     isapprox(c_float, -4) && return 4 // 1
 
