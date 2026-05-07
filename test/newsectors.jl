@@ -67,7 +67,7 @@ dim(s::NewSU2Irrep) = twice(s.j) + 1
 function fusiontensor(a::NewSU2Irrep, b::NewSU2Irrep, c::NewSU2Irrep)
     Nabc = Nsymbol(a, b, c)
     C = Array{Float64}(undef, dim(a), dim(b), dim(c), Nabc)
-    Nabc || return C
+    Nabc == 0 && return C
     ja, jb, jc = a.j, b.j, c.j
 
     for kc in 1:dim(c), kb in 1:dim(b), ka in 1:dim(a)
