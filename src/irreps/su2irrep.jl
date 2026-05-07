@@ -72,7 +72,9 @@ end
 
 function fusiontensor(a::SU2Irrep, b::SU2Irrep, c::SU2Irrep)
     T = sectorscalartype(SU2Irrep)
-    C = Array{T}(undef, dim(a), dim(b), dim(c), 1)
+    Nabc = Nsymbol(a, b, c)
+    C = Array{T}(undef, dim(a), dim(b), dim(c), Nabc)
+    Nabc || return C
     ja, jb, jc = a.j, b.j, c.j
 
     for kc in 1:dim(c), kb in 1:dim(b), ka in 1:dim(a)

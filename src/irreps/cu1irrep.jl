@@ -218,8 +218,9 @@ function Rsymbol(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
 end
 
 function fusiontensor(a::CU1Irrep, b::CU1Irrep, c::CU1Irrep)
-    C = fill(zero(sectorscalartype(CU1Irrep)), dim(a), dim(b), dim(c), 1)
-    !Nsymbol(a, b, c) && return C
+    Nabc = Nsymbol(a, b, c)
+    C = fill(zero(sectorscalartype(CU1Irrep)), dim(a), dim(b), dim(c), Nabc)
+    Nabc || return C
     if c.j == 0
         if a.j == b.j == 0
             C[1, 1, 1, 1] = 1.0
