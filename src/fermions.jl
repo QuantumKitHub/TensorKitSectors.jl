@@ -55,7 +55,8 @@ twist(a::FermionParity) = a.isodd ? -1 : +1
 
 function fusiontensor(a::I, b::I, c::I) where {I <: FermionParity}
     @warn "FermionParity Arrays do not preserve categorical properties." maxlog = 1
-    return fill(Int(Nsymbol(a, b, c)), (1, 1, 1, 1))
+    Nabc = Nsymbol(a, b, c)
+    return fill(Int(Nabc), (1, 1, 1, Nabc))
 end
 
 function Base.show(io::IO, a::FermionParity)
