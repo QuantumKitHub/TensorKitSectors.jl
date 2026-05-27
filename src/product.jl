@@ -87,89 +87,64 @@ end
 _firstsector(x::ProductSector) = x.sectors[1]
 _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c, d, e, f))
-    tails = map(_tailsector, (a, b, c, d, e, f))
-    F₁ = Fsymbol(heads...)
-    F₂ = Fsymbol(tails...)
-    return _kron_promote(F₁, F₂, _array_size_functions(heads, tails)...)
+@inline function _product_symbol(symbol_func, sectors)
+    heads = map(_firstsector, sectors)
+    V₁ = symbol_func(heads...)
+    sz₁ = _symbol_size(heads)
+
+    tails = map(_tailsector, sectors)
+    V₂ = symbol_func(tails...)
+    sz₂ = _symbol_size(tails)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
 end
-function Fsymbol(
-        a::I, b::I, c::I, d::I, e::I, f::I
-    ) where {I <: ProductSector{<:Tuple{Sector}}}
+
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
+    return _product_symbol(Fsymbol, (a, b, c, d, e, f))
+end
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol(map(_firstsector, (a, b, c, d, e, f))...)
 end
 function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c, d, e, f))
-    tails = map(_tailsector, (a, b, c, d, e, f))
-    F₁ = Fsymbol_from_fusiontensor(heads...)
-    F₂ = Fsymbol_from_fusiontensor(tails...)
-    return _kron_promote(F₁, F₂, _array_size_functions(heads, tails)...)
+    return _product_symbol(Fsymbol_from_fusiontensor, (a, b, c, d, e, f))
 end
-function Fsymbol_from_fusiontensor(
-        a::I, b::I, c::I, d::I, e::I, f::I
-    ) where {I <: ProductSector{<:Tuple{Sector}}}
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol_from_fusiontensor(map(_firstsector, (a, b, c, d, e, f))...)
 end
 
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    R₁ = Rsymbol(heads...)
-    R₂ = Rsymbol(tails...)
-    return _kron_promote(R₁, R₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Rsymbol, (a, b, c))
 end
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol(map(_firstsector, (a, b, c))...)
 end
 function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    R₁ = Rsymbol_from_fusiontensor(heads...)
-    R₂ = Rsymbol_from_fusiontensor(tails...)
-    return _kron_promote(R₁, R₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Rsymbol_from_fusiontensor, (a, b, c))
 end
 function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    B₁ = Bsymbol(heads...)
-    B₂ = Bsymbol(tails...)
-    return _kron_promote(B₁, B₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Bsymbol, (a, b, c))
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol(map(_firstsector, (a, b, c))...)
 end
 function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    B₁ = Bsymbol_from_fusiontensor(heads...)
-    B₂ = Bsymbol_from_fusiontensor(tails...)
-    return _kron_promote(B₁, B₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Bsymbol_from_fusiontensor, (a, b, c))
 end
 function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    A₁ = Asymbol(heads...)
-    A₂ = Asymbol(tails...)
-    return _kron_promote(A₁, A₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Asymbol, (a, b, c))
 end
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
 end
 function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    A₁ = Asymbol_from_fusiontensor(heads...)
-    A₂ = Asymbol_from_fusiontensor(tails...)
-    return _kron_promote(A₁, A₂, _matrix_size_functions(heads, tails)...)
+    return _product_symbol(Asymbol_from_fusiontensor, (a, b, c))
 end
 function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
