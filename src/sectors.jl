@@ -220,9 +220,12 @@ Base.isreal(I::Type{<:Sector}) = sectorscalartype(I) <: Real
     otimes(a::I, b::I...) where {I <: Sector}
 
 Return an iterable of elements of `c::I` that appear in the fusion product `a ⊗ b`.
+Each sector `c` should appear at most once in this iteration, even if the multiplicity ``N_c^{ab} > 1``.
+The actual multiplicities are accessed separately through [`Nsymbol`](@ref).
 
-Note that every element `c` should appear at most once, fusion degeneracies (if
-`FusionStyle(I) == GenericFusion()`) should be accessed via `Nsymbol(a, b, c)`.
+The return type is typically [`SectorProductIterator{I}`](@ref) which provides a type-stable iterable that supports pretty-printing, but could also be any custom iterable.
+
+See also [`FusionStyle`](@ref) for the trait associated to the fusion behavior of a given sector type.
 """
 function ⊗ end
 const otimes = ⊗
@@ -297,8 +300,11 @@ end
 """
     Nsymbol(a::I, b::I, c::I) where {I <: Sector} -> Integer
 
-Return an `Integer` representing the number of times `c` appears in the fusion product
-`a ⊗ b`. Could be a `Bool` if `FusionStyle(I) == UniqueFusion()` or `SimpleFusion()`.
+The fusion multiplicity ``N_c^{ab}``, indicating how many times sector `c` appears in the fusion product `a ⊗ b`.
+
+The return type depends on the [`FusionStyle`](@ref), where [`UniqueFusion`](@ref) and [`SimpleFusion`](@ref) return `Bool` values, while [`GenericFusion`](@ref) returns `Int`.
+
+See also [`⊗`](@ref) to obtain the set of sectors `c` that appear in `a ⊗ b`.
 """
 function Nsymbol end
 
@@ -437,7 +443,27 @@ function dim_from_Fsymbol(a::Sector)
         abs(1 / Fsymbol(a, dual(a), a, a, leftunit(a), rightunit(a))[1])
     end
 end
+
+"""
+    sqrtdim(a::Sector)
+
+Return the square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `sqrt(1)` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `sqrt(dim(a))`.
+"""
 sqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : sqrt(dim(a))
+
+"""
+    invsqrtdim(a::Sector)
+
+Return the inverse square root of the (quantum) dimension of sector `a`.
+
+This is a performance specialization that avoids computing `inv(sqrt(1))` for sectors with 
+`UniqueFusion`, preserving the number type (returning `1::Int` instead of `1.0::Float64`).
+For other sectors, it is equivalent to `inv(sqrt(dim(a)))`.
+"""
 invsqrtdim(a::Sector) = (FusionStyle(a) isa UniqueFusion) ? 1 : inv(sqrt(dim(a)))
 
 """
