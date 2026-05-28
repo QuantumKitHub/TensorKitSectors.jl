@@ -90,8 +90,8 @@ _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 @inline function _kron_promote_inputs(sectors)
     heads = map(_firstsector, sectors)
     tails = map(_tailsector, sectors)
-    sz₁ = _symbol_size(heads...)
-    sz₂ = _symbol_size(tails...)
+    sz₁ = _symbol_size(heads)
+    sz₂ = _symbol_size(tails)
     return heads, tails, sz₁, sz₂
 end
 
