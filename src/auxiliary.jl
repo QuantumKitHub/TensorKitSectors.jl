@@ -18,12 +18,6 @@ function _kron_promote(A₁, B₁, sz₁, sz₂)
     return _kron(A₁ isa Number ? fill(A₁, sz₁) : A₁, B₁ isa Number ? fill(B₁, sz₂) : B₁)
 end
 
-# handles R-, A- and B-symbols correctly because of Frobenius reciprocity
-# i.e. Nsymbol(a, b, c) = Nsymbol(c, dual(b), a) = Nsymbol(dual(a), c, b)
-# and for braided categories Nsymbol(a, b, c) = Nsymbol(b, a, c)
-_symbol_size((a, b, c)::NTuple{3, Sector}) = (n = Nsymbol(a, b, c); (n, n))
-_symbol_size((a, b, c, d, e, f)::NTuple{6, Sector}) = (Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))
-
 # Manhattan based distance enumeration: I is supposed to be one-based index
 # TODO: is there any way to make this faster?
 

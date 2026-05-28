@@ -87,6 +87,12 @@ end
 _firstsector(x::ProductSector) = x.sectors[1]
 _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 
+# handles R-, A- and B-symbols correctly because of Frobenius reciprocity
+# i.e. Nsymbol(a, b, c) = Nsymbol(c, dual(b), a) = Nsymbol(dual(a), c, b)
+# and for braided categories Nsymbol(a, b, c) = Nsymbol(b, a, c)
+_symbol_size((a, b, c)::NTuple{3, Sector}) = (n = Nsymbol(a, b, c); (n, n))
+_symbol_size((a, b, c, d, e, f)::NTuple{6, Sector}) = (Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))
+
 @inline function _kron_promote_inputs(sectors)
     heads = map(_firstsector, sectors)
     tails = map(_tailsector, sectors)
