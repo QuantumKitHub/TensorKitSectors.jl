@@ -1,11 +1,11 @@
 # ``SU(2)`` Representations: `SU2Irrep`
 
-`SU2Irrep` represents irreducible representations of the compact group ``SU(2)`` as a `Sector`.
+`SU2Irrep` represents irreducible representations (irreps) of the compact group ``SU(2)`` as a `Sector`.
 This page documents how the type behaves in code (construction, iteration, fusion, and access to topological data).
 
 ## Sector type
 
-The irreducible representations of ``SU(2)`` are labeled by non-negative half-integers (e.g. ``0``, ``\frac{1}{2}``, ``1``, ``\frac{3}{2}``, …).
+The irreps of ``SU(2)`` are labeled by non-negative integers or half-integers (e.g. ``0``, ``\frac{1}{2}``, ``1``, ``\frac{3}{2}``, …).
 
 ```@docs; canonical = false
 SU2Irrep
