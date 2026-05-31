@@ -1,29 +1,48 @@
-# Fermion Parity: FermionParity
+# Fermion Parity: `FermionParity`
 
-## Type Definition
+`FermionParity` is the two-sector fermionic category ``SVect`` for even and odd parity.
+Odd sectors pick up a minus sign when exchanged with another odd sector.
 
-## Construction
+## Sector type
 
-## Labels
+```@docs; canonical = false
+FermionParity
+```
 
-## Physical Interpretation
+The labels are `FermionParity(false)` for even parity and `FermionParity(true)` for odd parity.
+They are displayed as `FermionParity(0)` and `FermionParity(1)`.
+The unit is even parity, and every sector is self-dual.
 
 ## Fusion Rules
 
-## Quantum Dimensions
+Fusion is addition modulo two:
 
-## Topological Data
+```math
+p \otimes q = p \oplus q.
+```
 
-### F-symbols
+The category has `FusionStyle(FermionParity) = UniqueFusion()`.
 
-### R-symbols
+## Topological data
 
-### Braiding Style
+All quantum dimensions are `1`, and [`Fsymbol`](@ref) is trivial on allowed channels.
 
-### Twist
+The braiding style is `Fermionic()`.
+The [`Rsymbol`](@ref) is `-1` only when both input sectors are odd:
 
-## Code Examples
+```math
+R^{11}_0 = -1.
+```
 
-## Implementation Notes
+The twists are
 
-### Relationship to Super Vector Spaces
+```math
+\theta_0 = 1,\qquad \theta_1 = -1.
+```
+
+`fusiontensor` is defined for array construction, but it emits a warning because plain arrays with `FermionParity` labels do not preserve all fermionic signs.
+
+## References
+
+- [Fermion parity](https://en.wikipedia.org/wiki/Fermion_parity)
+- [Super vector space](https://en.wikipedia.org/wiki/Super_vector_space)
