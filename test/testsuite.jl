@@ -83,7 +83,9 @@ end
 function randsector(::Type{I}) where {I <: Sector}
     s = collect(smallset(I))
     a = Random.rand(s)
-    length(values(I)) == 1 && return a
+    if Base.IteratorSize(values(I)) === Base.HasLength()
+        length(values(I)) == 1 && return a
+    end
     while isunit(a) # don't use trivial label
         a = Random.rand(s)
     end
