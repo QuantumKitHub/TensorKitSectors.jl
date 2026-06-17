@@ -83,12 +83,12 @@ end
 function randsector(::Type{I}) where {I <: Sector}
     s = collect(smallset(I))
     a = Random.rand(s)
+    length(values(I)) == 1 && return a
     while isunit(a) # don't use trivial label
         a = Random.rand(s)
     end
     return a
 end
-randsector(::Type{I}) where {I <: Union{Trivial, PlanarTrivial}} = unit(I)
 
 """
     can_fuse(a::I, b::I) where {I <: Sector}
