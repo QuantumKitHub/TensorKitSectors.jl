@@ -292,11 +292,11 @@ end
                     Rcde, Rdce = Rsymbol(c, d, e), Rsymbol(d, c, e)
                     Fdabefc = Fsymbol(d, a, b, e, f, c)
                     if FusionStyle(I) isa MultiplicityFreeFusion
-                        RFR1 = Rcde * conj(Fdabefc) * conj(Rdaf)
-                        RFR2 = conj(Rdce) * conj(Fdabefc) * Radf
+                        RFR1 = Rcde * conj(Fdabefc) * conj(Radf)
+                        RFR2 = conj(Rdce) * conj(Fdabefc) * Rdaf
                     else
-                        @tensor RFR1[μ, ν, σ, λ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Rdaf[σ, κ])
-                        @tensor RFR2[μ, ν, σ, λ] := conj(Rdce[ν, ρ]) * conj(Fdabefc[κ, λ, μ, ρ]) * Radf[σ, κ]
+                        @tensor RFR1[μ, ν, λ, σ] := Rcde[ν, ρ] * conj(Fdabefc[κ, λ, μ, ρ]) * conj(Radf[σ, κ])
+                        @tensor RFR2[μ, ν, λ, σ] := conj(Rdce[ρ, ν]) * conj(Fdabefc[κ, λ, μ, ρ]) * Rdaf[κ, σ]
                     end
                     FRF1, FRF2 = zero(RFR1), zero(RFR2)
                     for g in ⊗(d, b)
@@ -305,10 +305,10 @@ end
                         Rbdg, Rdbg = Rsymbol(b, d, g), Rsymbol(d, b, g)
                         if FusionStyle(I) isa MultiplicityFreeFusion
                             FRF1 += Fabdecg * Rbdg * conj(Fadbefg)
-                            FRF2 += conj(Fabdecg) * conj(Rdbg) * Fadbefg
+                            FRF2 += Fabdecg * conj(Rdbg) * conj(Fadbefg)
                         else
-                            @tensor FRF1[μ, ν, σ, λ] += Fabdecg[μ, ν, κ, ψ] * Rbdg[κ, θ] * conj(Fadbefg[σ, λ, θ, ψ])
-                            @tensor FRF2[μ, ν, σ, λ] += conj(Fabdecg[μ, ν, κ, ψ]) * conj(Rdbg[κ, θ]) * Fadbefg[σ, λ, θ, ψ]
+                            @tensor FRF1[μ, ν, β, α] += Fabdecg[μ, ν, κ, λ] * Rbdg[κ, θ] * conj(Fadbefg[α, β, θ, λ])
+                            @tensor FRF2[μ, ν, β, α] += Fabdecg[μ, ν, κ, λ] * conj(Rdbg[θ, κ]) * conj(Fadbefg[α, β, θ, λ])
                         end
                     end
                     @test isapprox(RFR1, FRF1; atol = 1.0e-12, rtol = 1.0e-12)

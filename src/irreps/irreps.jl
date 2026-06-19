@@ -66,7 +66,8 @@ Rsymbol(a::I, b::I, c::I) where {I <: AbelianIrrep} = braidingscalartype(I)(Nsym
 
 function fusiontensor(a::I, b::I, c::I) where {I <: AbelianIrrep}
     T = sectorscalartype(I)
-    return fill(T(Nsymbol(a, b, c)), (1, 1, 1, 1))
+    Nabc = Nsymbol(a, b, c)
+    return fill(T(Nabc), (1, 1, 1, Nabc))
 end
 
 include("znirrep.jl")

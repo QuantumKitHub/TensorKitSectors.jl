@@ -87,110 +87,94 @@ end
 _firstsector(x::ProductSector) = x.sectors[1]
 _tailsector(x::ProductSector) = ProductSector(Base.tail(x.sectors))
 
-function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c, d, e, f))
-    tails = map(_tailsector, (a, b, c, d, e, f))
-    F₁ = Fsymbol(heads...)
-    F₂ = Fsymbol(tails...)
-    if F₁ isa Number && F₂ isa Number
-        return F₁ * F₂
-    elseif F₁ isa Number
-        a₁, b₁, c₁, d₁, e₁, f₁ = heads
-        sz₁ = (
-            Nsymbol(a₁, b₁, e₁), Nsymbol(e₁, c₁, d₁), Nsymbol(b₁, c₁, f₁), Nsymbol(a₁, f₁, d₁),
-        )
-        F₁′ = fill(F₁, sz₁)
-        return _kron(F₁′, F₂)
-    elseif F₂ isa Number
-        a₂, b₂, c₂, d₂, e₂, f₂ = tails
-        sz₂ = (
-            Nsymbol(a₂, b₂, e₂), Nsymbol(e₂, c₂, d₂), Nsymbol(b₂, c₂, f₂), Nsymbol(a₂, f₂, d₂),
-        )
-        F₂′ = fill(F₂, sz₂)
-        return _kron(F₁, F₂′)
-    else
-        return _kron(F₁, F₂)
-    end
+# handles R-, A- and B-symbols correctly because of Frobenius reciprocity
+# i.e. Nsymbol(a, b, c) = Nsymbol(c, dual(b), a) = Nsymbol(dual(a), c, b)
+# and for braided categories Nsymbol(a, b, c) = Nsymbol(b, a, c)
+_symbol_size((a, b, c)::NTuple{3, Sector}) = (n = Nsymbol(a, b, c); (n, n))
+_symbol_size((a, b, c, d, e, f)::NTuple{6, Sector}) = (Nsymbol(a, b, e), Nsymbol(e, c, d), Nsymbol(b, c, f), Nsymbol(a, f, d))
+
+@inline function _kron_promote_inputs(sectors)
+    heads = map(_firstsector, sectors)
+    tails = map(_tailsector, sectors)
+    sz₁ = _symbol_size(heads)
+    sz₂ = _symbol_size(tails)
+    return heads, tails, sz₁, sz₂
 end
-function Fsymbol(
-        a::I, b::I, c::I, d::I, e::I, f::I
-    ) where {I <: ProductSector{<:Tuple{Sector}}}
+
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c, d, e, f))
+    V₁ = Fsymbol(heads...)
+    V₂ = Fsymbol(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
+end
+function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol(map(_firstsector, (a, b, c, d, e, f))...)
+end
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c, d, e, f))
+    V₁ = Fsymbol_from_fusiontensor(heads...)
+    V₂ = Fsymbol_from_fusiontensor(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
+end
+function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
+    return Fsymbol_from_fusiontensor(map(_firstsector, (a, b, c, d, e, f))...)
 end
 
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    R₁ = Rsymbol(heads...)
-    R₂ = Rsymbol(tails...)
-    if R₁ isa Number && R₂ isa Number
-        R₁ * R₂
-    elseif R₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(b₁, a₁, c₁)) # 0 x 0 or 1 x 1
-        R₁′ = fill(R₁, sz₁)
-        return _kron(R₁′, R₂)
-    elseif R₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(b₂, a₂, c₂)) # 0 x 0 or 1 x 1
-        R₂′ = fill(R₂, sz₂)
-        return _kron(R₁, R₂′)
-    else
-        return _kron(R₁, R₂)
-    end
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Rsymbol(heads...)
+    V₂ = Rsymbol(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
 end
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol(map(_firstsector, (a, b, c))...)
 end
+function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Rsymbol_from_fusiontensor(heads...)
+    V₂ = Rsymbol_from_fusiontensor(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
+end
+function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
+    return Rsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
+end
 
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    B₁ = Bsymbol(heads...)
-    B₂ = Bsymbol(tails...)
-    if B₁ isa Number && B₂ isa Number
-        B₁ * B₂
-    elseif B₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(c₁, dual(b₁), a₁)) # 0 x 0 or 1 x 1
-        B₁′ = fill(B₁, sz₁)
-        return _kron(B₁′, B₂)
-    elseif B₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(c₂, dual(b₂), a₂)) # 0 x 0 or 1 x 1
-        B₂′ = fill(B₂, sz₂)
-        return _kron(B₁, B₂′)
-    else
-        return _kron(B₁, B₂)
-    end
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Bsymbol(heads...)
+    V₂ = Bsymbol(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol(map(_firstsector, (a, b, c))...)
 end
+function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Bsymbol_from_fusiontensor(heads...)
+    V₂ = Bsymbol_from_fusiontensor(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
+end
+function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
+    return Bsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
+end
 
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads = map(_firstsector, (a, b, c))
-    tails = map(_tailsector, (a, b, c))
-    A₁ = Asymbol(heads...)
-    A₂ = Asymbol(tails...)
-    if A₁ isa Number && A₂ isa Number
-        A₁ * A₂
-    elseif A₁ isa Number
-        a₁, b₁, c₁ = heads
-        sz₁ = (Nsymbol(a₁, b₁, c₁), Nsymbol(dual(a₁), c₁, b₁)) # 0 x 0 or 1 x 1
-        A₁′ = fill(A₁, sz₁)
-        return _kron(A₁′, A₂)
-    elseif A₂ isa Number
-        a₂, b₂, c₂ = tails
-        sz₂ = (Nsymbol(a₂, b₂, c₂), Nsymbol(dual(a₂), c₂, b₂)) # 0 x 0 or 1 x 1
-        A₂′ = fill(A₂, sz₂)
-        return _kron(A₁, A₂′)
-    else
-        return _kron(A₁, A₂)
-    end
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Asymbol(heads...)
+    V₂ = Asymbol(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
 end
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
+end
+function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
+    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    V₁ = Asymbol_from_fusiontensor(heads...)
+    V₂ = Asymbol_from_fusiontensor(tails...)
+    return _kron_promote(V₁, V₂, sz₁, sz₂)
+end
+function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
+    return Asymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
 frobenius_schur_phase(p::ProductSector) = prod(frobenius_schur_phase, p.sectors)
@@ -236,6 +220,8 @@ end
 fermionparity(p::ProductSector) = mapreduce(fermionparity, xor, p.sectors)
 
 dim(p::ProductSector) = *(dim.(p.sectors)...)
+twist(p::ProductSector) = *(twist.(p.sectors)...)
+hopflink(p::I, q::I) where {I <: ProductSector} = *(hopflink.(p.sectors, q.sectors)...)
 
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)

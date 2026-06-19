@@ -198,8 +198,9 @@ end
 
 function fusiontensor(a::I, b::I, c::I) where {N, I <: DNIrrep{N}}
     T = sectorscalartype(I)
-    C = zeros(T, dim(a), dim(b), dim(c), 1)
-    Nsymbol(a, b, c) || return C
+    Nabc = Nsymbol(a, b, c)
+    C = zeros(T, dim(a), dim(b), dim(c), Nabc)
+    Nabc || return C
 
     if c.j == 0
         if a.j == b.j == 0 || (2 * a.j == 2 * b.j == N)
