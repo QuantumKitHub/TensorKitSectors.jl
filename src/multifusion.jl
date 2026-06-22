@@ -30,7 +30,7 @@ const all_isingbimod_objects = (
     IsingBimodule(1, 2, 0), IsingBimodule(2, 2, 0), IsingBimodule(2, 2, 1),
 )
 
-Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.HasLength()
+Base.IteratorSize(::Type{SectorValues{IsingBimodule}}) = Base.SizeUnknown()
 Base.iterate(::SectorValues{IsingBimodule}, i = 1) = iterate(all_isingbimod_objects, i)
 Base.length(::SectorValues{IsingBimodule}) = length(all_isingbimod_objects)
 
