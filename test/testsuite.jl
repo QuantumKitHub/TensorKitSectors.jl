@@ -77,7 +77,16 @@ end
 function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Sector}
     sectors = collect(Iterators.take(values(I), 10 * size))
     sectors = shuffle!(filter!(s -> dim(s) < maxdim, sectors))
-    return resize!(sectors, min(size, length(sectors)))
+    result = sectors[1:min(size, length(sectors))]
+    # make sure a sector with dim > 1 is included when possible, so that
+    # non-abelian sectors are tested consistently
+    if FusionStyle(I) isa MultipleFusion
+        i = findfirst(>(1) ∘ dim, sectors)
+        if !isnothing(i) && (i > length(result)) # no changes if set to have multiple fusion but actually abelian
+            result[end] = sectors[i]
+        end
+    end
+    return result
 end
 
 function randsector(::Type{I}) where {I <: Sector}
