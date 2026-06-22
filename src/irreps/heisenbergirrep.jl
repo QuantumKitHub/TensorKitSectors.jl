@@ -201,35 +201,36 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
         K = mod(x.k + y.k, N)
         if !iszero(K) # → π_K with multiplicity N
             s = mod(-x.k * invmod(y.k, N), N)
-            for i in 1:dx, j in 1:dy, m in 1:dz, μ in 1:Nxyz
-                if iszero(mod(j - m - s * (i - m), N)) # C[i,j,m,μ] = ω^{(μ-1)(i-m)} / √N if j - m = s(i - m) mod N, s = -k / k' mod N
-                    C[i, j, m, μ] = ω^mod((μ - 1) * (i - m), N) * invsqrtN
+            for i in 1:dx, j in 1:dy, m in 1:dz
+                if iszero(mod(j - m - s * (i - m), N)) # j - m = s(i - m) mod N, s = -k / k' mod N
+                    μ = mod(i - j, N) + 1 # C[i,j,m,μ] = 1 if μ - 1 = i - j mod N (pure permutation)
+                    C[i, j, m, μ] = one(T)
                 end
             end
         else # k + k' = 0: → Σ_{a,b} χ_{a,b}, each with multiplicity 1
             a, b = z.a, z.b
-            t = mod(invmod(x.k, N) * a, N)
+            t = mod(invmod(x.k, N) * b, N)
             for i in 1:dx, j in 1:dy
-                if iszero(mod(j - i + t, N)) # C[i,j,1,1] = ω^{-b(i-1)} / √N if j = i - t mod N, t = a/k mod N
-                    C[i, j, 1, 1] = ω^mod(-b * (i - 1), N) * invsqrtN
+                if iszero(mod(j - i + t, N)) # C[i,j,1,1] = ω^{-a(i-1)} / √N if j = i - t mod N, t = b/k mod N
+                    C[i, j, 1, 1] = ω^mod(-a * (i - 1), N) * invsqrtN
                 end
             end
         end
     else # exactly one of x, y is χ, the other is π
         if iszero(x.k) # χ_{a,b} ⊗ π_k → π_k
             a, b, k = x.a, x.b, y.k
-            s = mod(invmod(k, N) * a, N)
+            s = mod(invmod(k, N) * b, N)
             for j in 1:dy, m in 1:dz
-                if iszero(mod(j - m + s, N)) # C[1,j,m,1] = ω^{b(m-1)} if j = m - s mod N, s = a/k mod N
-                    C[1, j, m, 1] = ω^mod(b * (m - 1), N)
+                if iszero(mod(j - m + s, N)) # C[1,j,m,1] = ω^{a(m-1)} if j = m - s mod N, s = b/k mod N
+                    C[1, j, m, 1] = ω^mod(a * (m - 1), N)
                 end
             end
         else # π_k ⊗ χ_{a,b} → π_k
             a, b, k = y.a, y.b, x.k
-            s = mod(invmod(k, N) * a, N)
+            s = mod(invmod(k, N) * b, N)
             for i in 1:dx, m in 1:dz
-                if iszero(mod(i - m + s, N)) # C[i,1,m,1] = ω^{b(m-1)} if i = m - s mod N, s = a/k mod N
-                    C[i, 1, m, 1] = ω^mod(b * (m - 1), N)
+                if iszero(mod(i - m + s, N)) # C[i,1,m,1] = ω^{a(m-1)} if i = m - s mod N, s = b/k mod N
+                    C[i, 1, m, 1] = ω^mod(a * (m - 1), N)
                 end
             end
         end
