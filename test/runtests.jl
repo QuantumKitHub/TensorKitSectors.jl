@@ -12,6 +12,7 @@ const sectorlist = (
     Z2Irrep, Z3Irrep, Z4Irrep, Irrep[ℤ{200}], U1Irrep,
     DNIrrep{3}, DNIrrep{4}, DNIrrep{5}, CU1Irrep,
     A4Irrep, SU2Irrep, NewSU2Irrep,
+    HeisenbergIrrep{3}, HeisenbergIrrep{5}, HeisenbergIrrep{7},
     FibonacciAnyon, IsingAnyon, FermionParity,
     FermionParity ⊠ FermionParity, FibonacciAnyon ⊠ PlanarTrivial,
     Z3Irrep ⊠ Z4Irrep,
@@ -74,6 +75,35 @@ end
                 L_S = Cmat' * kron(Sa, Sb) * Cmat
                 @test isapprox(L_T, Tc; atol = 1.0e-12)
                 @test isapprox(L_S, Sc; atol = 1.0e-12)
+            end
+        end
+    end
+end
+
+@testset "Intertwiner relation for HeisenbergIrrep{$N}" for N in (3, 5, 7)
+    ω = cispi(2 / N)
+    # X and Z generators with X|i⟩ = |i+1⟩, Z|i⟩ = ω^{ki}|i⟩ for Schrödinger irreps π_k (k ≠ 0),
+    # while X ↦ ω^a, Z ↦ ω^b for χ_{a,b} characters
+    function X(s::HeisenbergIrrep{N}) where {N}
+        iszero(s.k) && return hcat(ω^s.a)
+        M = zeros(ComplexF64, N, N)
+        for i in 0:(N - 1)
+            M[mod(i + 1, N) + 1, i + 1] = 1
+        end
+        return M
+    end
+    Z(s::HeisenbergIrrep{N}) where {N} = iszero(s.k) ? hcat(ω^s.b) : Diagonal([ω^(s.k * i) for i in 0:(N - 1)])
+    for a in values(HeisenbergIrrep{N}), b in values(HeisenbergIrrep{N})
+        for c in ⊗(a, b)
+            C = fusiontensor(a, b, c)
+            Xa, Xb, Xc = X(a), X(b), X(c)
+            Za, Zb, Zc = Z(a), Z(b), Z(c)
+            for μ in 1:Nsymbol(a, b, c)
+                Cmat = reshape(view(C, :, :, :, μ), (dim(a) * dim(b), dim(c)))
+                L_X = Cmat' * kron(Xb, Xa) * Cmat
+                L_Z = Cmat' * kron(Zb, Za) * Cmat
+                @test isapprox(L_X, Xc; atol = 1.0e-12)
+                @test isapprox(L_Z, Zc; atol = 1.0e-12)
             end
         end
     end
