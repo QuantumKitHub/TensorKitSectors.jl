@@ -281,7 +281,6 @@ end
 end
 
 # https://quantumkithub.github.io/TensorKit.jl/stable/man/fusiontrees/#Manipulations-on-a-fusion-tree
-# label (α, β) as (σ, λ) and g <-> f in FRF path
 @testsuite "Artin braid equality" I -> begin
     BraidingStyle(I) isa HasBraiding || return nothing
     for a in smallset(I), b in smallset(I), d in smallset(I)
