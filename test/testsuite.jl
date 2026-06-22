@@ -80,9 +80,9 @@ function smallset(::Type{I}, size::Int = 5, maxdim::Real = 10) where {I <: Secto
     result = sectors[1:min(size, length(sectors))]
     # make sure a sector with dim > 1 is included when possible, so that
     # non-abelian sectors are tested consistently
-    if FusionStyle(I) isa MultipleFusion && !any(s -> dim(s) > 1, result)
-        is = findall(s -> dim(s) > 1, sectors)
-        !isempty(is) && (result[end] = sectors[rand(is)]) # no changes if set to have multiple fusion but actually abelian
+    if FusionStyle(I) isa MultipleFusion && !any(>(1) ∘ dim, result)
+        i = findfirst(>(1) ∘ dim, sectors)
+        !isnothing(i) && (result[end] = sectors[i]) # no changes if set to have multiple fusion but actually abelian
     end
     return result
 end
