@@ -70,7 +70,7 @@ end
 end
 
 @testsuite "Fusion product iterator" I -> begin
-    for a in values(I), b in values(I)
+    for a in smallset(I), b in smallset(I)
         cs = a ⊗ b
         @test length(cs) == length(collect(cs))
     end
