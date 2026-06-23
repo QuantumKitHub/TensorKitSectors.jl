@@ -1,4 +1,5 @@
 const _primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+
 """
     struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     HeisenbergIrrep{N}(n::Integer, isodd::Bool=false)
@@ -47,7 +48,7 @@ fusionscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 braidingscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 sectorscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 
-isschrodinger(a::HeisenbergIrrep{N}) where {N} = !iszero(a.k)
+isschrodinger(a::HeisenbergIrrep) = !iszero(a.k)
 
 unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0, 0, 0)
 function dual(a::HeisenbergIrrep{N}) where {N}
