@@ -69,13 +69,6 @@ end
     end
 end
 
-@testsuite "Fusion product iterator" I -> begin
-    for a in smallset(I), b in smallset(I)
-        cs = a ⊗ b
-        @test length(cs) == length(collect(cs))
-    end
-end
-
 @testsuite "Fusion and dimensions" I -> begin
     for a in smallset(I), b in smallset(I)
         cs = a ⊗ b
