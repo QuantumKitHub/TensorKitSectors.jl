@@ -37,7 +37,13 @@ Base.length(::SectorValues{IsingBimodule}) = length(all_isingbimod_objects)
 const IsingBimoduleProdIterator = SectorProductIterator{IsingBimodule}
 ⊗(a::IsingBimodule, b::IsingBimodule) = SectorProductIterator(a, b)
 
-Base.IteratorSize(::Type{IsingBimoduleProdIterator}) = Base.SizeUnknown()
+Base.IteratorSize(::Type{IsingBimoduleProdIterator}) = Base.HasLength()
+function Base.length(x::IsingBimoduleProdIterator)
+    a, b = x.a, x.b
+    a.col == b.row || return 0
+    a.row == b.col && a.row != a.col && return 2
+    return 1
+end
 
 function Base.iterate(iter::IsingBimoduleProdIterator, state = 0)
     a, b = iter.a, iter.b
