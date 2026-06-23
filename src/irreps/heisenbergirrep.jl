@@ -1,4 +1,4 @@
-_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
+const _primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
 """
     struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     HeisenbergIrrep{N}(n::Integer, isodd::Bool=false)
@@ -47,9 +47,11 @@ fusionscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 braidingscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 sectorscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 
+isschrodinger(a::HeisenbergIrrep{N}) where {N} = !iszero(a.k)
+
 unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0, 0, 0)
 function dual(a::HeisenbergIrrep{N}) where {N}
-    return if iszero(a.k)
+    return if !isschrodinger(a)
         HeisenbergIrrep{N}(N - a.a, N - a.b, 0)
     else
         HeisenbergIrrep{N}(0, 0, N - a.k)
@@ -74,10 +76,10 @@ end
 # Sector iterator
 # ---------------
 function Base.isless(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}) where {N}
-    if iszero(a.k)
-        return iszero(b.k) ? isless((a.a, a.b), (b.a, b.b)) : true # 1d irreps come before Schrödinger irreps
+    if !isschrodinger(a)
+        return !isschrodinger(b) ? isless((a.a, a.b), (b.a, b.b)) : true # 1d irreps come before Schrödinger irreps
     else
-        return iszero(b.k) ? false : isless(a.k, b.k)
+        return !isschrodinger(b) ? false : isless(a.k, b.k)
     end
 end
 Base.IteratorSize(::Type{SectorValues{<:HeisenbergIrrep}}) = Base.HasLength()
@@ -100,7 +102,7 @@ end
 end
 
 function findindex(::SectorValues{HeisenbergIrrep{N}}, a::HeisenbergIrrep{N}) where {N}
-    if iszero(a.k) # 1d irreps
+    if !isschrodinger(a) # 1d irreps
         return a.a * N + a.b + 1
     else
         return N^2 + a.k
@@ -116,7 +118,7 @@ const HeisenbergIrrepProdIterator{N} = SectorProductIterator{HeisenbergIrrep{N}}
 Base.IteratorSize(::Type{<:HeisenbergIrrepProdIterator}) = Base.HasLength()
 function Base.length(x::HeisenbergIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
-    if !iszero(a.k) && !iszero(b.k) # π ⊗ π
+    if isschrodinger(a) && isschrodinger(b) # π ⊗ π
         return iszero(mod(a.k + b.k, N)) ? N^2 : 1 # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps but count it once
     else
         return 1
@@ -126,14 +128,14 @@ end
 function Base.iterate(p::HeisenbergIrrepProdIterator{N}, state::Int = 1) where {N}
     a, b = p.a, p.b
     if state == 1
-        if !(iszero(a.k) && iszero(b.k)) # π ⊗ π
+        if isschrodinger(a) && isschrodinger(b) # π ⊗ π
             k_new = mod(a.k + b.k, N)
             if iszero(k_new) # special case: k1 + k2 = 0 gives the N^2 χ's
                 return (unit(typeof(a)), 2) # return unit χ first, then iterate over the other χ's in the next states
             else
                 return (HeisenbergIrrep{N}(0, 0, k_new), 2) # return this only once, even with multiplicity N
             end
-        elseif iszero(a.k) && iszero(b.k) # χ ⊗ χ
+        elseif !isschrodinger(a) && !isschrodinger(b) # χ ⊗ χ
             a_new = mod(a.a + b.a, N)
             b_new = mod(a.b + b.b, N)
             return (HeisenbergIrrep{N}(a_new, b_new, 0), 2)
@@ -154,12 +156,12 @@ end
 
 # Topological data
 # ----------------
-dim(a::HeisenbergIrrep{N}) where {N} = iszero(a.k) ? 1 : N
+dim(a::HeisenbergIrrep{N}) where {N} = isschrodinger(a) ? N : 1
 
 function Nsymbol(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrrep{N}) where {N}
-    a_1d = iszero(a.k)
-    b_1d = iszero(b.k)
-    c_1d = iszero(c.k)
+    a_1d = !isschrodinger(a)
+    b_1d = !isschrodinger(b)
+    c_1d = !isschrodinger(c)
 
     # immediate zeroes
     (a_1d && b_1d && !c_1d) && return 0 # χ ⊗ χ -> π
@@ -190,13 +192,13 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
     C = zeros(T, dx, dy, dz, Nxyz)
     isempty(C) && return C
 
-    if iszero(x.k) && iszero(y.k) # χ ⊗ χ → χ (trivial)
+    if !isschrodinger(x) && !isschrodinger(y) # χ ⊗ χ → χ (trivial)
         C[1, 1, 1, 1] = one(T)
         return C
     end
 
     ω = cispi(2 / N)
-    if !iszero(x.k) && !iszero(y.k) # π_k ⊗ π_{k'}
+    if isschrodinger(x) && isschrodinger(y) # π_k ⊗ π_{k'}
         invsqrtN = T(1 / sqrt(N))
         K = mod(x.k + y.k, N)
         if !iszero(K) # → π_K with multiplicity N
@@ -217,7 +219,7 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
             end
         end
     else # exactly one of x, y is χ, the other is π
-        if iszero(x.k) # χ_{a,b} ⊗ π_k → π_k
+        if !isschrodinger(x) # χ_{a,b} ⊗ π_k → π_k
             a, b, k = x.a, x.b, y.k
             s = mod(invmod(k, N) * b, N)
             for j in 1:dy, m in 1:dz
