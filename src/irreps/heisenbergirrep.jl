@@ -63,7 +63,7 @@ end
 Base.IteratorSize(::Type{SectorValues{<:HeisenbergIrrep}}) = Base.HasLength()
 Base.length(::SectorValues{HeisenbergIrrep{N}}) where {N} = N^2 + N - 1
 
-function Base.iterate(v::SectorValues{<:HeisenbergIrrep}, i = 1)
+function Base.iterate(v::SectorValues{HeisenbergIrrep{N}}, i = 1) where {N}
     return i > length(v) ? nothing : (v[i], i + 1)
 end
 
