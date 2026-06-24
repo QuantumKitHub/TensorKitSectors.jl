@@ -1,46 +1,27 @@
-const _primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47]
-
 """
     struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
-    HeisenbergIrrep{N}(n::Integer, isodd::Bool=false)
-    Irrep[Heisenberg{N}](n::Integer, isodd::Bool=false)
+    HeisenbergIrrep{N}(n::Int8)
+    Irrep[Heisenberg{N}](n::Int8)
 
 Represents irreps of the finite Heisenberg group ``H_N`` for `N` prime.
-There are N² one-dimensional irreps labeled by a pair of integers ``(a, b)`` with ``a, b ∈ ℤ_N``,
-and N - 1 irreps of dimension N labeled by an integer ``k ∈ ℤ_N \\ {0}``.
-These are commonly referred to as the characters ``χₐ,ᵦ`` and the Schrödinger representations ``πₖ``, respectively.
+Irreps are labeled by a single integer `n`: if `N < n < 0`, the irrep is the Schrödinger
+representation ``πₖ`` with `k = -n`. Otherwise, the irrep is the character ``χₐ,ᵦ`` with
+`a, b = divrem(n, N)`, of which there are N².
 
-## Properties
+## Fields
 
-- `a::Int`: the first label for the one-dimensional irreps.
-- `b::Int`: the second label for the one-dimensional irreps.
-- `k::Int`: the label for the N-dimensional irreps.
-
-The last index `k` is only relevant for the N-dimensional irreps, and is set to 0 for the one-dimensional irreps.
-Similarly, the first two indices `a` and `b` are only relevant for the one-dimensional irreps, and are set to 0 for the N-dimensional irreps.
+- `n::Int`: the label of the irrep.
 """
 struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
-    a::Int
-    b::Int
-    k::Int
-    function HeisenbergIrrep{N}(a::Int, b::Int, k::Int) where {N}
-        if N ∉ _primes
+    n::Int8
+    function HeisenbergIrrep{N}(n::Integer) where {N}
+        if !isprime(N)
             throw(ArgumentError("N must be a prime number"))
         end
-        if iszero(k) # 1d irreps
-            a_mod = mod(a, N)
-            b_mod = mod(b, N)
-            k_mod = 0
-        else # Schrödinger irreps
-            iszero(a) && iszero(b) || throw(ArgumentError("N-dimensional irreps must have a = b = 0"))
-            a_mod = 0
-            b_mod = 0
-            k_mod = mod(k, N)
-        end
-        return new{N}(a_mod, b_mod, k_mod)
+        -N < n < N^2 || throw(ArgumentError("Unknown HeisenbergIrrep{N} with label n = $n."))
+        return new{N}(n)
     end
 end
-# TODO: consider union of 2 kinds of irreps?
 
 FusionStyle(::Type{<:HeisenbergIrrep}) = GenericFusion()
 BraidingStyle(::Type{<:HeisenbergIrrep}) = Anyonic()
@@ -48,39 +29,35 @@ fusionscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 braidingscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 sectorscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 
-isschrodinger(a::HeisenbergIrrep) = !iszero(a.k)
+isschrodinger(a::HeisenbergIrrep) = a.n < 0
 
-unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0, 0, 0)
-function dual(a::HeisenbergIrrep{N}) where {N}
-    return if !isschrodinger(a)
-        HeisenbergIrrep{N}(N - a.a, N - a.b, 0)
-    else
-        HeisenbergIrrep{N}(0, 0, N - a.k)
+unit(::Type{HeisenbergIrrep{N}}) where {N} = HeisenbergIrrep{N}(0)
+function dual(x::HeisenbergIrrep{N}) where {N}
+    if isschrodinger(x) # Schrödinger irrep: k -> N - k
+        return HeisenbergIrrep{N}(-N - x.n)
+    else # character: (a, b) -> (-a, -b)
+        a, b = divrem(x.n, N)
+        return HeisenbergIrrep{N}(mod(-a, N) * N + mod(-b, N))
     end
 end
 
-Base.hash(a::HeisenbergIrrep, h::UInt) = hash((a.a, a.b, a.k), h)
-Base.convert(::Type{HeisenbergIrrep{N}}, (a, b, k)::NTuple{3, Int}) where {N} = HeisenbergIrrep{N}(a, b, k)
+Base.hash(x::HeisenbergIrrep, h::UInt) = hash(x.n, h)
+Base.convert(::Type{HeisenbergIrrep{N}}, n::Integer) where {N} = HeisenbergIrrep{N}(n)
 
 Base.getindex(::IrrepTable, ::Type{Heisenberg{N}}) where {N} = HeisenbergIrrep{N}
 
 const Heis3Irrep = HeisenbergIrrep{3}
 
-function Base.show(io::IO, a::HeisenbergIrrep)
-    if get(io, :typeinfo, nothing) !== typeof(a)
-        print(io, type_repr(typeof(a)))
-    end
-    print(io, "(", a.a, ", ", a.b, ", ", a.k, ")")
-    return nothing
-end
-
 # Sector iterator
 # ---------------
 function Base.isless(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}) where {N}
-    if !isschrodinger(a)
-        return !isschrodinger(b) ? isless((a.a, a.b), (b.a, b.b)) : true # 1d irreps come before Schrödinger irreps
-    else
-        return !isschrodinger(b) ? false : isless(a.k, b.k)
+    na, nb = a.n, b.n
+    if na >= 0 && nb >= 0 # both characters
+        return na < nb
+    elseif na < 0 && nb < 0 # both Schrödinger: order on k is reversed order on n
+        return na > nb
+    else # characters come before Schrödinger irreps
+        return na >= 0
     end
 end
 Base.IteratorSize(::Type{SectorValues{<:HeisenbergIrrep}}) = Base.HasLength()
@@ -94,21 +71,13 @@ end
     L = length(v)
     @boundscheck 1 <= i <= L || throw(BoundsError(v, i))
     if i <= N^2 # first N^2 should be the 1d irreps, then the N-dimensional irreps
-        a = div(i - 1, N) # for fixed a provide all b's, then move to next a
-        b = mod(i - 1, N)
-        return HeisenbergIrrep{N}(a, b, 0)
+        return HeisenbergIrrep{N}(i - 1)
     else
-        return HeisenbergIrrep{N}(0, 0, i - N^2)
+        return HeisenbergIrrep{N}(N^2 - i)
     end
 end
 
-function findindex(::SectorValues{HeisenbergIrrep{N}}, a::HeisenbergIrrep{N}) where {N}
-    if !isschrodinger(a) # 1d irreps
-        return a.a * N + a.b + 1
-    else
-        return N^2 + a.k
-    end
-end
+findindex(::SectorValues{HeisenbergIrrep{N}}, x::HeisenbergIrrep{N}) where {N} = isschrodinger(x) ? N^2 - x.n : x.n + 1
 
 # Product iterator
 # ----------------
@@ -120,7 +89,7 @@ Base.IteratorSize(::Type{<:HeisenbergIrrepProdIterator}) = Base.HasLength()
 function Base.length(x::HeisenbergIrrepProdIterator{N}) where {N}
     a, b = x.a, x.b
     if isschrodinger(a) && isschrodinger(b) # π ⊗ π
-        return iszero(mod(a.k + b.k, N)) ? N^2 : 1 # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps but count it once
+        return iszero(mod(a.n + b.n, N)) ? N^2 : 1 # special case: k1 + k2 = 0 gives N^2 χ's, otherwise gives N π irreps but count it once
     else
         return 1
     end
@@ -130,23 +99,24 @@ function Base.iterate(p::HeisenbergIrrepProdIterator{N}, state::Int = 1) where {
     a, b = p.a, p.b
     if state == 1
         if isschrodinger(a) && isschrodinger(b) # π ⊗ π
-            k_new = mod(a.k + b.k, N)
+            k_new = mod(-(a.n + b.n), N)
             if iszero(k_new) # special case: k1 + k2 = 0 gives the N^2 χ's
                 return (unit(typeof(a)), 2) # return unit χ first, then iterate over the other χ's in the next states
             else
-                return (HeisenbergIrrep{N}(0, 0, k_new), 2) # return this only once, even with multiplicity N
+                return (HeisenbergIrrep{N}(-k_new), 2) # return this only once, even with multiplicity N
             end
         elseif !isschrodinger(a) && !isschrodinger(b) # χ ⊗ χ
-            a_new = mod(a.a + b.a, N)
-            b_new = mod(a.b + b.b, N)
-            return (HeisenbergIrrep{N}(a_new, b_new, 0), 2)
+            a1, b1 = divrem(a.n, N)
+            a2, b2 = divrem(b.n, N)
+            return (HeisenbergIrrep{N}(mod(a1 + a2, N) * N + mod(b1 + b2, N)), 2)
         else # χ ⊗ π or π ⊗ χ
-            return (HeisenbergIrrep{N}(0, 0, a.k + b.k), 2)
+            k = isschrodinger(a) ? -a.n : -b.n
+            return (HeisenbergIrrep{N}(-k), 2)
         end
     elseif state <= length(p) # π ⊗ π
-        k_new = mod(a.k + b.k, N)
+        k_new = mod(-(a.n + b.n), N)
         if iszero(k_new) # special case
-            return (HeisenbergIrrep{N}(div(state - 1, N), mod(state - 1, N), 0), state + 1)
+            return (HeisenbergIrrep{N}(state - 1), state + 1)
         else # all other π irreps
             return nothing
         end
@@ -170,13 +140,17 @@ function Nsymbol(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}, c::HeisenbergIrre
     (!a_1d && b_1d && c_1d) && return 0 # π ⊗ χ -> χ
 
     if a_1d && b_1d && c_1d # χ ⊗ χ -> χ
-        return Int(mod(a.a + b.a, N) == c.a && mod(a.b + b.b, N) == c.b)
+        a1, b1 = divrem(a.n, N)
+        a2, b2 = divrem(b.n, N)
+        a3, b3 = divrem(c.n, N)
+        return Int(mod(a1 + a2, N) == a3 && mod(b1 + b2, N) == b3)
     elseif ((a_1d && !b_1d) || (!a_1d && b_1d)) && !c_1d # χ ⊗ π or π ⊗ χ -> π
-        return Int(a.k + b.k == c.k)
+        k_ab = a_1d ? -b.n : -a.n
+        return Int(k_ab == -c.n)
     else # π ⊗ π
-        k_new = mod(a.k + b.k, N)
+        k_new = mod(-(a.n + b.n), N)
         iszero(k_new) && return Int(c_1d) # special case
-        return mod(k_new, N) == c.k ? N : 0
+        return k_new == -c.n ? N : 0
     end
 end
 
@@ -201,9 +175,10 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
     ω = cispi(2 / N)
     if isschrodinger(x) && isschrodinger(y) # π_k ⊗ π_{k'}
         invsqrtN = T(1 / sqrt(N))
-        K = mod(x.k + y.k, N)
+        kx, ky = -x.n, -y.n
+        K = mod(kx + ky, N)
         if !iszero(K) # → π_K with multiplicity N
-            s = mod(-x.k * invmod(y.k, N), N)
+            s = mod(-kx * invmod(ky, N), N)
             for i in 1:dx, j in 1:dy, m in 1:dz
                 if iszero(mod(j - m - s * (i - m), N)) # j - m = s(i - m) mod N, s = -k / k' mod N
                     μ = mod(i - j, N) + 1 # C[i,j,m,μ] = 1 if μ - 1 = i - j mod N (pure permutation)
@@ -211,8 +186,8 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
                 end
             end
         else # k + k' = 0: → Σ_{a,b} χ_{a,b}, each with multiplicity 1
-            a, b = z.a, z.b
-            t = mod(invmod(x.k, N) * b, N)
+            a, b = divrem(z.n, N)
+            t = mod(invmod(kx, N) * b, N)
             for i in 1:dx, j in 1:dy
                 if iszero(mod(j - i + t, N)) # C[i,j,1,1] = ω^{-a(i-1)} / √N if j = i - t mod N, t = b/k mod N
                     C[i, j, 1, 1] = ω^mod(-a * (i - 1), N) * invsqrtN
@@ -221,7 +196,8 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
         end
     else # exactly one of x, y is χ, the other is π
         if !isschrodinger(x) # χ_{a,b} ⊗ π_k → π_k
-            a, b, k = x.a, x.b, y.k
+            a, b = divrem(x.n, N)
+            k = -y.n
             s = mod(invmod(k, N) * b, N)
             for j in 1:dy, m in 1:dz
                 if iszero(mod(j - m + s, N)) # C[1,j,m,1] = ω^{a(m-1)} if j = m - s mod N, s = b/k mod N
@@ -229,7 +205,8 @@ function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::Heisenber
                 end
             end
         else # π_k ⊗ χ_{a,b} → π_k
-            a, b, k = y.a, y.b, x.k
+            a, b = divrem(y.n, N)
+            k = -x.n
             s = mod(invmod(k, N) * b, N)
             for i in 1:dx, m in 1:dz
                 if iszero(mod(i - m + s, N)) # C[i,1,m,1] = ω^{a(m-1)} if i = m - s mod N, s = b/k mod N

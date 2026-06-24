@@ -67,6 +67,7 @@ using LinearAlgebra: tr, Diagonal, I
 using TensorOperations
 using HalfIntegers
 using WignerSymbols
+using WignerSymbols: isprime
 
 # includes
 # --------

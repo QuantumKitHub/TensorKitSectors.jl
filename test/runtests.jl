@@ -85,14 +85,14 @@ end
     # X and Z generators with X|i⟩ = |i+1⟩, Z|i⟩ = ω^{ki}|i⟩ for Schrödinger irreps π_k (k ≠ 0),
     # while X ↦ ω^a, Z ↦ ω^b for χ_{a,b} characters
     function X(s::HeisenbergIrrep{N}) where {N}
-        iszero(s.k) && return hcat(ω^s.a)
+        s.n < 0 || return hcat(ω^div(s.n, N))
         M = zeros(ComplexF64, N, N)
         for i in 0:(N - 1)
             M[mod(i + 1, N) + 1, i + 1] = 1
         end
         return M
     end
-    Z(s::HeisenbergIrrep{N}) where {N} = iszero(s.k) ? hcat(ω^s.b) : Diagonal([ω^(s.k * i) for i in 0:(N - 1)])
+    Z(s::HeisenbergIrrep{N}) where {N} = s.n < 0 ? Diagonal([ω^(-s.n * i) for i in 0:(N - 1)]) : hcat(ω^mod(s.n, N))
     for a in values(HeisenbergIrrep{N}), b in values(HeisenbergIrrep{N})
         for c in ⊗(a, b)
             C = fusiontensor(a, b, c)
