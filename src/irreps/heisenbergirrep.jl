@@ -18,7 +18,7 @@ struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
         if !isprime(N)
             throw(ArgumentError("N must be a prime number"))
         end
-        -N < n < N^2 || throw(ArgumentError("Unknown HeisenbergIrrep{N} with label n = $n."))
+        -N < n < N^2 || throw(ArgumentError("Unknown HeisenbergIrrep{$N} with label n = $n."))
         return new{N}(n)
     end
 end
