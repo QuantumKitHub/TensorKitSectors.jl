@@ -15,9 +15,8 @@ representation ``πₖ`` with `k = -n`. Otherwise, the irrep is the character ``
 struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     n::Int8
     function HeisenbergIrrep{N}(n::Integer) where {N}
-        if !isprime(N)
-            throw(ArgumentError("N must be a prime number"))
-        end
+        isprime(N) || throw(ArgumentError("N must be a prime number"))
+        N^2 < typemax(Int8) || throw(ArgumentError("$N is too large for Int8."))
         -N < n < N^2 || throw(ArgumentError("Unknown HeisenbergIrrep{$N} with label n = $n."))
         return new{N}(n)
     end
