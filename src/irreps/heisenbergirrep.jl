@@ -10,7 +10,7 @@ representation ``πₖ`` with `k = -n`. Otherwise, the irrep is the character ``
 
 ## Fields
 
-- `n::Int`: the label of the irrep.
+- `n::Int8`: the label of the irrep.
 """
 struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
     n::Int8
@@ -50,14 +50,9 @@ const Heis3Irrep = HeisenbergIrrep{3}
 # Sector iterator
 # ---------------
 function Base.isless(a::HeisenbergIrrep{N}, b::HeisenbergIrrep{N}) where {N}
-    na, nb = a.n, b.n
-    if na >= 0 && nb >= 0 # both characters
-        return na < nb
-    elseif na < 0 && nb < 0 # both Schrödinger: order on k is reversed order on n
-        return na > nb
-    else # characters come before Schrödinger irreps
-        return na >= 0
-    end
+    na = isschrodinger(a) ? -a.n + N^2 : a.n
+    nb = isschrodinger(b) ? -b.n + N^2 : b.n
+    return na < nb
 end
 Base.IteratorSize(::Type{SectorValues{<:HeisenbergIrrep}}) = Base.HasLength()
 Base.length(::SectorValues{HeisenbergIrrep{N}}) where {N} = N^2 + N - 1
