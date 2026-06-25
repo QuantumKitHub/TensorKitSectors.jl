@@ -24,6 +24,7 @@ export Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, LargeZNIrrep, U1Irrep
 export D3Irrep, D4Irrep, DNIrrep, CU1Irrep
 export A4Irrep
 export SU2Irrep
+export HeisenbergIrrep, Heis3Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, NamedSector, @NamedSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
@@ -38,6 +39,7 @@ export charge, modulus
 export ⊠, ⊗, ×
 export Cyclic, ℤ, ℤ₂, ℤ₃, ℤ₄, U₁, SU, SU₂, Dihedral, D₃, D₄, CU₁
 export Alternating, A₄
+export Heisenberg, Heis₃
 export fℤ₂, fU₁, fSU₂
 
 # public
@@ -65,6 +67,7 @@ using LinearAlgebra: tr, Diagonal, I
 using TensorOperations
 using HalfIntegers
 using WignerSymbols
+using WignerSymbols: isprime
 
 # includes
 # --------
