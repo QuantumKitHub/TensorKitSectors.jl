@@ -29,9 +29,9 @@ Each irrep has dimension ``d = 2j + 1``.
 The [`Fsymbol`](@ref) is computed from [Wigner ``6j``](https://en.wikipedia.org/wiki/6-j_symbol) (Racah-``W``) symbols as
 
 ```math
-\left(F_{abc}^d\right)_e^f = (-1)^{j_a + j_b + j_c + j_e} \sqrt{d_e d_f}  \begin{Bmatrix}
-j_a & j_b & j_d \\
-j_c & j_e & j_f
+\left(F_{abc}^d\right)_e^f = (-1)^{j_a + j_b + j_c + j_d} \sqrt{d_e d_f}  \begin{Bmatrix}
+j_a & j_b & j_e \\
+j_c & j_d & j_f
 \end{Bmatrix}
 ```
 
