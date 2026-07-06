@@ -21,6 +21,7 @@ This page provides an overview of the concrete sector types implemented in Tenso
 | [`FermionNumber`](@ref)  | fU₁                             | Unique       | Fermionic | Yes       | Fermion number conservation                                |
 | [`FermionSpin`](@ref)    | fSU₂                            | Simple       | Fermionic | Yes       | Fermions with spin symmetry                                |
 | [`ProductSector`](@ref)  | Product categories              | Varies       | Varies    | Varies    | Multiple simultaneous symmetries                           |
+| [`NamedSector`](@ref)    | Product categories              | Varies       | Varies    | Varies    | Product sectors with name-accessible components            |
 | [`TimeReversed`](@ref)   | Inverted braiding               | Varies       | Varies    | Varies    | Time-reversal or other orientation-reversing symmetries    |
 
 ## Other packages

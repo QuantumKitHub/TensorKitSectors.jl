@@ -55,6 +55,7 @@ makedocs(;
             ],
             "Composite Sectors" => [
                 "Product" => "sectors/composite/product.md",
+                "Named" => "sectors/composite/named.md",
                 "Time-Reversed" => "sectors/composite/timereversed.md",
             ],
         ],
