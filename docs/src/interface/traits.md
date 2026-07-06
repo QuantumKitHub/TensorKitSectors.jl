@@ -24,7 +24,7 @@ GenericFusion
 
 This enables various optimizations for different cases.
 Firstly, since the shape (size of the arrays) of the topological data is determined by combinations of the [`Nsymbol`](@ref), for `UniqueFusion` and `SimpleFusion` we can use scalar quantities instead of arrays.
-Secondly, in the `UniqueFusion` case, there is only a single channel for ``a \otimes b \otimes c \otimes \ldots``, avoiding the need to iterate through all options.
+Secondly, in the `UniqueFusion` case, there is only a single channel for ``a ⊗ b ⊗ c ⊗ …``, avoiding the need to iterate through all options.
 
 It is additionally possible to combine fusion styles through the `&` operator, which returns the style with the least assumptions.
 For example:

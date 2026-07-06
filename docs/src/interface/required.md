@@ -61,13 +61,13 @@ FusionStyle
 Every sector type has a unit (identity) label and a notion of dual (conjugate).
 `unit` returns the identity label, and `dual` returns the label that fuses with `a` to give the unit.
 
-The unit ``\mathbb{1}`` acts as the identity under fusion:
+The unit ``𝟙`` acts as the identity under fusion:
 ```math
-\mathbb{1} ⊗ a ≅ a ≅ a ⊗ \mathbb{1}
+𝟙 ⊗ a ≅ a ≅ a ⊗ 𝟙
 ```
 The dual of a sector ``a`` is the unique sector ``\bar{a}`` such that:
 ```math
-N^{a\bar{a}}_{\mathbb{1}} = 1 \quad \text{and} \quad N^{\bar{a}a}_{\mathbb{1}} = 1
+N^{a\bar{a}}_{𝟙} = 1 \quad \text{and} \quad N^{\bar{a}a}_{𝟙} = 1
 ```
 
 ```@docs; canonical = false
@@ -99,7 +99,7 @@ Fsymbol
 Formally, the F-symbol ``F^{abc}_d`` with intermediate sectors ``e`` and ``f`` is a linear transformation between the two different parenthesizations:
 
 ```math
-(F_{abc}^d)^e_f : (a ⊗ b → e) ⊗ c → d \quad \longrightarrow \quad a ⊗ (b ⊗ c → f) → d
+(F_{abc}^d)^e_f : (a ⊗ b → e) ⊗ c → d \quad ⟶ \quad a ⊗ (b ⊗ c → f) → d
 ```
 
 For sectors with `UniqueFusion` or `SimpleFusion`, the F-symbol is a scalar `<:Number`.

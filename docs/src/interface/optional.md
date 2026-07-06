@@ -29,14 +29,14 @@ invsqrtdim
 ## Frobenius-Schur Indicators
 
 The Frobenius-Schur indicator and phase characterize the self-duality properties of sectors.
-The Frobenius-Schur phase ``\kappa_a`` is obtained from the F-symbol as
+The Frobenius-Schur phase ``κ_a`` is obtained from the F-symbol as
 
 ```math
-\kappa_a = \text{sign}\left( (F_{a \bar{a} a}^a)^{1_a}_{_a1} \right)
+κ_a = \text{sign}\left( (F_{a \bar{a} a}^a)^{1_a}_{_a1} \right)
 ```
 
 and is the category-theoretic quantity that appears in line-bending operations.
-The Frobenius-Schur indicator ``\nu_a`` coincides with ``\kappa_a`` for self-dual sectors (``a = \bar{a}``) and is ``0`` otherwise; it distinguishes real, complex, and quaternionic representations.
+The Frobenius-Schur indicator ``ν_a`` coincides with ``κ_a`` for self-dual sectors (``a = \bar{a}``) and is ``0`` otherwise; it distinguishes real, complex, and quaternionic representations.
 
 ```@docs; canonical = false
 frobenius_schur_indicator
@@ -65,7 +65,7 @@ The A-symbol and B-symbol relate different ways of bending strands, while the tw
 
 The A-symbol ``A^{ab}_c`` relates splitting and fusion vertices:
 ```math
-A^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} \, \overline{\kappa_a (F_{\bar{a} a b}^b)^1_c}
+A^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} \, \overline{κ_a (F_{\bar{a} a b}^b)^1_c}
 ```
 
 The B-symbol ``B^{ab}_c`` relates splitting and fusion vertices:
@@ -73,9 +73,9 @@ The B-symbol ``B^{ab}_c`` relates splitting and fusion vertices:
 B^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} (F_{a b \bar{b}}^a)^c_1
 ```
 
-The twist ``\theta_a`` of a sector is the topological spin phase, computed as the trace of the R-matrix for braiding a sector with itself:
+The twist ``θ_a`` of a sector is the topological spin phase, computed as the trace of the R-matrix for braiding a sector with itself:
 ```math
-\theta_a = \frac{1}{d_a} \sum_{b \in a \otimes a} d_b \text{tr}(R^{aa}_b)
+θ_a = \frac{1}{d_a} \sum_{b ∈ a ⊗ a} d_b \text{tr}(R^{aa}_b)
 ```
 
 ```@docs; canonical = false

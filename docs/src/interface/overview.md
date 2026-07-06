@@ -6,14 +6,14 @@ A `Sector` is a label for the different *symmetry charges* or *quantum numbers* 
 In particular, these are the labels used to decompose vector spaces as:
 
 ```math
-V = \bigoplus_{a \in \text{Sectors}} \mathbb{C}^{n_a} \otimes V_a
+V = \bigoplus_{a ∈ \text{Sectors}} ℂ^{n_a} ⊗ V_a
 ```
 
 where ``n_a`` is the multiplicity of sector ``a`` and ``V_a`` is the associated vector space.
 
 Sectors encode the structural rules TensorKit needs:
 - **Objects**: the labels themselves (irreps, anyons, …)
-- **Fusion rules**: which labels appear in ``a \otimes b \rightarrow \bigoplus_c N^{ab}_c c``
+- **Fusion rules**: which labels appear in ``a ⊗ b → \bigoplus_c N^{ab}_c c``
 - **Associativity**: how different parenthesizations are related
 - **Braiding**: how labels behave under exchange (if supported)
 

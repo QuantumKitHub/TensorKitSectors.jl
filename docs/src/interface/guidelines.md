@@ -47,17 +47,17 @@ Additionally, if the [`Fsymbol`](@ref) and [`Rsymbol`](@ref) do not correspond t
 Therefore, computing the number of valid fusion channels for both diagrams as the product of the relevant [`Nsymbol`](@ref)s, we have:
 
 ```math
-\left(N^{ab}_e N^{ec}_d = 0 \lor N^{af}_d N^{bc}_f = 0\right) \implies (F_{abc}^d)^e_f = 0
+\left(N^{ab}_e N^{ec}_d = 0 ∨ N^{af}_d N^{bc}_f = 0\right) ⟹ (F_{abc}^d)^e_f = 0
 ```
 
 ```math
-N^{ab}_c = 0 \implies R^{ab}_c = 0
+N^{ab}_c = 0 ⟹ R^{ab}_c = 0
 ```
 
 ### [`GenericFusion`](@ref)
 
 - `Nsymbol(a, b, c)`: Returns a positive `Integer`.
-- `Fsymbol(a, b, c, d, e, f)`: Returns a ``N^{ab}_e \times N^{ec}_d \times N^{af}_d \times N^{bc}_f`` array of `sectorscalartype(I)` elements.
-- `Rsymbol(a, b, c)`: Returns a ``N^{ab}_c \times N^{ba}_c`` array of `sectorscalartype(I)` elements.
+- `Fsymbol(a, b, c, d, e, f)`: Returns a ``N^{ab}_e × N^{ec}_d × N^{af}_d × N^{bc}_f`` array of `sectorscalartype(I)` elements.
+- `Rsymbol(a, b, c)`: Returns a ``N^{ab}_c × N^{ba}_c`` array of `sectorscalartype(I)` elements.
 
 Here invalid fusion channels will necessarily lead to empty arrays.
