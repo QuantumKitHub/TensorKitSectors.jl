@@ -8,15 +8,18 @@ It is the standard way to combine independent symmetry or anyon labels, such as 
 ```@docs; canonical = false
 ProductSector
 ⊠
+deligneproduct
 ```
 
 A product sector stores its component sectors in a tuple.
-The recommended constructor is the Deligne product operator `⊠` or `boxtimes`:
+The recommended constructor is the Deligne product operator `⊠` or `boxtimes`.
+The more verbose option is `deligneproduct`:
 
 ```julia
 using TensorKitSectors
 
 a = Z2Irrep(1) ⊠ FibonacciAnyon(:τ) # (Irrep[ℤ₂](1) ⊠ FibonacciAnyon(:τ))
+deligneproduct(Z2Irrep(1), FibonacciAnyon(:τ)) # same as above
 ```
 
 The same operator works on sector types:
