@@ -50,7 +50,7 @@ makedocs(;
                 "Fermion Number" => "sectors/fermions/number.md",
                 "Fermion Spin" => "sectors/fermions/spin.md",
             ],
-            "Group Sectors" => [
+            "Group Elements" => [
                 "ℤₙ (Cyclic)" => "sectors/groupelement/znelement.md",
             ],
             "Composite Sectors" => [
