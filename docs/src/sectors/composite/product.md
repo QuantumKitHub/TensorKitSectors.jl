@@ -12,8 +12,8 @@ deligneproduct
 ```
 
 A product sector stores its component sectors in a tuple.
-The recommended constructor is the Deligne product operator `⊠` or `boxtimes`.
-The more verbose option is `deligneproduct`:
+The recommended constructor is the Deligne product operator `⊠` (typed as `\boxtimes<TAB>`).
+The more verbose alias `deligneproduct` is also available:
 
 ```julia
 using TensorKitSectors
