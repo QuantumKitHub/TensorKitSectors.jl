@@ -57,7 +57,7 @@ d_{(N/2,\pm)} = 1\quad (N \text{ even}).
 The [`Fsymbol`](@ref) is computed from the selected [`fusiontensor`](@ref) basis.
 The [`Rsymbol`](@ref) equals the N-symbol, up to a sign of ``-1`` on the ``(0,-)`` odd one-dimensional output channel produced by fusing two two-dimensional irreps.
 
-## Fusion tensor and basis conventions
+## Fusion Tensor and Basis Conventions
 
 `fusiontensor(a, b, c)` returns a rank-4 array of size ``d_a \times d_b \times d_c \times N_c^{ab}``.
 The implementation uses real Clebsch-Gordan coefficients.

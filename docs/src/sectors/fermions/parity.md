@@ -23,7 +23,7 @@ p \otimes q = p \oplus q.
 
 The category has `FusionStyle(FermionParity) = UniqueFusion()`.
 
-## Topological data
+## Topological Data
 
 All quantum dimensions are `1`, and [`Fsymbol`](@ref) is trivial on allowed channels.
 

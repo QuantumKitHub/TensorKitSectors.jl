@@ -28,7 +28,7 @@ n_1 \otimes n_2 = n_1 + n_2.
 
 The fermion parity component is then fixed automatically by the resulting charge.
 
-## Topological data
+## Topological Data
 
 All sectors have quantum dimension `1`.
 
