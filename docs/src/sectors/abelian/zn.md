@@ -3,6 +3,10 @@
 `ZNIrrep{N}` and `LargeZNIrrep{N}` represent irreducible representations of the cyclic group ``\mathbb{Z}_N``.
 Use `ZNIrrep{N}` when possible; it selects the compact storage type automatically.
 
+!!! note
+    `ZNIrrep{N}` grades a space by the *irreps* of ``\mathbb{Z}_N`` (the `Rep[ℤₙ]` category).
+    To instead grade by the *group elements* of ``\mathbb{Z}_N`` (the `Vec[ℤₙ]` category, which also supports discrete torsion), see [`ZNElement`](@ref).
+
 ## Sector types
 
 ```@docs; canonical = false
