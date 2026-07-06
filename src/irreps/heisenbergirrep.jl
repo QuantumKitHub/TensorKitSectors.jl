@@ -23,7 +23,7 @@ struct HeisenbergIrrep{N} <: AbstractIrrep{Heisenberg{N}}
 end
 
 FusionStyle(::Type{<:HeisenbergIrrep}) = GenericFusion()
-BraidingStyle(::Type{<:HeisenbergIrrep}) = Anyonic()
+BraidingStyle(::Type{<:HeisenbergIrrep}) = Bosonic()
 fusionscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 braidingscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
 sectorscalartype(::Type{<:HeisenbergIrrep}) = ComplexF64
@@ -153,7 +153,7 @@ Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: HeisenbergIrrep} =
 
 Rsymbol(a::I, b::I, c::I) where {I <: HeisenbergIrrep} = Rsymbol_from_fusiontensor(a, b, c)
 
-# https://www.rintonpress.com/xxqic8/qic-8-5/0438-0467.pdf eqs 60, 63, 67
+# https://arxiv.org/pdf/quant-ph/0612107 eqs 60, 63, 67
 function fusiontensor(x::HeisenbergIrrep{N}, y::HeisenbergIrrep{N}, z::HeisenbergIrrep{N}) where {N}
     T = fusionscalartype(HeisenbergIrrep{N})
     Nxyz = Nsymbol(x, y, z)
