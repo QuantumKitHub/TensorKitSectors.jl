@@ -115,16 +115,16 @@ All omitted entries are zero. These conventions determine the real [`Fsymbol`](@
 `values(CU1Irrep)` is infinite.
 It starts with the two zero-charge irreps and then lists positive half-integer charges:
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> using TensorKitSectors
 
-values(CU1Irrep)[1]
+julia> values(CU1Irrep)[1]
 Irrep[CU₁](0, 0)
 
-values(CU1Irrep)[2]
+julia> values(CU1Irrep)[2]
 Irrep[CU₁](0, 1)
 
-values(CU1Irrep)[5]
+julia> values(CU1Irrep)[5]
 Irrep[CU₁](3/2, 2)
 ```
 
