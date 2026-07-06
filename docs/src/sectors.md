@@ -14,7 +14,7 @@ This page provides an overview of the concrete sector types implemented in Tenso
 | [`CU1Irrep`](@ref)       | Rep[U₁ ⋊ ℤ₂]                       | Simple       | Bosonic   | Yes       | Particle-hole symmetry, O(2)                               |
 | [`DNIrrep`](@ref)        | Rep[Dₙ]                   | Simple       | Bosonic   | No        | Molecular/crystal symmetries                               |
 | [`A4Irrep`](@ref)        | Rep[A₄]                | Generic      | Bosonic   | No        | Tetrahedral symmetry                                       |
-| [`HeisenbergIrrep`](@ref)| Rep[H_N]  | Generic      | Anyonic   | No        | Chern-Simons theory, quantum computing              |
+| [`HeisenbergIrrep`](@ref)| Rep[H_N]  | Generic      | Bosonic   | No        | Weyl-Heisenberg symmetry, projective representations |
 | [`FibonacciAnyon`](@ref) | Fibonacci category              | Simple       | Anyonic   | No        | Topological quantum computing                              |
 | [`IsingAnyon`](@ref)     | Ising category                  | Simple       | Anyonic   | No        | Majorana fermions, ν=5/2 QHE                               |
 | [`FermionParity`](@ref)  | fℤ₂                             | Unique       | Fermionic | No        | Fermion parity conservation                                |
