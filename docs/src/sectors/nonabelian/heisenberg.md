@@ -52,7 +52,7 @@ N \cdot \pi_{(k+k') \bmod N}, & k + k' \not\equiv 0 \pmod N, \\[4pt]
 \end{cases}
 ```
 
-In the first case the ``N``-fold multiplicity accounts for the dimension count ``N \times N = N \times N`` (``N`` copies of the ``N``-dimensional ``\pi_{(k+k')\bmod N}``); in the second, the ``N^2``-dimensional product decomposes into all ``N^2`` one-dimensional characters, each with multiplicity one.
+In the first case the ``N``-fold multiplicity accounts for the dimension count ``N \times N = N^2`` (``N`` copies of the ``N``-dimensional ``\pi_{(k+k')\bmod N}``); in the second, the ``N^2``-dimensional product decomposes into all ``N^2`` one-dimensional characters, each with multiplicity one.
 
 Because of this multiplicity-``N`` channel, `FusionStyle(HeisenbergIrrep) = GenericFusion()`.
 The [`Nsymbol`](@ref) returns the corresponding integer multiplicities directly from the case distinction above.
