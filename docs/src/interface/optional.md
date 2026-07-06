@@ -29,13 +29,14 @@ invsqrtdim
 ## Frobenius-Schur Indicators
 
 The Frobenius-Schur indicator and phase characterize the self-duality properties of sectors.
+The Frobenius-Schur phase ``\kappa_a`` is obtained from the F-symbol as
 
 ```math
 \kappa_a = \text{sign}\left( (F_{a \bar{a} a}^a)^{1_a}_{_a1} \right)
 ```
 
-The indicator distinguishes real, complex, and quaternionic representations.
-The phase is the category-theoretic version that appears in line bending operations.
+and is the category-theoretic quantity that appears in line-bending operations.
+The Frobenius-Schur indicator ``\nu_a`` coincides with ``\kappa_a`` for self-dual sectors (``a = \bar{a}``) and is ``0`` otherwise; it distinguishes real, complex, and quaternionic representations.
 
 ```@docs; canonical = false
 frobenius_schur_indicator
