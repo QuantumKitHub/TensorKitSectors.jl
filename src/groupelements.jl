@@ -100,7 +100,7 @@ to the constructor, but only the value `mod(n, N)` is relevant. The second type 
 is then being given by
 
 ```julia
-cocycle(a, b, c) = cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N))
+cocycle(a, b, c) = cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2))
 ```
 
 If `p` is not specified, it defaults to `0`, i.e. the trivial cocycle.
