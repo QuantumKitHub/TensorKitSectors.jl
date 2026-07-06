@@ -3,7 +3,7 @@
 ## Introduction
 
 A `Sector` is a label for the different *symmetry charges* or *quantum numbers* that organize graded vector spaces.
-In particular, these are the labels use to decompose vector spaces as:
+In particular, these are the labels used to decompose vector spaces as:
 
 ```math
 V = \bigoplus_{a \in \text{Sectors}} \mathbb{C}^{n_a} \otimes V_a
