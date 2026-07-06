@@ -13,7 +13,7 @@ A sector type `I <: Sector` represents the set of all labels that can be used to
 This corresponds to all irreducible representations of a group, or all simple objects in a fusion category.
 The first requirement is making this set **enumerable** through the iterator interface.
 
-The set of all sector values is obtained via `values(I)`, which returns a `SectorValues{I}()` singleton type by default.
+The set of all sector values is obtained via `values(I)`, which returns a `SectorValues{I}()` singleton.
 This `SectorValues{I}()` must be iterable, enabling enumeration of all sectors of type `I`.
 To do so, one needs to implement the [Iteration interface](https://docs.julialang.org/en/v1/manual/interfaces/#man-interface-iteration).
 In particular, we require the following methods to be defined:
