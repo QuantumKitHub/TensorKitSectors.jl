@@ -38,6 +38,7 @@ makedocs(;
                 "CU₁" => "sectors/nonabelian/cu1.md",
                 "Dₙ (Dihedral)" => "sectors/nonabelian/dn.md",
                 "A₄ (Alternating)" => "sectors/nonabelian/a4.md",
+                "Heisenberg" => "sectors/nonabelian/heisenberg.md",
             ],
             "Anyonic Sectors" => [
                 "PlanarTrivial" => "sectors/anyons/planartrivial.md",
@@ -48,6 +49,9 @@ makedocs(;
                 "Fermion Parity" => "sectors/fermions/parity.md",
                 "Fermion Number" => "sectors/fermions/number.md",
                 "Fermion Spin" => "sectors/fermions/spin.md",
+            ],
+            "Group Sectors" => [
+                "ℤₙ (Cyclic)" => "sectors/groupelement/znelement.md",
             ],
             "Composite Sectors" => [
                 "Product" => "sectors/composite/product.md",
