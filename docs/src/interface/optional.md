@@ -63,7 +63,7 @@ The A-symbol and B-symbol relate different ways of bending strands, while the tw
 
 The A-symbol ``A^{ab}_c`` relates splitting and fusion vertices:
 ```math
-A^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} \overline{\kappa_a} (F_{\bar{a} a b}^b)^1_c
+A^{ab}_c = \sqrt{\frac{d_a d_b}{d_c}} \, \overline{\kappa_a (F_{\bar{a} a b}^b)^1_c}
 ```
 
 The B-symbol ``B^{ab}_c`` relates splitting and fusion vertices:
