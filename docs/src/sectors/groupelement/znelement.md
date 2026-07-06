@@ -89,6 +89,7 @@ a, b = Z3Element(1), Z3Element(2)
 only(a ⊗ b) == unit(typeof(a))
 
 # output
+true
 ```
 
 ```jldoctest znelement_consistency
@@ -96,6 +97,7 @@ I = Z4Element{2} # 2p == N, so this admits a braiding
 BraidingStyle(I)
 
 # output
+Anyonic()
 ```
 
 ## References
