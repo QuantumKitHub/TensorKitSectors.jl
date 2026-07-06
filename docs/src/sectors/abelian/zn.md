@@ -26,7 +26,7 @@ The category has `FusionStyle(ZNIrrep{N}) = UniqueFusion()`.
 
 ## Topological Data
 
-All quantum dimensions are `1`, as well as all twist.
+All quantum dimensions are `1`, as well as all twists.
 F-symbols, R-symbols and fusion tensors are trivial in allowed channels.
 The braiding style is `Bosonic()`.
 
