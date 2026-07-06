@@ -1,6 +1,6 @@
 # Dihedral Group Representations: `DNIrrep`
 
-`DNIrrep{N}` represents irreducible representations of the dihedral group ``D_N = \mathbb{Z}_N ⋊ C``.
+`DNIrrep{N}` represents irreducible representations of the dihedral group ``D_N = ℤ_N ⋊ C``.
 The aliases `D3Irrep` and `D4Irrep` are provided for `DNIrrep{3}` and `DNIrrep{4}`.
 
 ## Sector type
@@ -16,13 +16,13 @@ The `isodd` flag is valid only for one-dimensional irreps: always at `j == 0`, a
 For odd `N`, the labels are
 
 ```math
-(0,\text{false}),\ (0,\text{true}),\ 1,2,\ldots,(\frac{N-1}{2},\text{false}).
+(0,\text{false}),\ (0,\text{true}),\ 1,2,…,(\frac{N-1}{2},\text{false}).
 ```
 
 For even `N`, the labels are
 
 ```math
-(0,\text{false}),\ (0,\text{true}),\ 1,2,\ldots,\frac{N}{2}-1,\ (N/2,\text{false}),\ (N/2,\text{true}).
+(0,\text{false}),\ (0,\text{true}),\ 1,2,…,\frac{N}{2}-1,\ (N/2,\text{false}),\ (N/2,\text{true}).
 ```
 
 The unit is `DNIrrep{N}(0, false)`, and all irreps are self-dual.
@@ -35,7 +35,7 @@ The fusion product of a one-dimensional irrep with a two-dimensional irrep prese
 For ordinary two-dimensional labels, fusion follows the dihedral character rule:
 
 ```math
-\rho_i \otimes \rho_j = \rho_{|i-j|} \oplus \rho_{i+j},
+ρ_i ⊗ ρ_j = ρ_{|i-j|} ⊕ ρ_{i+j},
 ```
 
 where labels are folded back into the range `0:N÷2`.
@@ -47,8 +47,8 @@ Otherwise, `FusionStyle(DNIrrep{N}) = SimpleFusion()`.
 Quantum dimensions are
 
 ```math
-d_{(0,\pm)} = 1,\qquad d_{\rho_j} = 2,\qquad
-d_{(N/2,\pm)} = 1\quad (N \text{ even}).
+d_{(0,±)} = 1,\qquad d_{ρ_j} = 2,\qquad
+d_{(N/2,±)} = 1\quad (N \text{ even}).
 ```
 
 ## Topological Data
@@ -59,7 +59,7 @@ The [`Rsymbol`](@ref) equals the N-symbol, up to a sign of ``-1`` on the ``(0,-)
 
 ## Fusion Tensor and Basis Conventions
 
-`fusiontensor(a, b, c)` returns a rank-4 array of size ``d_a \times d_b \times d_c \times N_c^{ab}``.
+`fusiontensor(a, b, c)` returns a rank-4 array of size ``d_a × d_b × d_c × N_c^{ab}``.
 The implementation uses real Clebsch-Gordan coefficients.
 #TODO: source for the convention used here
 

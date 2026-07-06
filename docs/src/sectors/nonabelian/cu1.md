@@ -21,8 +21,8 @@ Fusing either one-dimensional irrep with a two-dimensional irrep returns the sam
 For two positive charges, the outputs are governed by sum and absolute difference:
 
 ```math
-j_1 \otimes j_2 =
-|j_1-j_2| \oplus (j_1+j_2),
+j_1 ⊗ j_2 =
+|j_1-j_2| ⊕ (j_1+j_2),
 ```
 
 with the special case `j1 == j2`, where the zero-charge difference splits into the two one-dimensional irreps.
@@ -42,7 +42,7 @@ The [`Rsymbol`](@ref) is real and equals the N-symbol, with an additional negati
 
 ## Fusion Tensor and Basis Conventions
 
-`fusiontensor(a, b, c)` returns a rank-4 array of size ``d_a \times d_b \times d_c \times N_c^{ab}``.
+`fusiontensor(a, b, c)` returns a rank-4 array of size ``d_a × d_b × d_c × N_c^{ab}``.
 Since `CU1Irrep` has simple fusion, the final multiplicity axis has length `0` or `1`.
 For allowed channels, the tensor entries are real Clebsch-Gordan coefficients in the convention explained below.
 
@@ -58,19 +58,19 @@ When two equal positive-charge irreps fuse to a zero-charge irrep, the fusion te
 
 ```math
 \ket{(0,0)} =
-\frac{1}{\sqrt{2}}\left(\ket{+j}\otimes\ket{-j} + \ket{-j}\otimes\ket{+j}\right),
+\frac{1}{\sqrt{2}}\left(\ket{+j}⊗\ket{-j} + \ket{-j}⊗\ket{+j}\right),
 ```
 
 ```math
 \ket{(0,1)} =
-\frac{1}{\sqrt{2}}\left(\ket{+j}\otimes\ket{-j} - \ket{-j}\otimes\ket{+j}\right).
+\frac{1}{\sqrt{2}}\left(\ket{+j}⊗\ket{-j} - \ket{-j}⊗\ket{+j}\right).
 ```
 
 In array form, these are the entries
 
 ```math
 C_{1,2,1} = \frac{1}{\sqrt{2}},\qquad
-C_{2,1,1} = \pm\frac{1}{\sqrt{2}},
+C_{2,1,1} = ±\frac{1}{\sqrt{2}},
 ```
 
 with the plus sign for `(0, 0)` and the minus sign for `(0, 1)`.
@@ -79,9 +79,9 @@ Fusing a zero-charge irrep with a two-dimensional irrep leaves the charge label 
 The odd zero-charge irrep contributes a sign on the second basis vector:
 
 ```math
-(0,s) \otimes (j,2) \to (j,2):\qquad
-\ket{+j}\mapsto\ket{+j},\quad
-\ket{-j}\mapsto (-1)^s\ket{-j}.
+(0,s) ⊗ (j,2) → (j,2):\qquad
+\ket{+j}↦\ket{+j},\quad
+\ket{-j}↦ (-1)^s\ket{-j}.
 ```
 
 The same convention is used for `(j,2) ⊗ (0,s)`, with the sign attached to the second basis vector of the two-dimensional input.
@@ -89,23 +89,23 @@ The same convention is used for `(j,2) ⊗ (0,s)`, with the sign attached to the
 For two positive charges, the sum channel is diagonal:
 
 ```math
-(j_a,2)\otimes(j_b,2)\to(j_a+j_b,2):\qquad
-\ket{+j_a,+j_b}\mapsto\ket{+(j_a+j_b)},\quad
-\ket{-j_a,-j_b}\mapsto\ket{-(j_a+j_b)}.
+(j_a,2)⊗(j_b,2)→(j_a+j_b,2):\qquad
+\ket{+j_a,+j_b}↦\ket{+(j_a+j_b)},\quad
+\ket{-j_a,-j_b}↦\ket{-(j_a+j_b)}.
 ```
 
 The difference channel pairs opposite weights. If `j_a > j_b`,
 
 ```math
-\ket{+j_a,-j_b}\mapsto\ket{+(j_a-j_b)},\qquad
-\ket{-j_a,+j_b}\mapsto\ket{-(j_a-j_b)}.
+\ket{+j_a,-j_b}↦\ket{+(j_a-j_b)},\qquad
+\ket{-j_a,+j_b}↦\ket{-(j_a-j_b)}.
 ```
 
 If `j_b > j_a`, the output basis is ordered by the positive charge `j_b - j_a`, so the two nonzero entries are swapped accordingly:
 
 ```math
-\ket{-j_a,+j_b}\mapsto\ket{+(j_b-j_a)},\qquad
-\ket{+j_a,-j_b}\mapsto\ket{-(j_b-j_a)}.
+\ket{-j_a,+j_b}↦\ket{+(j_b-j_a)},\qquad
+\ket{+j_a,-j_b}↦\ket{-(j_b-j_a)}.
 ```
 
 All omitted entries are zero. These conventions determine the real [`Fsymbol`](@ref) values.

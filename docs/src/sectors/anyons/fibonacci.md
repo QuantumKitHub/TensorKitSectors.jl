@@ -16,37 +16,37 @@ Both sectors are self-dual, and the unit is `FibonacciAnyon(:I)`.
 The only non-trivial fusion rule is
 
 ```math
-\tau \otimes \tau = I \oplus \tau.
+τ ⊗ τ = I ⊕ τ.
 ```
 
 Thus `FusionStyle(FibonacciAnyon) = SimpleFusion()`.
 The quantum dimensions are
 
 ```math
-d_I = 1,\qquad d_\tau = \varphi = \frac{1 + \sqrt{5}}{2}.
+d_I = 1,\qquad d_τ = φ = \frac{1 + \sqrt{5}}{2}.
 ```
 
 ## Topological Data
 
-The non-trivial associator appears when all external anyons are ``\tau``:
+The non-trivial associator appears when all external anyons are ``τ``:
 
 ```math
-F^{\tau\tau\tau}_{\tau} =
+F^{τττ}_{τ} =
 \begin{pmatrix}
-\varphi^{-1} & \varphi^{-1/2}\\
-\varphi^{-1/2} & -\varphi^{-1}
+φ^{-1} & φ^{-1/2}\\
+φ^{-1/2} & -φ^{-1}
 \end{pmatrix},
 ```
 
-in the intermediate basis ``(I,\tau)``.
+in the intermediate basis ``(I,τ)``.
 All other allowed `Fsymbol` values are `1`.
 
 The braiding style is `Anyonic()`.
-For ``\tau \otimes \tau``,
+For ``τ ⊗ τ``,
 
 ```math
-R^{\tau\tau}_I = e^{4\pi i/5},\qquad
-R^{\tau\tau}_\tau = e^{-3\pi i/5}.
+R^{ττ}_I = e^{4π i/5},\qquad
+R^{ττ}_τ = e^{-3π i/5}.
 ```
 
 There is no fusion tensor as the fusion category does not originate from a group or its representations.

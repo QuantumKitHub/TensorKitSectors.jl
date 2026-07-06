@@ -48,15 +48,15 @@ Fusion is componentwise.
 For product sectors
 
 ```math
-a = (a_1,\ldots,a_n),\qquad b = (b_1,\ldots,b_n),
+a = (a_1,…,a_n),\qquad b = (b_1,…,b_n),
 ```
 
 the fusion outputs are
 
 ```math
-a \otimes b = 
-\bigoplus_{c_i \in a_i \otimes b_i} N^{ab}_c
-(c_1,\ldots,c_n).
+a ⊗ b = 
+\bigoplus_{c_i ∈ a_i ⊗ b_i} N^{ab}_c
+(c_1,…,c_n).
 ```
 
 The fusion multiplicities multiply:
@@ -71,8 +71,8 @@ In particular, a product of unique-fusion sectors remains unique, while adding a
 Duals, units, and quantum dimensions are also componentwise:
 
 ```math
-(a_1,\ldots,a_n)^* = (a_1^*,\ldots,a_n^*),\qquad
-d_{(a_1,\ldots,a_n)} = \prod_i d_{a_i}.
+(a_1,…,a_n)^* = (a_1^*,…,a_n^*),\qquad
+d_{(a_1,…,a_n)} = \prod_i d_{a_i}.
 ```
 
 If a component category has multiple units, `allunits` returns the product of the component unit sets.

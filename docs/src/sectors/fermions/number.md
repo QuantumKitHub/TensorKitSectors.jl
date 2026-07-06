@@ -13,7 +13,7 @@ Construct `FermionNumber(n)` from an integer charge `n`.
 The underlying product label is
 
 ```math
-n \mapsto (U(1)\text{ charge } n,\; n \bmod 2).
+n ↦ (U(1)\text{ charge } n,\; n \bmod 2).
 ```
 
 The unit is `FermionNumber(0)`, and duality negates the ``U(1)`` charge while preserving the parity constraint.
@@ -23,7 +23,7 @@ The unit is `FermionNumber(0)`, and duality negates the ``U(1)`` charge while pr
 Fusion adds charges:
 
 ```math
-n_1 \otimes n_2 = n_1 + n_2.
+n_1 ⊗ n_2 = n_1 + n_2.
 ```
 
 The fermion parity component is then fixed automatically by the resulting charge.

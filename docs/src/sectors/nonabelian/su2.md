@@ -14,14 +14,14 @@ SU2Irrep
 Fusing two irreps together leads to a direct sum of irreps:
 
 ```math
-a \otimes b = \bigoplus_{c_j = |j_a - j_b|}^{j_a + j_b} c
+a ⊗ b = \bigoplus_{c_j = |j_a - j_b|}^{j_a + j_b} c
 ```
 
 Since each output appears only once, we have `FusionStyle(SU2Irrep) = SimpleFusion()`.
 The [`Nsymbol`](@ref) returns a `Bool` that checks the triangle inequality:
 
 ```math
-N_c^{ab} = |j_a - j_b| \leq j_c \leq j_a + j_b \land j_a + j_b + j_c \in \mathbb{N}
+N_c^{ab} = |j_a - j_b| ≤ j_c ≤ j_a + j_b ∧ j_a + j_b + j_c ∈ ℕ
 ```
 
 Each irrep has dimension ``d = 2j + 1``.
@@ -35,19 +35,19 @@ j_c & j_d & j_f
 \end{Bmatrix}
 ```
 
-The `BraidingStyle` is `Bosonic`, and [`Rsymbol`](@ref) is ``\pm 1`` for allowed fusion channels based on the parity of ``j_a + j_b - j_c``.
+The `BraidingStyle` is `Bosonic`, and [`Rsymbol`](@ref) is ``± 1`` for allowed fusion channels based on the parity of ``j_a + j_b - j_c``.
 
 ## Fusion Tensor and Basis Conventions
 
-`fusiontensor(a, b, c)` returns Clebsch–Gordan coefficients as a rank‑4 array of size ``d_a \times d_b \times d_c \times 1``.
-We can label the basis by using ``\ket{j, m}``, where the magnetic quantum number takes on values ``m \in \{j, j-1, \ldots, -j\}`` (in that order).
+`fusiontensor(a, b, c)` returns Clebsch–Gordan coefficients as a rank‑4 array of size ``d_a × d_b × d_c × 1``.
+We can label the basis by using ``\ket{j, m}``, where the magnetic quantum number takes on values ``m ∈ \{j, j-1, …, -j\}`` (in that order).
 
-Each irrep acts on the standard basis $\lvert j, m \rangle$ where $m = j, j-1, \dots, -j$.
+Each irrep acts on the standard basis $\lvert j, m \rangle$ where $m = j, j-1, …, -j$.
 In that basis, the generators of ``\mathfrak{su}(2)`` are represented by the usual angular momentum operators:
 
 ```math
 J_z \lvert j, m \rangle = m \lvert j, m \rangle, \quad
-J_\pm \lvert j, m \rangle = \sqrt{(j \mp m)(j \pm m + 1)}\, \lvert j, m \pm 1 \rangle.
+J_± \lvert j, m \rangle = \sqrt{(j ∓ m)(j ± m + 1)}\, \lvert j, m ± 1 \rangle.
 ```
 
 ```jldoctest generators; output = false
@@ -79,24 +79,24 @@ Jp, Jm, Jz = generators(a)
 ([0.0 1.4142135623730951 0.0; 0.0 0.0 1.4142135623730951; 0.0 0.0 0.0], [0.0 0.0 0.0; 1.4142135623730951 0.0 0.0; 0.0 1.4142135623730951 0.0], [1.0 0.0 0.0; 0.0 0.0 0.0; 0.0 0.0 -1.0])
 ```
 
-The tensor product representation for ``a \otimes b`` is given in terms of the representations ``a`` and ``b`` as:
+The tensor product representation for ``a ⊗ b`` is given in terms of the representations ``a`` and ``b`` as:
 
 ```math
-\mathbf{J}^{(a \otimes b)} = \mathbf{J}^{(a)} \otimes \mathbf{1}^{(b)} + \mathbf{1}^{(a)} \otimes \mathbf{J}^{(b)}
+\mathbf{J}^{(a ⊗ b)} = \mathbf{J}^{(a)} ⊗ \mathbf{1}^{(b)} + \mathbf{1}^{(a)} ⊗ \mathbf{J}^{(b)}
 ```
 
 The [`fusiontensor`](@ref) supplies the change‑of‑basis coefficients ``C^{J M}_{j_a m_a, j_b m_b}`` that map the uncoupled product basis to the coupled basis:
 
 ```math
 \lvert J, M \rangle = \sum_{m_a, m_b} C^{J M}_{j_a m_a, j_b m_b}
-\lvert j_a, m_a \rangle \otimes \lvert j_b, m_b \rangle.
+\lvert j_a, m_a \rangle ⊗ \lvert j_b, m_b \rangle.
 ```
 
 In particular, this block-diagonalizes the generators, and we must have that for every ``\mathbf{J}``, the following holds:
 
 ```math
-\left(\mathbf{J}^{(a)} \otimes \mathbf{1}^{(b)} + \mathbf{1}^{(a)} \otimes \mathbf{J}^{(b)}\right) \cdot C^c_{ab} =
-    C^c_{ab} \cdot \mathbf{J}^{(c)}
+\left(\mathbf{J}^{(a)} ⊗ \mathbf{1}^{(b)} + \mathbf{1}^{(a)} ⊗ \mathbf{J}^{(b)}\right) ⋅ C^c_{ab} =
+    C^c_{ab} ⋅ \mathbf{J}^{(c)}
 ```
 
 ```jldoctest generators; output = false

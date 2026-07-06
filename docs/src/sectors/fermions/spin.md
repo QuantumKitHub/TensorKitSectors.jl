@@ -13,7 +13,7 @@ Construct `FermionSpin(j)` from an integer or half-integer spin.
 The parity is odd exactly when `2j` is odd:
 
 ```math
-j \mapsto (SU(2)\text{ spin }j,\; 2j \bmod 2).
+j ↦ (SU(2)\text{ spin }j,\; 2j \bmod 2).
 ```
 
 The unit is `FermionSpin(0)`, and all sectors are self-dual because the ``SU(2)`` irreps and parity sectors are self-dual.
@@ -23,7 +23,7 @@ The unit is `FermionSpin(0)`, and all sectors are self-dual because the ``SU(2)`
 The ``SU(2)`` component fuses by angular-momentum addition:
 
 ```math
-j_1 \otimes j_2 =
+j_1 ⊗ j_2 =
 \bigoplus_{j = |j_1-j_2|}^{j_1+j_2} j.
 ```
 

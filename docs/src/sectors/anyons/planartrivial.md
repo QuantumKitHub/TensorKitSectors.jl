@@ -17,7 +17,7 @@ It is its own unit and dual.
 Fusion is uniquely trivial:
 
 ```math
-1 \otimes 1 = 1.
+1 ⊗ 1 = 1.
 ```
 
 `FusionStyle(PlanarTrivial) = UniqueFusion()` and `Nsymbol` is `1` for the only allowed channel.

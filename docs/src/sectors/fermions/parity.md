@@ -18,7 +18,7 @@ The unit is even parity, and every sector is self-dual.
 Fusion is addition modulo two:
 
 ```math
-p \otimes q = p \oplus q.
+p ⊗ q = p ⊕ q.
 ```
 
 The category has `FusionStyle(FermionParity) = UniqueFusion()`.
@@ -37,7 +37,7 @@ R^{11}_0 = -1.
 The twists are
 
 ```math
-\theta_0 = 1,\qquad \theta_1 = -1.
+θ_0 = 1,\qquad θ_1 = -1.
 ```
 
 `fusiontensor` is defined for array construction, but it emits a warning because plain arrays with `FermionParity` labels do not preserve all fermionic signs.

@@ -22,7 +22,7 @@ Trivial()
 Fusion is uniquely trivial:
 
 ```math
-1 \otimes 1 = 1.
+1 ⊗ 1 = 1.
 ```
 
 Therefore `FusionStyle(Trivial) = UniqueFusion()` and `Nsymbol(Trivial(), Trivial(), Trivial()) == true`.

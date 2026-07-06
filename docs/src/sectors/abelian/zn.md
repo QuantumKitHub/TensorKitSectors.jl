@@ -1,11 +1,11 @@
 # Cyclic Group Representations: `ZNIrrep`
 
-`ZNIrrep{N}` and `LargeZNIrrep{N}` represent irreducible representations of the cyclic group ``\mathbb{Z}_N``.
+`ZNIrrep{N}` and `LargeZNIrrep{N}` represent irreducible representations of the cyclic group ``ℤ_N``.
 Use `ZNIrrep{N}` when possible; it selects the compact storage type automatically.
 
 !!! note
-    `ZNIrrep{N}` grades a space by the *irreps* of ``\mathbb{Z}_N`` (the `Rep[ℤₙ]` category).
-    To instead grade by the *group elements* of ``\mathbb{Z}_N`` (the `Vec[ℤₙ]` category, which also supports discrete torsion), see [`ZNElement`](@ref).
+    `ZNIrrep{N}` grades a space by the *irreps* of ``ℤ_N`` (the `Rep[ℤₙ]` category).
+    To instead grade by the *group elements* of ``ℤ_N`` (the `Vec[ℤₙ]` category, which also supports discrete torsion), see [`ZNElement`](@ref).
 
 ## Sector types
 
@@ -23,7 +23,7 @@ Labels are charges modulo `N`.
 The unit is charge `0`, duality negates the charge modulo `N`, and fusion adds charges:
 
 ```math
-a \otimes b = (a + b) \bmod N,\qquad a^* = -a \bmod N.
+a ⊗ b = (a + b) \bmod N,\qquad a^* = -a \bmod N.
 ```
 
 The category has `FusionStyle(ZNIrrep{N}) = UniqueFusion()`.

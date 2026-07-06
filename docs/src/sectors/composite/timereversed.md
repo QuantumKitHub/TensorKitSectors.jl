@@ -49,15 +49,15 @@ R_{\overline{c}}^{\overline{a}\,\overline{b}}
 For scalar braiding phases this is complex conjugation, so anyonic spins change sign:
 
 ```math
-\theta_{\overline{a}} = \overline{\theta_a}.
+θ_{\overline{a}} = \overline{θ_a}.
 ```
 
 For example, in the conventions of this package,
 
 ```math
-\theta_\sigma = e^{\pi i/8}
-\quad\Longrightarrow\quad
-\theta_{\overline{\sigma}} = e^{-\pi i/8}
+θ_σ = e^{π i/8}
+\quad⟹\quad
+θ_{\overline{σ}} = e^{-π i/8}
 ```
 
 for the Ising `σ` anyon.
