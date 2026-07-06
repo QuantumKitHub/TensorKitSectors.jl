@@ -24,6 +24,13 @@ This page provides an overview of the concrete sector types implemented in Tenso
 | [`NamedSector`](@ref)    | Product categories              | Varies       | Varies    | Varies    | Product sectors with name-accessible components            |
 | [`TimeReversed`](@ref)   | Inverted braiding               | Varies       | Varies    | Varies    | Time-reversal or other orientation-reversing symmetries    |
 
+## Multifusion categories
+
+Beyond fusion categories (with a unique simple unit), TensorKitSectors.jl also supports *multifusion* categories, whose unit is semisimple.
+These are signalled by `UnitStyle(I) === GenericUnit()` and require the additional `allunits`, `leftunit`, and `rightunit` methods.
+The exported [`IsingBimodule`](@ref) is a minimal worked example: the Ising category reinterpreted as a bimodule category over two copies of `Irrep[ℤ₂]`.
+It is intended as a reference implementation illustrating how to build such categories, rather than as a general-purpose sector, so it is not listed in the summary table above.
+
 ## Other packages
 
 TensorKitSectors.jl provides the architecture for implementing new sector types, but does not implement all possible sectors. Other packages which implement additional sector types and their topological data include:
