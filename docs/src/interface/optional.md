@@ -4,7 +4,8 @@ CollapsedDocStrings = true
 
 # Optional Methods
 
-The following methods have default implementations but can be overridden for performance or to provide additional functionality.
+Most of the following methods have default implementations derived from the required methods, but can be overridden for performance or to provide additional functionality.
+The exception is [`fusiontensor`](@ref), which has no default: it is genuinely optional and, when needed, must be supplied explicitly (see the Fusion Basis section below).
 
 ## Quantum Dimensions
 
