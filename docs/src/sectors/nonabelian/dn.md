@@ -55,7 +55,7 @@ d_{(N/2,\pm)} = 1\quad (N \text{ even}).
 
 `DNIrrep{N}` is a bosonic representation category, so all twists are `1`.
 The [`Fsymbol`](@ref) is computed from the selected [`fusiontensor`](@ref) basis.
-The [`Rsymbol`](@ref) is the N-symbol with a possible sign on odd one-dimensional output channels from two non-trivial two-dimensional inputs.
+The [`Rsymbol`](@ref) equals the N-symbol, up to a sign of ``-1`` on the ``(0,-)`` odd one-dimensional output channel produced by fusing two two-dimensional irreps.
 
 ## Fusion tensor and basis conventions
 
