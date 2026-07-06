@@ -72,7 +72,7 @@ Braiding is only defined in two cases:
   R^{ab}_{a+b} = \exp\left(\frac{2\pi i\, p\, a\, b}{N^2}\right),
   ```
 
-  giving abelian braiding statistics for the ``\mathbb{Z}_N`` charges (e.g. `N = 4, p = 2` reproduces semion-like statistics).
+  giving abelian anyonic braiding statistics for the ``\mathbb{Z}_N`` charges. For example, `N = 4, p = 2` (used in the example below) yields topological spins ``\theta_a = \exp(i\pi a^2 / 4)``.
 
 For any other value of `p`, `BraidingStyle(ZNElement{N,p}) = NoBraiding()`.
 
