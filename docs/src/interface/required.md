@@ -22,11 +22,12 @@ In particular, we require the following methods to be defined:
 - `Base.IteratorSize(::Type{SectorValues{I}})` — Specify whether the number of sector values is known, finite, or infinite.
 
 Here the `IteratorSize` is either `HasLength()`, `SizeUnknown()` or `IsInfinite()`.
-If the length is known (`HasLength()`), three further methods are required so that sectors can be indexed by position:
+If the length is known (`HasLength()`), sectors can be indexed by position.
+This requires `Base.length`, while `Base.getindex` and `findindex` have generic fallbacks that are typically overridden for performance:
 
-- `Base.length(::SectorValues{I})` — Return the number of sectors.
-- `Base.getindex(::SectorValues{I}, i::Int)` — Access the `i`-th sector value.
-- `findindex(::SectorValues{I}, c::I)` — Find the index of sector `c`.
+- `Base.length(::SectorValues{I})` — Return the number of sectors. **(required for `HasLength()`)**
+- `Base.getindex(::SectorValues{I}, i::Int)` — Access the `i`-th sector value. A fallback linearly iterates the values.
+- `findindex(::SectorValues{I}, c::I)` — Find the index of sector `c`. A fallback linearly searches the values.
 
 !!! note
     The choice of `IteratorSize` determines how associative containers are constructed in e.g. a `GradedSpace`.
