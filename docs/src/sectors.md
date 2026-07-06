@@ -7,7 +7,7 @@ This page provides an overview of the concrete sector types implemented in Tenso
 | Sector Type              | Group/Category                | Fusion Style | Braiding  | Infinite? | Common Use Cases                                          |
 |--------------------------|--------------------------------|--------------|-----------|-----------|-------------------------------------------------------------|
 | [`Trivial`](@ref)        | Trivial group                  | Unique       | Bosonic   | No        | No symmetry                                                |
-| [`ZNIrrep`](@ref)        | Rep(ℤₙ)               | Unique       | Bosonic   | No        | Clock models, discrete symmetries                          |
+| [`ZNIrrep`](@ref)        | Rep[ℤₙ]               | Unique       | Bosonic   | No        | Clock models, discrete symmetries                          |
 | [`ZNElement`](@ref)      | Vec[ℤₙ]  | Unique       | Varies    | No        | Group-graded categories, discrete torsion  |
 | [`U1Irrep`](@ref)        | Rep[U₁]                            | Unique       | Bosonic   | Yes       | Particle number, charge conservation                       |
 | [`SU2Irrep`](@ref)       | Rep[SU₂]                           | Simple       | Bosonic   | Yes       | Spin systems, angular momentum                             |
