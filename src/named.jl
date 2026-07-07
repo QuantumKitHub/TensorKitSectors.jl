@@ -23,7 +23,7 @@ julia> s.spin
 ```
 
 !!! warning
-    The sectors are stored internally in the `s.sectors` field, so the named components should not contain the `sectors` as a name.
+    The sectors are stored internally in the `s.sectors` field, so the named components should not contain `sectors` as a name.
 """
 struct NamedSector{NT <: NamedSectorTuple} <: Sector
     sectors::NT

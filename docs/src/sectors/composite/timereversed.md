@@ -39,11 +39,10 @@ d_{\overline{a}} = d_a,\qquad
 ## Topological Data
 
 The [`Fsymbol`](@ref), [`Asymbol`](@ref), and [`Bsymbol`](@ref) are inherited directly from the original sector.
-The [`Rsymbol`](@ref) is adjointed:
+The [`Rsymbol`](@ref) is replaced by its adjoint:
 
 ```math
-R_{\overline{c}}^{\overline{a}\,\overline{b}}
-= \left(R_c^{ab}\right)^\dagger.
+R_{\overline{c}}^{\overline{a}\,\overline{b}} = \left(R_c^{ab}\right)^\dagger.
 ```
 
 For scalar braiding phases this is complex conjugation, so anyonic spins change sign:

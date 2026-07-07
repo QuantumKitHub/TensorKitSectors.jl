@@ -16,19 +16,21 @@ overridden by a concrete implementation of `AbstractGroupElement`.
 
 For the fusion structure, a specific `SomeGroupElement <: AbstractGroupElement{SomeGroup}`
 should only implement the following methods
+
 ```julia
-Base.:*(c1::GroupElement, c2::GroupElement) -> GroupElement
-Base.one(::Type{GroupElement}) -> GroupElement
-Base.inv(c::GroupElement) -> GroupElement
+Base.:*(c1::SomeGroupElement, c2::SomeGroupElement) -> SomeGroupElement
+Base.one(::Type{SomeGroupElement}) -> SomeGroupElement
+Base.inv(c::SomeGroupElement) -> SomeGroupElement
 # and optionally
-TensorKitSectors.cocycle(c1::GroupElement, c2::GroupElement, c3::GroupElement) -> Number
+TensorKitSectors.cocycle(c1::SomeGroupElement, c2::SomeGroupElement, c3::SomeGroupElement) -> Number
 ```
+
 The methods `conj`, `dual`, `⊗`, `Nsymbol`, `Fsymbol`, `dim`, `Asymbol`, `Bsymbol` and
 `frobenius_schur_phase` will then be automatically defined. If no `cocycle` method is defined,
 the cocycle will be assumed to be trivial, i.e. equal to `1`.
-
 """
 abstract type AbstractGroupElement{G <: Group} <: Sector end
+
 FusionStyle(::Type{<:AbstractGroupElement}) = UniqueFusion()
 BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
 
