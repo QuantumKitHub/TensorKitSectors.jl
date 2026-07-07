@@ -11,9 +11,7 @@ As a fusion category, this is identified with ``\text{Vec}_{ℤ_N}^{ω_p}``, the
 AbstractGroupElement
 ```
 
-`ZNElement{N,p}` is currently the only concrete subtype of `AbstractGroupElement{Group}`. Any concrete `G <: AbstractGroupElement{Group}` only needs to implement `Base.:*`, `Base.one`, `Base.inv`, and optionally `TensorKitSectors.cocycle`; the fusion category structure (`⊗`, `dual`, `unit`, `Nsymbol`, `Fsymbol`, `dim`, `Asymbol`, `Bsymbol`, `frobenius_schur_phase`) follows automatically.
-`FusionStyle(AbstractGroupElement) = UniqueFusion()` always, and `BraidingStyle(AbstractGroupElement) = NoBraiding()` by default, though a concrete type is free to override this (as `ZNElement` does, see below).
-If no `cocycle` method is defined, it defaults to the trivial one.
+`ZNElement{N,p}` is currently the only concrete subtype of `AbstractGroupElement{Group}`.
 
 ## Sector type
 

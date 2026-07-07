@@ -108,9 +108,9 @@ b = SU2Irrep(1)
 
 for c in a ⊗ b
     CGC = dropdims(fusiontensor(a, b, c); dims = 4) # drop trivial multiplicity dimension
-    for (ga, gb, gc) in zip(generators(a), generators(b), generators(c))
-        @tensor lhs[a b; c] := ga[a; a'] * CGC[a' b; c] + gb[b; b'] * CGC[a b'; c]
-        @tensor rhs[a b; c] := CGC[a b; c'] * gc[c'; c]
+    for (Ja, Jb, Jc) in zip(generators(a), generators(b), generators(c))
+        @tensor lhs[a b; c] := Ja[a; a'] * CGC[a' b; c] + Jb[b; b'] * CGC[a b'; c]
+        @tensor rhs[a b; c] := CGC[a b; c'] * Jc[c'; c]
         @test isapprox(lhs, rhs)
     end
 end

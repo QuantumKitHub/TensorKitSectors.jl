@@ -40,7 +40,7 @@ The twists are
 θ_0 = 1,\qquad θ_1 = -1.
 ```
 
-`fusiontensor` is defined for array construction, but it emits a warning because plain arrays with `FermionParity` labels do not preserve all fermionic signs.
+`fusiontensor` is defined for array construction, but it emits a warning because plain arrays with `FermionParity` labels can not preserve all fermionic signs.
 
 ## References
 

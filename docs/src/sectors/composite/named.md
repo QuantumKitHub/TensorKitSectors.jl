@@ -23,7 +23,6 @@ I = @NamedSector{charge::U1Irrep, spin::SU2Irrep}
 I(U1Irrep(1), SU2Irrep(1//2)) # same as above
 ```
 
-The components are stored in the `s.sectors` field, so `sectors` cannot be used as a component name.
 
 ## Fusion Rules
 
