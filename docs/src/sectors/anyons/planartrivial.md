@@ -1,7 +1,7 @@
 # Planar Trivial Anyon: `PlanarTrivial`
 
 `PlanarTrivial` is the one-object fusion category without braiding.
-It is mostly useful as the smallest non-braided sector to be used tests and examples, e.g. of planar contractions (hence the name).
+It is mostly useful as the smallest non-braided sector to be used in tests and examples, e.g. of planar contractions (hence the name).
 
 ## Sector type
 
