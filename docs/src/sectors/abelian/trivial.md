@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using TensorKitSectors
+end
+```
+
 # Trivial Sector: `Trivial`
 
 `Trivial` is the trivial sector for ordinary vector spaces.
@@ -11,9 +17,8 @@ Trivial
 
 There is only one label:
 
-```julia
-using TensorKitSectors
-
+```jldoctest
+julia> Trivial()
 Trivial()
 ```
 

@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using TensorKitSectors
+end
+```
+
 # Product Sectors: `ProductSector`
 
 `ProductSector` represents the Deligne tensor product of sector categories.
@@ -15,20 +21,22 @@ A product sector stores its component sectors in a tuple.
 The recommended constructor is the Deligne product operator `⊠` (typed as `\boxtimes<TAB>`).
 The more verbose alias `deligneproduct` is also available:
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> a = Z2Irrep(1) ⊠ FibonacciAnyon(:τ)
+(Irrep[ℤ₂](1) ⊠ FibonacciAnyon(:τ))
 
-a = Z2Irrep(1) ⊠ FibonacciAnyon(:τ) # (Irrep[ℤ₂](1) ⊠ FibonacciAnyon(:τ))
-deligneproduct(Z2Irrep(1), FibonacciAnyon(:τ)) # same as above
+julia> deligneproduct(Z2Irrep(1), FibonacciAnyon(:τ)) # same as above
+(Irrep[ℤ₂](1) ⊠ FibonacciAnyon(:τ))
 ```
 
 The same operator works on sector types:
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> I = Z2Irrep ⊠ FibonacciAnyon
+ProductSector{Tuple{Z2Irrep, FibonacciAnyon}}
 
-I = Z2Irrep ⊠ FibonacciAnyon
-a = I(1, :τ)
+julia> a = I(1, :τ)
+(Irrep[ℤ₂](1) ⊠ FibonacciAnyon(:τ))
 ```
 
 Products are flattened, and `Trivial` factors are removed:

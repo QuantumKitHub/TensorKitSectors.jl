@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using TensorKitSectors
+end
+```
+
 # Time-Reversed Sectors: `TimeReversed`
 
 `TimeReversed{I}` represents the time-reversed, or conjugate-braided, version of a sector type `I`.
@@ -13,12 +19,15 @@ timereversed
 Construct a wrapped sector with `TimeReversed(a)` or `TimeReversed{I}(a)`.
 The helper `timereversed(a)` avoids unnecessary wrappers for symmetric braiding categories and unwraps an already time-reversed sector:
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> a = IsingAnyon(:σ)
+IsingAnyon(:σ)
 
-a = IsingAnyon(:σ)
-timereversed(a)               # TimeReversed{IsingAnyon}(:σ)
-timereversed(timereversed(a)) # IsingAnyon(:σ)
+julia> timereversed(a)
+TimeReversed{IsingAnyon}(:σ)
+
+julia> timereversed(timereversed(a))
+IsingAnyon(:σ)
 ```
 
 `TimeReversed` is not defined for sectors with `NoBraiding()`.

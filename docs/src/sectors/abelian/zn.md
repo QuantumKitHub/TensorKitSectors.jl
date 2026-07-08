@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using TensorKitSectors
+end
+```
+
 # Cyclic Group Representations: `ZNIrrep`
 
 `ZNIrrep{N}` and `LargeZNIrrep{N}` represent irreducible representations of the cyclic group ``ℤ_N``.
@@ -38,11 +44,12 @@ The braiding style is `Bosonic()`.
 
 `values(ZNIrrep{N})` iterates charges in increasing order from `0` to `N - 1`.
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> values(ZNIrrep{5})[4]
+Irrep[ℤ{5}](3)
 
-values(ZNIrrep{5})[4] # output is Irrep[ℤ{5}](3)
-values(ZNIrrep{34})[34] # output is Irrep[ℤ{34}](33)
+julia> values(ZNIrrep{34})[34]
+Irrep[ℤ{34}](33)
 ```
 
 ## References

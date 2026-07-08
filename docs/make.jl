@@ -11,6 +11,10 @@ mathengine = MathJax3(
         )
     )
 )
+DocMeta.setdocmeta!(
+    TensorKitSectors, :DocTestSetup, :(using TensorKitSectors); recursive = true
+)
+
 makedocs(;
     sitename = "TensorKitSectors.jl",
     format = Documenter.HTML(;
