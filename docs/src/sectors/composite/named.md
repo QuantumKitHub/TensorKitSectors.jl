@@ -1,3 +1,9 @@
+```@meta
+DocTestSetup = quote
+    using TensorKitSectors
+end
+```
+
 # Named Sectors: `NamedSector`
 
 `NamedSector` represents the same Deligne tensor product as [`ProductSector`](@ref), but stores its component sectors in a *named* tuple so that they can be accessed by name rather than by position.
@@ -12,15 +18,21 @@ NamedSector
 
 A named sector is constructed with keyword arguments to `⊠`/`NamedSector`, or from a type built with the [`@NamedSector`](@ref) macro:
 
-```julia
-using TensorKitSectors
+```jldoctest
+julia> s = ⊠(; charge = U1Irrep(1), spin = SU2Irrep(1//2))
+NamedSector(; charge=Irrep[U₁](1), spin=Irrep[SU₂](1/2))
 
-s = ⊠(; charge = U1Irrep(1), spin = SU2Irrep(1//2)) # (charge=1, spin=1/2)
-s.charge # 1
-s.spin   # 1/2
+julia> s.charge
+Irrep[U₁](1)
 
-I = @NamedSector{charge::U1Irrep, spin::SU2Irrep}
-I(U1Irrep(1), SU2Irrep(1//2)) # same as above
+julia> s.spin
+Irrep[SU₂](1/2)
+
+julia> I = @NamedSector{charge::U1Irrep, spin::SU2Irrep}
+NamedSector{@NamedTuple{charge::U1Irrep, spin::SU2Irrep}}
+
+julia> I(U1Irrep(1), SU2Irrep(1//2))
+NamedSector(; charge=Irrep[U₁](1), spin=Irrep[SU₂](1/2))
 ```
 
 
