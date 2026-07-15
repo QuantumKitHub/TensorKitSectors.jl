@@ -29,6 +29,7 @@ makedocs(;
             "Optional Methods" => "interface/optional.md",
             "Traits and Styles" => "interface/traits.md",
             "Implementation Guidelines" => "interface/guidelines.md",
+            "Testing a Sector Implementation" => "interface/testsuite.md",
         ],
         "Sector Types" => [
             "Overview" => "sectors.md",

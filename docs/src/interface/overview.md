@@ -30,3 +30,4 @@ The interface documentation is divided into several pages:
 - **[Optional Methods](optional.md)**: Additional methods with default implementations that can be specialized
 - **[Traits and Styles](traits.md)**: Compile-time properties that control behavior and optimizations
 - **[Implementation Guidelines](guidelines.md)**: Practical advice and helper types for implementing sectors
+- **[Testing a Sector Implementation](testsuite.md)**: A reusable test suite that checks whether a new sector type satisfies the required categorical properties and is functional with TensorKit.jl
