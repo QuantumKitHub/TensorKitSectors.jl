@@ -52,7 +52,8 @@ For a two-dimensional irrep `(j, 2)` with `j > 0`, the basis is ordered as a pai
 \ket{+j},\ \ket{-j}.
 ```
 
-The zero-charge irreps `(0, 0)` and `(0, 1)` are one-dimensional. The label `(0, 0)` is even under charge conjugation, while `(0, 1)` is odd.
+The zero-charge irreps `(0, 0)` and `(0, 1)` are one-dimensional.
+The label `(0, 0)` is even under charge conjugation, while `(0, 1)` is odd.
 
 When two equal positive-charge irreps fuse to a zero-charge irrep, the fusion tensors pick the symmetric and antisymmetric combinations:
 
@@ -94,7 +95,8 @@ For two positive charges, the sum channel is diagonal:
 \ket{-j_a,-j_b}↦\ket{-(j_a+j_b)}.
 ```
 
-The difference channel pairs opposite weights. If `j_a > j_b`,
+The difference channel pairs opposite weights.
+If `j_a > j_b`,
 
 ```math
 \ket{+j_a,-j_b}↦\ket{+(j_a-j_b)},\qquad
@@ -108,7 +110,8 @@ If `j_b > j_a`, the output basis is ordered by the positive charge `j_b - j_a`, 
 \ket{+j_a,-j_b}↦\ket{-(j_b-j_a)}.
 ```
 
-All omitted entries are zero. These conventions determine the real [`Fsymbol`](@ref) values.
+All omitted entries are zero.
+These conventions determine the real [`Fsymbol`](@ref) values.
 
 ## Iteration
 
