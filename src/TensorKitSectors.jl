@@ -26,6 +26,7 @@ export A4Irrep
 export SU2Irrep
 export HeisenbergIrrep, Heis3Irrep
 export ZNElement, Z2Element, Z3Element, Z4Element
+export ℤNElement, ℤ₂Element, ℤ₃Element, ℤ₄Element
 export ProductSector, NamedSector, @NamedSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
