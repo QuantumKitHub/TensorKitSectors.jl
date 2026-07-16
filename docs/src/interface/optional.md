@@ -55,8 +55,7 @@ sectorscalartype
 ```
 
 !!! note
-    While there is a fallback definition that tries to determine the result from computing the functions on the unit sector,
-    it is often a good idea to define this method explicitly to avoid depending on compiler heuristics to constant-fold these calls.
+    While there is a fallback definition that tries to determine the result from computing the functions on the unit sector, it is often a good idea to define this method explicitly to avoid depending on compiler heuristics to constant-fold these calls.
 
 ## Topological Data Symbols
 

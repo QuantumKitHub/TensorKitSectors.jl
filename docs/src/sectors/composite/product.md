@@ -7,7 +7,8 @@ end
 # Product Sectors: `ProductSector`
 
 `ProductSector` represents the Deligne tensor product of sector categories.
-It is the standard way to combine independent symmetry or anyon labels, such as charge and parity, or two different anyon theories. For the bosonic group or representation categories, this Deligne product corresponds to the ordinary product of groups or direct product of representations.
+It is the standard way to combine independent symmetry or anyon labels, such as charge and parity, or two different anyon theories.
+For the bosonic group or representation categories, this Deligne product corresponds to the ordinary product of groups or direct product of representations.
 
 ## Sector type
 

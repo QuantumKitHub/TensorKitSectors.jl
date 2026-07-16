@@ -33,7 +33,8 @@ It is intended as a reference implementation illustrating how to build such cate
 
 ## Other packages
 
-TensorKitSectors.jl provides the architecture for implementing new sector types, but does not implement all possible sectors. Other packages which implement additional sector types and their topological data include:
+TensorKitSectors.jl provides the architecture for implementing new sector types, but does not implement all possible sectors.
+Other packages which implement additional sector types and their topological data include:
 - [`SUNRepresentations.jl`](https://github.com/QuantumKitHub/SUNRepresentations.jl): Implements irreducible representations of SU(N) for arbitrary N
 - [`CategoryData.jl`](https://github.com/QuantumKitHub/CategoryData.jl): Provides a variety of fusion categories up to rank 7, based on the [`AnyonWiki`](https://anyonwiki.github.io/)
 - [`QWignerSymbols.jl`](https://github.com/QuantumKitHub/QWignerSymbols.jl): Provides the irreps of q-deformed SU(2)
