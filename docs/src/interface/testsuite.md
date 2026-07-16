@@ -35,11 +35,34 @@ The suite relies on [`TestExtras.jl`](https://github.com/Jutho/TestExtras.jl) fo
 
 Broadly, the sector tests fall into three categories:
 
- Category  | Checks 
----|---
-Interface & type stability | 1) Basic properties: the required methods exist, are type-stable, and return the documented types <br> 2) Show and parse: `Sector`s are printed in a parseable manner <br> 3) Value iterator: `Sector`s are ordered within `values(I)` in a consistent and expected manner (through `findindex`)
-Category-theoretic consistency | The algebraic identities a unitary (braided) fusion category must satisfy: pentagon and hexagon equations, unitarity of the F- and R-move, triangle equation, ribbon condition, self-duality of the braiding, symmetric braiding condition, Artin braid equality
-Cross-consistency of derived quantities | Whenever a quantity can be computed both directly and through a generic fallback derived from other data (e.g. [`dim`](@ref) versus the internal `dim_from_Fsymbol`, or [`Bsymbol`](@ref) versus `Bsymbol_from_fusiontensor`), the two must agree
+```@raw html
+<table align="left">
+
+<tr>
+    <th> Category </th> <th> Checks </th>
+</tr>
+
+<tr>
+    <td> Interface & type stability</td>
+    <td>
+    1) Basic properties: the required methods exist, are type-stable, and return the documented types <br>
+    2) Show and parse: <code>Sector</code>s are printed in a parseable manner <br>
+    3) Value iterator: <code>Sector</code>s are ordered within <code>values(I)</code> in a consistent and expected manner (through <code>findindex</code>)
+    </td>
+</tr>
+
+<tr>
+    <td> Category-theoretic consistency </td>
+    <td> The algebraic identities a unitary (braided) fusion category must satisfy: pentagon and hexagon equations, unitarity of the F- and R-move, triangle equation, ribbon condition, self-duality of the braiding, symmetric braiding condition, Artin braid equality </td>
+</tr>
+
+<tr>
+    <td> Cross-consistency of derived quantities </td>
+    <td> Whenever a quantity can be computed both directly and through a generic fallback derived from other data (e.g. <code>dim</code> versus the internal <code>dim_from_Fsymbol</code>, or <code>Bsymbol</code> versus <code>Bsymbol_from_fusiontensor</code>), the two must agree </td>
+</tr>
+
+</table>
+```
 
 Tests that only apply to a subset of sectors are skipped automatically based on traits: braiding-related testsets pass untested unless `BraidingStyle(I) isa HasBraiding`, the fusion-tensor comparisons are skipped when `fusiontensor` has no method for `I`, and so on.
 A test therefore never fails simply because a sector chooses not to implement an optional method.
@@ -65,10 +88,12 @@ These are all exported by `SectorTestSuite` and are also useful when writing add
 
 ## Adding a new test to the test suite
 
-New checks are registered with the `@testsuite` macro, which takes a name and a function of the sector type `I`:
+Users who wish to contribute new checks to this package can register them with the `@testsuite` macro, which takes a name and a function of the sector type `I`:
 
 ```julia
 @testsuite "My new property" I -> begin
     # test body
 end
 ```
+
+These should be added under `test/sectors.jl`, while additional utility functions should be added to `test/testsuite.jl` and exported from `SectorTestSuite`.
