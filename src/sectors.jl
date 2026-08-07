@@ -1005,6 +1005,7 @@ Base.IteratorEltype(::Type{<:SectorSet}) = HasEltype()
 Base.IteratorSize(::Type{SectorSet{I, F, S}}) where {I <: Sector, F, S} = Base.IteratorSize(S)
 
 Base.eltype(::SectorSet{I}) where {I <: Sector} = I
+Base.eltype(::Type{<:SectorSet{I}}) where {I} = I
 Base.length(s::SectorSet) = length(s.set)
 Base.size(s::SectorSet) = size(s.set)
 
