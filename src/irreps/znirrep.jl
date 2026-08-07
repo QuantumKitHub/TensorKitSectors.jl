@@ -84,7 +84,7 @@ dual(c::AnyZNIrrep{N}) where {N} = typeof(c)(N - c.n)
 
 Base.IteratorSize(::Type{SectorValues{<:ZNIrrep}}) = HasLength()
 # for larger values it doesn't make sense to store the sectors as a tuple
-Base.IteratorSize(::Type{SectorValues{<:LargeZNIrrep}}) = SizeUnknown()
+Base.IteratorSize(::Type{SectorValues{I}}) where {I <: LargeZNIrrep} = SizeUnknown()
 
 Base.length(::SectorValues{I}) where {I <: AnyZNIrrep} = modulus(I)
 Base.iterate(::SectorValues{I}, i = 0) where {I <: AnyZNIrrep} = i == modulus(I) ? nothing : (I(i), i + 1)
