@@ -39,12 +39,29 @@ end
 function _size(::SectorValues{I}) where {I <: ProductSector}
     return map(s -> _length(values(s)), _sectors(I))
 end
-function Base.getindex(P::SectorValues{I}, i::Int) where {I <: ProductSector}
-    inds = manhattan_to_multidimensional_index(i, _size(P))
+# finite <=> the product iterator has a shape, which is exactly the condition
+# under which Vect[I] uses NTuple storage (pre potential cutoff)
+@inline function tabulate(P::SectorValues, sz::Dims)
+    return Base.IteratorSize(P) isa Union{HasLength, HasShape} && prod(sz) ≤ MAXTABLE
+end
+Base.@propagate_inbounds function Base.getindex(P::SectorValues{I}, i::Int) where {I <: ProductSector}
+    sz = _size(P)
+    @boundscheck checksectorindex(P, i)
+    inds = if tabulate(P, sz)
+        @inbounds mtable(I, sz).multi[i]
+    else
+        manhattan_to_multidimensional_index(i, sz)
+    end
     return I(getindex.(values.(_sectors(I)), inds))
 end
 function findindex(P::SectorValues{I}, c::I) where {I <: ProductSector}
-    return to_manhattan_index(findindex.(values.(_sectors(I)), Tuple(c)), _size(P))
+    J = findindex.(values.(_sectors(I)), Tuple(c))
+    sz = _size(P)
+    return if tabulate(P, sz)
+        @inbounds mtable(I, sz).lin[CartesianIndex(J)]
+    else
+        to_manhattan_index(J, sz)
+    end
 end
 
 function Base.iterate(P::SectorValues{I}, i = 1) where {I <: ProductSector}
