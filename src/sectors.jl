@@ -74,16 +74,17 @@ Base.IteratorEltype(::Type{<:SectorValues}) = HasEltype()
 Base.eltype(::Type{SectorValues{I}}) where {I <: Sector} = I
 Base.values(::Type{I}) where {I <: Sector} = SectorValues{I}()
 
-Base.@propagate_inbounds function Base.getindex(
-        v::SectorValues{I}, i::Int
-    ) where {I <: Sector}
-    @boundscheck begin
-        if Base.IteratorSize(v) === HasLength()
-            1 ≤ i ≤ length(v) || throw(BoundsError(v, i))
-        else
-            1 ≤ i || throw(BoundsError(v, i))
-        end
+@inline function checksectorindex(v::SectorValues, i::Integer)
+    if Base.IteratorSize(v) isa Union{HasLength, HasShape}
+        1 ≤ i ≤ length(v) || throw(BoundsError(v, i))
+    else
+        1 ≤ i || throw(BoundsError(v, i))
     end
+    return nothing
+end
+
+Base.@propagate_inbounds function Base.getindex(v::SectorValues{I}, i::Int) where {I <: Sector}
+    @boundscheck checksectorindex(v, i)
     for (j, c) in enumerate(v)
         j == i && return c
     end
