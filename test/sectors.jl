@@ -91,8 +91,10 @@ end
         can_fuse(a, b) || @test_throws ArgumentError Nsymbol(a, b, r)
         for c in smallset(I)
             can_fuse(b, c) || @test_throws ArgumentError Nsymbol(b, c, r)
-            for e in smallset(I), f in smallset(I)
+            for f in smallset(I)
                 can_fuse(a, f) || @test_throws ArgumentError Nsymbol(a, f, r)
+            end
+            for e in smallset(I)
                 can_fuse(e, c) || @test_throws ArgumentError Nsymbol(e, c, r)
             end
             for e in ⊗(a, b), f in ⊗(b, c) # guaranteed can_fuse
