@@ -11,19 +11,19 @@ Similar to [`ProductSector`](@ref), but components are accessible by name via `s
 
 # Examples
 
-```julia
+```jldoctest
 julia> s = NamedSector(; charge=U1Irrep(1), spin=SU2Irrep(1//2))
-(charge=1, spin=1/2)
+NamedSector(; charge=Irrep[U₁](1), spin=Irrep[SU₂](1/2))
 
 julia> s.charge
-1
+Irrep[U₁](1)
 
 julia> s.spin
-1/2
+Irrep[SU₂](1/2)
 ```
 
 !!! warning
-    The sectors are stored internally in the `s.sectors` field, so the named components should not contain the `sectors` as a name.
+    The sectors are stored internally in the `s.sectors` field, so the named components should not contain `sectors` as a name.
 """
 struct NamedSector{NT <: NamedSectorTuple} <: Sector
     sectors::NT
@@ -182,12 +182,12 @@ Convenience macro for constructing a `NamedSector` type with named components,
 analogous to `@NamedTuple`.
 
 # Examples
-```julia
+```jldoctest
 julia> @NamedSector{charge::U1Irrep, spin::SU2Irrep}
 NamedSector{@NamedTuple{charge::U1Irrep, spin::SU2Irrep}}
 
 julia> (@NamedSector{charge::U1Irrep, spin::SU2Irrep})(U1Irrep(1), SU2Irrep(1//2))
-(charge=1, spin=1/2)
+NamedSector(; charge=Irrep[U₁](1), spin=Irrep[SU₂](1/2))
 ```
 """
 macro NamedSector(ex)

@@ -13,6 +13,10 @@ function _kron(A, B)
     end
     return C
 end
+_kron_promote(A::Number, B::Number, _, _) = A * B
+function _kron_promote(A₁, B₁, sz₁, sz₂)
+    return _kron(A₁ isa Number ? fill(A₁, sz₁) : A₁, B₁ isa Number ? fill(B₁, sz₂) : B₁)
+end
 
 # Manhattan based distance enumeration: I is supposed to be one-based index
 # TODO: is there any way to make this faster?
