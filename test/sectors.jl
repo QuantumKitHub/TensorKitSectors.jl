@@ -105,8 +105,8 @@ end
         end
     end
 
-    for a in smallset(I), b in smallset(I), c in smallset(I)
-        if BraidingStyle(I) isa HasBraiding
+    if BraidingStyle(I) isa HasBraiding
+        for a in smallset(I), b in smallset(I), c in smallset(I)
             R_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nsymbol(a, b, c), Nsymbol(b, a, c))
             @test size(Rsymbol(a, b, c)) == R_size
         end
