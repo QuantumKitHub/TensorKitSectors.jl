@@ -97,7 +97,7 @@ end
         can_fuse(a, b) || continue
         for c in smallset(I)
             can_fuse(b, c) || continue
-            for e in ⊗(a, b), f in ⊗(b, c) # guaranteed can_fuse
+            for f in ⊗(b, c), e in ⊗(a, b) # guaranteed can_fuse
                 Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
                 for d in ⊗(a, b, c)
                     F_size = FusionStyle(I) isa MultiplicityFreeFusion ? () : (Nabe, Nsymbol(e, c, d), Nbcf, Nsymbol(a, f, d))
