@@ -84,19 +84,19 @@ end
     end
 end
 
-@testsuite "Shapes of topological data" I -> begin
-    # shape of data from multiplicities
+@testsuite "Nsymbol error handling" I -> begin
     r = randsector(I)
     for a in smallset(I), b in smallset(I)
         can_fuse(a, b) || @test_throws ArgumentError Nsymbol(a, b, r)
+    end
+end
+
+@testsuite "Shapes of topological data" I -> begin
+    # shape of data from multiplicities
+    for a in smallset(I), b in smallset(I)
+        can_fuse(a, b) || continue
         for c in smallset(I)
-            can_fuse(b, c) || @test_throws ArgumentError Nsymbol(b, c, r)
-            for f in smallset(I)
-                can_fuse(a, f) || @test_throws ArgumentError Nsymbol(a, f, r)
-            end
-            for e in smallset(I)
-                can_fuse(e, c) || @test_throws ArgumentError Nsymbol(e, c, r)
-            end
+            can_fuse(b, c) || continue
             for e in ⊗(a, b), f in ⊗(b, c) # guaranteed can_fuse
                 Nabe, Nbcf = Nsymbol(a, b, e), Nsymbol(b, c, f)
                 for d in ⊗(a, b, c)
