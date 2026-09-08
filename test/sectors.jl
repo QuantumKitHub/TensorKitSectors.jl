@@ -8,6 +8,8 @@ using TensorKitSectors: TensorKitSectors as TKS
     @test @testinferred(hash(sc)) == hash(deepcopy(sc))
     if UnitStyle(I) isa SimpleUnit
         @test @testinferred(unit(sc)) == @testinferred(unit(I))
+    else
+        @test length(@testinferred(allunits(I))) > 1
     end
     @testinferred dual(sc)
     @testinferred dim(sc)
