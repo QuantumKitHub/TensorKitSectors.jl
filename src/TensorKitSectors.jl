@@ -58,7 +58,7 @@ end
 
 # imports
 # -------
-using Base: SizeUnknown, HasLength, IsInfinite
+using Base: SizeUnknown, HasLength, HasShape, IsInfinite
 using Base: HasEltype, EltypeUnknown
 using Base.Iterators: product, filter
 using Base: @assume_effects
