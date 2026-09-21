@@ -46,7 +46,7 @@ end
 const SMALL_TY_CUTOFF = (typemax(UInt8) + 1) ÷ 2
 
 function _check_TY_typeparams(N, K)
-    N isa Int && 1 <= N <= SMALL_TY_CUTOFF || throw(ArgumentError("N must satisfy 1 <= N <= $SMALL_TY_CUTOFF, got $N"))
+    N isa Integer && 1 <= N <= SMALL_TY_CUTOFF || throw(ArgumentError("N must satisfy 1 <= N <= $SMALL_TY_CUTOFF, got $N"))
     K === 1 || K === -1 || throw(ArgumentError("The Frobenius-Schur indicator K must be either 1 or -1, got $K"))
     return nothing
 end
@@ -58,7 +58,7 @@ end
 The order of the cyclic group, or the modulus of the charge labels.
 """
 modulus(n::TambaraYamagami) = modulus(typeof(n))
-modulus(::Type{TambaraYamagami{N, K}}) where {N, K} = N
+modulus(::Type{<:TambaraYamagami{N, K}}) where {N, K} = N
 
 _ism(a::TambaraYamagami) = a.n == modulus(a) # Checks whether a is the non-invertible
 _chi(a::I, b::I) where {I <: TambaraYamagami} = cispi(2 * a.n * b.n / modulus(I)) # Non-degenerate symmetric bicharacter on ℤ_N
