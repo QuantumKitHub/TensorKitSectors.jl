@@ -239,6 +239,12 @@ end
     @test_throws ArgumentError TambaraYamagami{UInt8(3), true}(1)
     @test_throws ArgumentError TambaraYamagami{true, false}(0)
     @test_throws ArgumentError TambaraYamagami{3, 1}(0)
+    for (i, c) in enumerate(values(I))
+        @test values(I)[i] == c
+        @test findindex(values(I), c) === i
+    end
+    @test_throws BoundsError values(I)[0]
+    @test_throws BoundsError values(I)[5]
 end
 
 @testset "Converter constructions" begin

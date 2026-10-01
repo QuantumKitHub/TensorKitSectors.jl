@@ -65,6 +65,12 @@ _ism(a::TambaraYamagami) = a.n == modulus(a) # Checks whether a is the non-inver
 _chi(a::I, b::I) where {I <: TambaraYamagami} = cispi(2 * a.n * b.n / modulus(I)) # Non-degenerate symmetric bicharacter on ℤ_N
 
 Base.length(::SectorValues{I}) where {I <: TambaraYamagami} = modulus(I) + 1
+Base.IteratorSize(::Type{SectorValues{I}}) where {I <: TambaraYamagami} = HasLength()
+Base.@propagate_inbounds function Base.getindex(v::SectorValues{I}, i::Int) where {I <: TambaraYamagami}
+    @boundscheck 1 <= i <= length(v) || throw(BoundsError(v, i))
+    return I(i - 1)
+end
+findindex(::SectorValues{I}, c::I) where {I <: TambaraYamagami} = Int(c.n) + 1
 Base.IteratorSize(::Type{<:SectorProductIterator{I}}) where {I <: TambaraYamagami} = HasLength()
 
 function Base.length(it::SectorProductIterator{I}) where {I <: TambaraYamagami}
