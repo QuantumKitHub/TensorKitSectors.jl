@@ -15,10 +15,11 @@ g ⊗ h = g + h \\mod N, \\qquad g ⊗ m = m ⊗ g = m, \\qquad m ⊗ m = \\bigo
 
 The F-symbols are constructed from a non-degenerate symmetric bicharacter
 ``χ(g, h) = \\exp(2π i g h / N)``, together with a Frobenius-Schur sign for the
-non-invertible object; the latter is fixed as the type parameter `K`. For fixed `N`,
-the two choices `K = ±1` generally give distinct fusion categories.
+non-invertible object; the latter is fixed as `κ = (-1)^K` through the type parameter
+`K::Bool`. For fixed `N`, the two choices `K = false` (`κ = 1`) and `K = true` (`κ = -1`)
+generally give distinct fusion categories.
 
-Only the case `N == 2` and `K == 1` admits a braiding, as this case coincides with Ising, but this is not currently implemented.
+Only the case `N == 2` and `K == false` admits a braiding, as this case coincides with Ising, but this is not currently implemented.
 
 ## Fields
 - `n::Int`: a group element for `0 <= n < N`, or the non-invertible object `m` for `n == N`.
@@ -47,7 +48,7 @@ const SMALL_TY_CUTOFF = (typemax(UInt8) + 1) ÷ 2
 
 function _check_TY_typeparams(N, K)
     N isa Integer && 1 <= N <= SMALL_TY_CUTOFF || throw(ArgumentError("N must satisfy 1 <= N <= $SMALL_TY_CUTOFF, got $N"))
-    K === 1 || K === -1 || throw(ArgumentError("The Frobenius-Schur indicator K must be either 1 or -1, got $K"))
+    K isa Bool || throw(ArgumentError("K must be a Bool, encoding the Frobenius-Schur indicator (-1)^K, got $K"))
     return nothing
 end
 
@@ -115,7 +116,7 @@ function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {N, K, I <: TambaraYa
     am, bm, cm = _ism(a), _ism(b), _ism(c)
 
     if am && bm && cm # F^{mmm}_m
-        return (K / sqrt(N)) * conj(_chi(e, f))
+        return ((1 - 2 * K) / sqrt(N)) * conj(_chi(e, f))
     elseif !am && bm && !cm # F^{gmh}_{m}
         return _chi(a, c)
     elseif am && !bm && cm # F^{mgm}_{h}

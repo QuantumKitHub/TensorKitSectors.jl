@@ -2,14 +2,14 @@
 
 `TambaraYamagami{N, K}` represents the Tambara-Yamagami fusion category ${\rm TY}(\mathbb Z_N, K)$ based on the cyclic group of order $N$.
 
-The $N+1$ simple objects coincide with the group elements of $\mathbb Z_N$ supplemented with one non-invertible object $m$. The type parameter `K` specifies the Frobenius-Schur indicator of $m$ as $\varkappa_m = K=\pm 1$.
+The $N+1$ simple objects coincide with the group elements of $\mathbb Z_N$ supplemented with one non-invertible object $m$. The type parameter `K` specifies the Frobenius-Schur indicator of $m$ as $\varkappa_m = (-1)^K = \pm 1$, i.e. `K = false` corresponds to $\varkappa_m = 1$ and `K = true` to $\varkappa_m = -1$.
 
 ## Sector type
 
 ```@docs; canonical = false
 TambaraYamagami
 ```
-Here, the type parameters `N` and `K` correspond respectively to the order of the underlying cyclic group and the Frobenius-Schur sign of the non-invertible object.
+Here, the type parameters `N` and `K` correspond respectively to the order of the underlying cyclic group and the Frobenius-Schur sign $(-1)^K$ of the non-invertible object.
 
 ## Fusion Rules
 
@@ -35,7 +35,7 @@ We write $χ(g, h) = \exp(2π i g h / N)$ for a normalised non-degenerate symmet
 ```math
 F^{g\,m\,h}_{m} = χ(g, h), \qquad
 F^{m\,g\,m}_{h} = χ(g, h), \qquad
-\left[F^{m\,m\,m}_{m}\right]_g^h = \frac{κ}{\sqrt{N}}\,\overline{χ(g, h)},
+\left[F^{m\,m\,m}_{m}\right]_g^h = \frac{\varkappa_m}{\sqrt{N}}\,\overline{χ(g, h)},
 ```
 
 for all $g, h \in \mathbb Z_N$.
