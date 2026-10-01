@@ -22,7 +22,7 @@ generally give distinct fusion categories.
 Only the case `N == 2` and `K == false` admits a braiding, as this case coincides with Ising, but this is not currently implemented.
 
 ## Fields
-- `n::Int`: a group element for `0 <= n < N`, or the non-invertible object `m` for `n == N`.
+- `n::UInt8`: a group element for `0 <= n < N`, or the non-invertible object `m` for `n == N`.
 
 ## References
 [1] D. Tambara and S. Yamagami, *Tensor categories with fusion rules of self-duality for
@@ -35,7 +35,7 @@ struct TambaraYamagami{N, K} <: Sector
     n::UInt8
     function TambaraYamagami{N, K}(n) where {N, K}
         _check_TY_typeparams(N, K)
-        0 <= n <= N|| throw(DomainError(n, "TambaraYamagami{$N} labels must satisfy 0 <= n <= $N"))
+        0 <= n <= N || throw(DomainError(n, "TambaraYamagami{$N, $K} labels must satisfy 0 <= n <= $N"))
         return new{N, K}(n)
     end
 end
@@ -44,6 +44,8 @@ function TambaraYamagami{N, K}(s::Symbol) where {N, K}
     return TambaraYamagami{N, K}(N)
 end
 
+# Labels are stored as `UInt8`; restricting to `N <= 128` guarantees that the sum `a.n + b.n`
+# of two group labels (at most `2(N - 1) = 254`) never overflows before taking it modulo `N`.
 const SMALL_TY_CUTOFF = (typemax(UInt8) + 1) ÷ 2
 
 function _check_TY_typeparams(N, K)
