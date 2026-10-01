@@ -231,6 +231,13 @@ end
     end
 end
 
+@testset "TambaraYamagami edge cases" begin
+    I = TambaraYamagami{3, true}
+    @test hash(I) isa UInt
+    @test hash(I(1)) == hash(I(1))
+    @test hash(I(1)) != hash(I(2))
+end
+
 @testset "Converter constructions" begin
     @test IsingAnyon(:ψ) isa IsingAnyon
     @test (IsingAnyon ⊠ IsingAnyon)(:ψ, :σ) isa (IsingAnyon ⊠ IsingAnyon)

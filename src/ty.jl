@@ -88,7 +88,6 @@ function Base.iterate(it::SectorProductIterator{I}, state::Int = 0) where {I <: 
 end
 
 Base.isless(a1::I, a2::I) where {I <: TambaraYamagami} = isless(a1.n, a2.n)
-Base.hash(a::Type{<:TambaraYamagami}, h::UInt) = hash(a.n, h)
 dim(a::TambaraYamagami) = _ism(a) ? sqrt(float(modulus(a))) : 1.0
 unit(::Type{I}) where {I <: TambaraYamagami} = I(0)
 dual(a::TambaraYamagami) = _ism(a) ? a : typeof(a)(mod(- Int(a.n), modulus(a)))
