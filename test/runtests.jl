@@ -376,5 +376,8 @@ end
 
 @testset "JET" begin
     using JET: JET
-    JET.test_package(TensorKitSectors; target_defined_modules = true)
+    # JET v0.12 loads empty stubs on unsupported (future) Julia versions
+    if !isdefined(JET, :JET_AVAILABLE) || JET.JET_AVAILABLE
+        JET.test_package(TensorKitSectors; target_modules = (TensorKitSectors,))
+    end
 end
