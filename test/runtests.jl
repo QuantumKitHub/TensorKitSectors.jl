@@ -236,6 +236,9 @@ end
     @test hash(I) isa UInt
     @test hash(I(1)) == hash(I(1))
     @test hash(I(1)) != hash(I(2))
+    @test_throws ArgumentError TambaraYamagami{UInt8(3), true}(1)
+    @test_throws ArgumentError TambaraYamagami{true, false}(0)
+    @test_throws ArgumentError TambaraYamagami{3, 1}(0)
 end
 
 @testset "Converter constructions" begin

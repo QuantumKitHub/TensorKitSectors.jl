@@ -47,7 +47,7 @@ end
 const SMALL_TY_CUTOFF = (typemax(UInt8) + 1) ÷ 2
 
 function _check_TY_typeparams(N, K)
-    N isa Integer && 1 <= N <= SMALL_TY_CUTOFF || throw(ArgumentError("N must satisfy 1 <= N <= $SMALL_TY_CUTOFF, got $N"))
+    N isa Int && 1 <= N <= SMALL_TY_CUTOFF || throw(ArgumentError("N must be an Int satisfying 1 <= N <= $SMALL_TY_CUTOFF, got $N::$(typeof(N))"))
     K isa Bool || throw(ArgumentError("K must be a Bool, encoding the Frobenius-Schur indicator (-1)^K, got $K"))
     return nothing
 end
