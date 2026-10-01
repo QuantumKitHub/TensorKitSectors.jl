@@ -36,6 +36,11 @@ jobs:
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
+        with:
+          # `auto` resolves to `true` on Dependabot/CompatHelper PRs, which is unsatisfiable on
+          # older Julia versions once a dependency's newest range drops support for them,
+          # so only apply it on the newest Julia (matching QuantumKitHubActions/TestGroups.yml).
+          force_latest_compatible_version: ${{ matrix.version == '1' && 'auto' || 'false' }}
       - uses: julia-actions/julia-processcoverage@v1
       - uses: codecov/codecov-action@v7
         with:
