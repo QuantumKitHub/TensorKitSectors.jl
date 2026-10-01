@@ -17,6 +17,7 @@ This page provides an overview of the concrete sector types implemented in Tenso
 | [`HeisenbergIrrep`](@ref)| Rep[H_N]  | Generic      | Bosonic   | No        | Weyl-Heisenberg symmetry, projective representations |
 | [`FibonacciAnyon`](@ref) | Fibonacci category              | Simple       | Anyonic   | No        | Topological quantum computing                              |
 | [`IsingAnyon`](@ref)     | Ising category                  | Simple       | Anyonic   | No        | Majorana fermions, ν=5/2 QHE                               |
+| [`TambaraYamagami`](@ref)     | ℤₙ-Tambara-Yamagami category                  | Simple       | No   | No        | Self-dual spin chains                             |
 | [`FermionParity`](@ref)  | fℤ₂                             | Unique       | Fermionic | No        | Fermion parity conservation                                |
 | [`FermionNumber`](@ref)  | fU₁                             | Unique       | Fermionic | Yes       | Fermion number conservation                                |
 | [`FermionSpin`](@ref)    | fSU₂                            | Simple       | Fermionic | Yes       | Fermions with spin symmetry                                |

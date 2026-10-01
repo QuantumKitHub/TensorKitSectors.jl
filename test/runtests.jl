@@ -30,6 +30,14 @@ const sectorlist = (
     FibonacciAnyon ⊠ Z4Element{3},
     IsingBimodule, IsingBimodule ⊠ IsingBimodule, IsingBimodule ⊠ Z2Irrep,
     IsingBimodule ⊠ SU2Irrep, IsingBimodule ⊠ FibonacciAnyon,
+    TambaraYamagami{1, false}, TambaraYamagami{1, true},
+    TambaraYamagami{2, false}, TambaraYamagami{2, true},
+    TambaraYamagami{4, false}, TambaraYamagami{4, true},
+    TambaraYamagami{7, false}, TambaraYamagami{8, true},
+    TambaraYamagami{67, false}, TambaraYamagami{128, false},
+    TambaraYamagami{3, true} ⊠ TambaraYamagami{2, true}, TambaraYamagami{2, false} ⊠ Z3Irrep,
+    TambaraYamagami{3, true} ⊠ FibonacciAnyon, TambaraYamagami{5, true} ⊠ IsingAnyon,
+    TambaraYamagami{64, false} ⊠ Z4Irrep, TambaraYamagami{128, true} ⊠ SU2Irrep,
     TimeReversed{Z2Irrep},
     TimeReversed{Z3Irrep}, TimeReversed{Z4Irrep}, TimeReversed{A4Irrep},
     TimeReversed{U1Irrep}, TimeReversed{CU1Irrep}, TimeReversed{SU2Irrep},
@@ -221,6 +229,22 @@ end
         @test charge(dual(a)) == mod(-charge(a), N)
         @test charge(only(a ⊗ a)) == mod(charge(a) + charge(a), N)
     end
+end
+
+@testset "TambaraYamagami edge cases" begin
+    I = TambaraYamagami{3, true}
+    @test hash(I) isa UInt
+    @test hash(I(1)) == hash(I(1))
+    @test hash(I(1)) != hash(I(2))
+    @test_throws ArgumentError TambaraYamagami{UInt8(3), true}(1)
+    @test_throws ArgumentError TambaraYamagami{true, false}(0)
+    @test_throws ArgumentError TambaraYamagami{3, 1}(0)
+    for (i, c) in enumerate(values(I))
+        @test values(I)[i] == c
+        @test findindex(values(I), c) === i
+    end
+    @test_throws BoundsError values(I)[0]
+    @test_throws BoundsError values(I)[5]
 end
 
 @testset "Converter constructions" begin

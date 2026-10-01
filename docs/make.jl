@@ -58,6 +58,9 @@ makedocs(;
             "Group Elements" => [
                 "ℤₙ (Cyclic)" => "sectors/groupelement/znelement.md",
             ],
+            "Other" => [
+                "ℤₙ-Tambara-Yamagami" => "sectors/other/ty.md",
+            ],
             "Composite Sectors" => [
                 "Product" => "sectors/composite/product.md",
                 "Named" => "sectors/composite/named.md",

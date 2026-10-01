@@ -29,6 +29,7 @@ export ZNElement, Z2Element, Z3Element, Z4Element
 export ProductSector, NamedSector, @NamedSector, TimeReversed
 export FermionParity, FermionNumber, FermionSpin
 export PlanarTrivial, FibonacciAnyon, IsingAnyon
+export TambaraYamagami
 export IsingBimodule
 
 # accessors
@@ -83,6 +84,7 @@ include("named.jl")     # named tuple product of different sectors
 include("fermions.jl")  # irreps with defined fermionparity and fermionic braiding
 include("anyons.jl")    # non-group sectors
 include("multifusion.jl") # multifusion example, namely Rep Z2 ⊕ Rep Z2 ≅ Ising
+include("ty.jl") # Tambara-Yamagami category for ℤ_N
 
 # precompile
 # ----------
