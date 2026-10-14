@@ -92,3 +92,31 @@ function manhattan_to_multidimensional_index(index::Int, sz::Dims{N}) where {N}
     index -= offset
     return invertlocaloffset(d, index - 1, sz)
 end
+
+# A cache that is read without locking, for values that are looked up very often and from many
+# tasks at once: lookups go to an immutable snapshot of the dictionary, and an insertion (rare, as
+# there are few distinct keys) publishes a new snapshot under a lock.
+mutable struct SnapshotCache{K, V}
+    @atomic dict::Dict{K, V}
+    const lock::ReentrantLock
+end
+SnapshotCache{K, V}() where {K, V} = SnapshotCache{K, V}(Dict{K, V}(), ReentrantLock())
+
+function cached!(f, c::SnapshotCache{K, V}, key) where {K, V}
+    v = get(@atomic(:acquire, c.dict), key, nothing)
+    isnothing(v) || return v
+    val = convert(V, f())
+    @lock c.lock begin
+        d = @atomic :acquire c.dict
+        v = get(d, key, nothing)
+        isnothing(v) || return v
+        d′ = length(d) < 10^5 ? copy(d) : Dict{K, V}() # start over beyond 10^5 entries
+        d′[key] = val
+        @atomic :release c.dict = d′
+    end
+    return val
+end
+function Base.empty!(c::SnapshotCache{K, V}) where {K, V}
+    @lock c.lock (@atomic :release c.dict = Dict{K, V}())
+    return c
+end

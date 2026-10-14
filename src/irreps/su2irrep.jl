@@ -48,6 +48,10 @@ sectorscalartype(::Type{SU2Irrep}) = Float64
 
 Nsymbol(sa::SU2Irrep, sb::SU2Irrep, sc::SU2Irrep) = WignerSymbols.δ(sa.j, sb.j, sc.j)
 
+# `racahW` takes the exact 6j symbol from a cache behind two lock acquisitions and converts it
+# from `Rational{BigInt}` at every call, so the F-symbols are cached as floating-point numbers
+const SU2_FSYMBOL_CACHE = SnapshotCache{NTuple{6, HalfInt}, Float64}()
+
 function Fsymbol(
         s1::SU2Irrep, s2::SU2Irrep, s3::SU2Irrep,
         s4::SU2Irrep, s5::SU2Irrep, s6::SU2Irrep
@@ -55,11 +59,13 @@ function Fsymbol(
     if all(==(_su2one), (s1, s2, s3, s4, s5, s6))
         return 1.0
     else
-        return sqrtdim(s5) * sqrtdim(s6) *
-            WignerSymbols.racahW(
-            fusionscalartype(SU2Irrep), s1.j, s2.j, s4.j, s3.j,
-            s5.j, s6.j
-        )
+        return cached!(SU2_FSYMBOL_CACHE, (s1.j, s2.j, s3.j, s4.j, s5.j, s6.j)) do
+            return sqrtdim(s5) * sqrtdim(s6) *
+                WignerSymbols.racahW(
+                fusionscalartype(SU2Irrep), s1.j, s2.j, s4.j, s3.j,
+                s5.j, s6.j
+            )
+        end
     end
 end
 
