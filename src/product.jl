@@ -96,82 +96,80 @@ _symbol_size((a, b, c, d, e, f)::NTuple{6, Sector}) = (Nsymbol(a, b, e), Nsymbol
 @inline function _kron_promote_inputs(sectors)
     heads = map(_firstsector, sectors)
     tails = map(_tailsector, sectors)
-    sz₁ = _symbol_size(heads)
-    sz₂ = _symbol_size(tails)
-    return heads, tails, sz₁, sz₂
+    return heads, tails
 end
 
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c, d, e, f))
+    heads, tails = _kron_promote_inputs((a, b, c, d, e, f))
     V₁ = Fsymbol(heads...)
     V₂ = Fsymbol(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Fsymbol(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol(map(_firstsector, (a, b, c, d, e, f))...)
 end
 function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c, d, e, f))
+    heads, tails = _kron_promote_inputs((a, b, c, d, e, f))
     V₁ = Fsymbol_from_fusiontensor(heads...)
     V₂ = Fsymbol_from_fusiontensor(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Fsymbol_from_fusiontensor(a::I, b::I, c::I, d::I, e::I, f::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Fsymbol_from_fusiontensor(map(_firstsector, (a, b, c, d, e, f))...)
 end
 
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Rsymbol(heads...)
     V₂ = Rsymbol(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Rsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol(map(_firstsector, (a, b, c))...)
 end
 function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Rsymbol_from_fusiontensor(heads...)
     V₂ = Rsymbol_from_fusiontensor(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Rsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Rsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Bsymbol(heads...)
     V₂ = Bsymbol(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Bsymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol(map(_firstsector, (a, b, c))...)
 end
 function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Bsymbol_from_fusiontensor(heads...)
     V₂ = Bsymbol_from_fusiontensor(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Bsymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Bsymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
 end
 
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Asymbol(heads...)
     V₂ = Asymbol(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Asymbol(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol(map(_firstsector, (a, b, c))...)
 end
 function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector}
-    heads, tails, sz₁, sz₂ = _kron_promote_inputs((a, b, c))
+    heads, tails = _kron_promote_inputs((a, b, c))
     V₁ = Asymbol_from_fusiontensor(heads...)
     V₂ = Asymbol_from_fusiontensor(tails...)
-    return _kron_promote(V₁, V₂, sz₁, sz₂)
+    return _kron_promote(V₁, V₂, heads, tails)
 end
 function Asymbol_from_fusiontensor(a::I, b::I, c::I) where {I <: ProductSector{<:Tuple{Sector}}}
     return Asymbol_from_fusiontensor(map(_firstsector, (a, b, c))...)
