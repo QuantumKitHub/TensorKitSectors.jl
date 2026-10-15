@@ -96,11 +96,13 @@ function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
     # find the last position that can be incremented while lowering the distance of the
     # positions after it, and otherwise move to the next layer
     r = 0 # Manhattan distance of the positions after k
-    k = N
-    while k > 0
-        r > 0 && I[k] < sz[k] && break
-        r += I[k] - 1
-        k -= 1
+    k = 0
+    for j in N:-1:1
+        if r > 0 && I[j] < sz[j]
+            k = j
+            break
+        end
+        r += I[j] - 1
     end
     if k > 0
         I = Base.setindex(I, I[k] + 1, k)
