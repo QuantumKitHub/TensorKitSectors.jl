@@ -97,7 +97,7 @@ function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
     # positions after it, and otherwise move to the next layer
     r = 0 # Manhattan distance of the positions after k
     k = 0
-    for j in N:-1:1
+    @inbounds for j in N:-1:1
         if r > 0 && I[j] < sz[j]
             k = j
             break
@@ -105,14 +105,14 @@ function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
         r += I[j] - 1
     end
     if k > 0
-        I = Base.setindex(I, I[k] + 1, k)
+        I = @inbounds Base.setindex(I, I[k] + 1, k)
         r -= 1
     else
         r += 1
     end
     # the smallest index with distance `r` for the positions after k is obtained by
     # filling them up from the back
-    for j in N:-1:(k + 1)
+    @inbounds for j in N:-1:(k + 1)
         x = min(r, sz[j] - 1)
         I = Base.setindex(I, x + 1, j)
         r -= x
