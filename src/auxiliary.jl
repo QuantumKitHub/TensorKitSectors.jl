@@ -22,8 +22,16 @@ end
 # Points are zero-based coordinates `x` with `0 ≤ x[i] < sz[i]`, ordered first by their
 # Manhattan distance `d = sum(x)` to the origin, and then lexicographically.
 
-# number of points with Manhattan distance smaller than `d`, computed in closed form through
-# inclusion-exclusion over the dimensions where the upper bound `sz[i]` is violated
+# Number of points `x` with `0 ≤ x[i] < sz[i]` and Manhattan distance `sum(x) < d`.
+#
+# Without the upper bounds, the number of points `x ≥ 0` with `sum(x) ≤ d - 1` is
+# `binomial(d - 1 + N, N)` (stars and bars). The points that violate the upper bound in
+# (at least) a subset `S` of the dimensions, i.e. with `x[i] ≥ sz[i]` for `i ∈ S`, are
+# counted in the same way after shifting `x[i] → x[i] - sz[i]`, which gives
+# `binomial(d - 1 - s + N, N)` with `s = sum(sz[i] for i in S)`. By inclusion-exclusion,
+# the number of points that satisfy all bounds is then
+#     ∑_S (-1)^|S| binomial(d - 1 - s + N, N)
+# where the subsets `S` are enumerated as the bits of `mask`, and terms with `s ≥ d` vanish.
 @inline function num_manhattan_points_below(d::Int, sz::Dims{N}) where {N}
     d ≤ 0 && return 0
     num = 0
@@ -42,6 +50,7 @@ end
 end
 
 # binomial(n, N) for n ≥ N, unrolled for small static N
+# (this is faster than a lookup table, since the divisions by constants are cheap)
 function _binomial(n::Int, ::Val{N}) where {N}
     r = 1
     for k in 1:N
