@@ -59,9 +59,6 @@ function _binomial(n::Int, ::Val{N}) where {N}
     return r
 end
 
-# number of points with Manhattan distance exactly `d`
-num_manhattan_points(d::Int, sz::Dims) = num_manhattan_points_below(d + 1, sz) - num_manhattan_points_below(d, sz)
-
 # forward mapping from multidimensional to single Manhattan index
 @inline localoffset(d, I::Tuple{Int}, sz::Tuple{Int}) = 0
 @inline function localoffset(d, I::NTuple{N, Int}, sz::NTuple{N, Int}) where {N}
