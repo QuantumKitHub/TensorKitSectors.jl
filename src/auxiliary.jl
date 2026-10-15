@@ -91,6 +91,33 @@ end
     return (lo + 1, invertlocaloffset(d - lo, offset, sz′)...)
 end
 
+# successor of a multidimensional index in Manhattan order, assuming it exists
+function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
+    # find the last position that can be incremented while lowering the distance of the
+    # positions after it, and otherwise move to the next layer
+    r = 0 # Manhattan distance of the positions after k
+    k = N
+    while k > 0
+        r > 0 && I[k] < sz[k] && break
+        r += I[k] - 1
+        k -= 1
+    end
+    if k > 0
+        I = Base.setindex(I, I[k] + 1, k)
+        r -= 1
+    else
+        r += 1
+    end
+    # the smallest index with distance `r` for the positions after k is obtained by
+    # filling them up from the back
+    for j in N:-1:(k + 1)
+        x = min(r, sz[j] - 1)
+        I = Base.setindex(I, x + 1, j)
+        r -= x
+    end
+    return I
+end
+
 manhattan_to_multidimensional_index(index::Int, ::Dims{0}) = ()
 manhattan_to_multidimensional_index(index::Int, ::Dims{1}) = (index,)
 function manhattan_to_multidimensional_index(index::Int, sz::Dims{N}) where {N}
