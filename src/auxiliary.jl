@@ -42,7 +42,7 @@ end
 end
 
 # binomial(n, N) for n ≥ N, unrolled for small static N
-@inline function _binomial(n::Int, ::Val{N}) where {N}
+function _binomial(n::Int, ::Val{N}) where {N}
     r = 1
     for k in 1:N
         r = (r * (n - N + k)) ÷ k
@@ -51,7 +51,7 @@ end
 end
 
 # number of points with Manhattan distance exactly `d`
-@inline function num_manhattan_points(d::Int, sz::Dims)
+function num_manhattan_points(d::Int, sz::Dims)
     return num_manhattan_points_below(d + 1, sz) - num_manhattan_points_below(d, sz)
 end
 
@@ -72,7 +72,7 @@ function to_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
 end
 
 # inverse mapping
-@inline invertlocaloffset(d, offset, sz::Tuple{Int}) = (d + 1,)
+invertlocaloffset(d, offset, sz::Tuple{Int}) = (d + 1,)
 @inline function invertlocaloffset(d, offset, sz::Tuple{Int, Int, Vararg{Int}})
     # find the largest first coordinate `x₁` such that the number of points at distance `d`
     # with a smaller first coordinate does not exceed `offset`
