@@ -13,10 +13,23 @@ function _kron(A, B)
     end
     return C
 end
-_kron_promote(A::Number, B::Number, _, _) = A * B
-function _kron_promote(A₁, B₁, sz₁, sz₂)
-    return _kron(A₁ isa Number ? fill(A₁, sz₁) : A₁, B₁ isa Number ? fill(B₁, sz₂) : B₁)
+# combine the symbols `A` and `B` of the factors `a` and `b` of product sectors; a scalar symbol
+# is promoted to an array of the same kind as the other symbol, with the size given by the
+# multiplicities of its sectors, unless these are all one: then it just scales the other symbol,
+# which is returned as is for a scalar one (symbols are not mutated, and may already be shared
+# with a cache); the type of the result thus only depends on the types of the symbols
+_kron_promote(A::Number, B::Number, a, b) = A * B
+function _kron_promote(A::Number, B::AbstractArray, a, b)
+    sz = _symbol_size(a)
+    all(isone, sz) || return _kron(fill!(similar(B, typeof(A), sz), A), B)
+    return isone(A) && promote_type(typeof(A), eltype(B)) === eltype(B) ? B : A * B
 end
+function _kron_promote(A::AbstractArray, B::Number, a, b)
+    sz = _symbol_size(b)
+    all(isone, sz) || return _kron(A, fill!(similar(A, typeof(B), sz), B))
+    return isone(B) && promote_type(eltype(A), typeof(B)) === eltype(A) ? A : A * B
+end
+_kron_promote(A::AbstractArray, B::AbstractArray, a, b) = _kron(A, B)
 
 # Manhattan based distance enumeration: I is supposed to be one-based index
 # Points are zero-based coordinates `x` with `0 ≤ x[i] < sz[i]`, ordered first by their
