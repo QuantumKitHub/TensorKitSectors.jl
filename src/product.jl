@@ -229,6 +229,8 @@ hopflink(p::I, q::I) where {I <: ProductSector} = *(hopflink.(p.sectors, q.secto
 Base.isequal(p1::ProductSector, p2::ProductSector) = isequal(p1.sectors, p2.sectors)
 Base.hash(p::ProductSector, h::UInt) = hash(p.sectors, h)
 function Base.isless(a::I, b::I) where {I <: ProductSector}
+    # cheap, and common when comparing tuples of sectors (equal entries until the first difference)
+    isequal(a, b) && return false
     I1 = findindex.(values.(_sectors(I)), a.sectors)
     I2 = findindex.(values.(_sectors(I)), b.sectors)
     d1 = sum(I1) - length(I1)
