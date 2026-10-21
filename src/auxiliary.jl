@@ -38,6 +38,7 @@ _kron_promote(A::AbstractArray, B::AbstractArray, a, b) = _kron(A, B)
 # size of an unbounded dimension (e.g. the values of an infinite sector type), whose bound can
 # then be left out at compile time
 struct Unbounded end
+const ManhattanSize = Union{Int, Unbounded}
 _bounded(::Tuple{}) = ()
 _bounded(sz::Tuple{Unbounded, Vararg}) = _bounded(Base.tail(sz))
 _bounded(sz::Tuple{Int, Vararg}) = (sz[1], _bounded(Base.tail(sz))...)
@@ -56,7 +57,7 @@ _maxcoordinate(::Unbounded, d::Int) = d
 # where the subsets `S` are enumerated as the bits of `mask`, and terms with `s ≥ d` vanish.
 # Unbounded dimensions (size `Unbounded()`) never violate their bound, and are left out of the
 # subsets at compile time.
-@inline function num_manhattan_points_below(d::Int, sz::NTuple{N, Any}) where {N}
+@inline function num_manhattan_points_below(d::Int, sz::NTuple{N, ManhattanSize}) where {N}
     d ≤ 0 && return 0
     bsz = _bounded(sz)
     num = 0
@@ -85,8 +86,8 @@ function _binomial(n::Int, ::Val{N}) where {N}
 end
 
 # forward mapping from multidimensional to single Manhattan index
-@inline localoffset(d, I::Tuple{Int}, sz::Tuple{Any}) = 0
-@inline function localoffset(d, I::NTuple{N, Int}, sz::NTuple{N, Any}) where {N}
+@inline localoffset(d, I::Tuple{Int}, sz::Tuple{ManhattanSize}) = 0
+@inline function localoffset(d, I::NTuple{N, Int}, sz::NTuple{N, ManhattanSize}) where {N}
     # number of points at distance `d` with a smaller first coordinate
     sz′ = Base.tail(sz)
     offset = num_manhattan_points_below(d + 1, sz′) - num_manhattan_points_below(d - I[1] + 2, sz′)
@@ -94,15 +95,15 @@ end
 end
 
 to_manhattan_index(::Tuple{}, ::Tuple{}) = 1
-to_manhattan_index(I::Tuple{Int}, ::Tuple{Any}) = I[1]
-function to_manhattan_index(I::Dims{N}, sz::NTuple{N, Any}) where {N}
+to_manhattan_index(I::Tuple{Int}, ::Tuple{ManhattanSize}) = I[1]
+function to_manhattan_index(I::Dims{N}, sz::NTuple{N, ManhattanSize}) where {N}
     d = sum(I) - N # Manhattan distance to origin for one-based indices
     return 1 + num_manhattan_points_below(d, sz) + localoffset(d, I, sz)
 end
 
 # inverse mapping
-invertlocaloffset(d, offset, sz::Tuple{Any}) = (d + 1,)
-@inline function invertlocaloffset(d, offset, sz::Tuple{Any, Any, Vararg})
+invertlocaloffset(d, offset, sz::Tuple{ManhattanSize}) = (d + 1,)
+@inline function invertlocaloffset(d, offset, sz::Tuple{ManhattanSize, ManhattanSize, Vararg{ManhattanSize}})
     # find the largest first coordinate `x₁` such that the number of points at distance `d`
     # with a smaller first coordinate does not exceed `offset`
     sz′ = Base.tail(sz)
@@ -122,7 +123,7 @@ end
 
 # successor of a multidimensional index in Manhattan order, assuming it exists
 # (here an unbounded size can be any size that is never reached)
-next_manhattan_index(I::Dims{N}, sz::NTuple{N, Any}) where {N} =
+next_manhattan_index(I::Dims{N}, sz::NTuple{N, ManhattanSize}) where {N} =
     next_manhattan_index(I, map(s -> s isa Unbounded ? typemax(Int) : s, sz))
 function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
     # find the last position that can be incremented while lowering the distance of the
@@ -153,8 +154,8 @@ function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
 end
 
 manhattan_to_multidimensional_index(index::Int, ::Tuple{}) = ()
-manhattan_to_multidimensional_index(index::Int, ::Tuple{Any}) = (index,)
-function manhattan_to_multidimensional_index(index::Int, sz::NTuple{N, Any}) where {N}
+manhattan_to_multidimensional_index(index::Int, ::Tuple{ManhattanSize}) = (index,)
+function manhattan_to_multidimensional_index(index::Int, sz::NTuple{N, ManhattanSize}) where {N}
     # find the layer of the Manhattan distance, i.e. the smallest `d` such that there are at
     # least `index` points with distance `≤ d`, by exponential followed by binary search
     lo, hi = 0, 1
