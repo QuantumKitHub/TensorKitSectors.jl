@@ -34,7 +34,7 @@ end
 Base.length(P::SectorValues{<:ProductSector}) = *(size(P)...)
 
 function _length(iter::SectorValues{I}) where {I <: Sector}
-    return Base.IteratorSize(iter) === Base.IsInfinite() ? typemax(Int) : length(iter)
+    return Base.IteratorSize(iter) === Base.IsInfinite() ? Unbounded() : length(iter)
 end
 function _size(::SectorValues{I}) where {I <: ProductSector}
     return map(s -> _length(values(s)), _sectors(I))

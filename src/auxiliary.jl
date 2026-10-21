@@ -35,6 +35,15 @@ _kron_promote(A::AbstractArray, B::AbstractArray, a, b) = _kron(A, B)
 # Points are zero-based coordinates `x` with `0 ≤ x[i] < sz[i]`, ordered first by their
 # Manhattan distance `d = sum(x)` to the origin, and then lexicographically.
 
+# size of an unbounded dimension (e.g. the values of an infinite sector type), whose bound can
+# then be left out at compile time
+struct Unbounded end
+_bounded(::Tuple{}) = ()
+_bounded(sz::Tuple{Unbounded, Vararg}) = _bounded(Base.tail(sz))
+_bounded(sz::Tuple{Int, Vararg}) = (sz[1], _bounded(Base.tail(sz))...)
+_maxcoordinate(sz::Int, d::Int) = min(sz - 1, d)
+_maxcoordinate(::Unbounded, d::Int) = d
+
 # Number of points `x` with `0 ≤ x[i] < sz[i]` and Manhattan distance `sum(x) < d`.
 #
 # Without the upper bounds, the number of points `x ≥ 0` with `sum(x) ≤ d - 1` is
@@ -45,15 +54,18 @@ _kron_promote(A::AbstractArray, B::AbstractArray, a, b) = _kron(A, B)
 # the number of points that satisfy all bounds is then
 #     ∑_S (-1)^|S| binomial(d - 1 - s + N, N)
 # where the subsets `S` are enumerated as the bits of `mask`, and terms with `s ≥ d` vanish.
-@inline function num_manhattan_points_below(d::Int, sz::Dims{N}) where {N}
+# Unbounded dimensions (size `Unbounded()`) never violate their bound, and are left out of the
+# subsets at compile time.
+@inline function num_manhattan_points_below(d::Int, sz::NTuple{N, Any}) where {N}
     d ≤ 0 && return 0
+    bsz = _bounded(sz)
     num = 0
-    for mask in 0:((1 << N) - 1)
+    for mask in 0:((1 << length(bsz)) - 1)
         s = 0
         sign = 1
-        for i in 1:N
+        for i in 1:length(bsz)
             if isodd(mask >> (i - 1))
-                s += min(sz[i], d) # clamp to avoid overflow, terms with s ≥ d vanish anyway
+                s += min(bsz[i], d) # clamp to avoid overflow, terms with s ≥ d vanish anyway
                 sign = -sign
             end
         end
@@ -73,8 +85,8 @@ function _binomial(n::Int, ::Val{N}) where {N}
 end
 
 # forward mapping from multidimensional to single Manhattan index
-@inline localoffset(d, I::Tuple{Int}, sz::Tuple{Int}) = 0
-@inline function localoffset(d, I::NTuple{N, Int}, sz::NTuple{N, Int}) where {N}
+@inline localoffset(d, I::Tuple{Int}, sz::Tuple{Any}) = 0
+@inline function localoffset(d, I::NTuple{N, Int}, sz::NTuple{N, Any}) where {N}
     # number of points at distance `d` with a smaller first coordinate
     sz′ = Base.tail(sz)
     offset = num_manhattan_points_below(d + 1, sz′) - num_manhattan_points_below(d - I[1] + 2, sz′)
@@ -82,20 +94,20 @@ end
 end
 
 to_manhattan_index(::Tuple{}, ::Tuple{}) = 1
-to_manhattan_index(I::Tuple{Int}, ::Tuple{Int}) = I[1]
-function to_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
+to_manhattan_index(I::Tuple{Int}, ::Tuple{Any}) = I[1]
+function to_manhattan_index(I::Dims{N}, sz::NTuple{N, Any}) where {N}
     d = sum(I) - N # Manhattan distance to origin for one-based indices
     return 1 + num_manhattan_points_below(d, sz) + localoffset(d, I, sz)
 end
 
 # inverse mapping
-invertlocaloffset(d, offset, sz::Tuple{Int}) = (d + 1,)
-@inline function invertlocaloffset(d, offset, sz::Tuple{Int, Int, Vararg{Int}})
+invertlocaloffset(d, offset, sz::Tuple{Any}) = (d + 1,)
+@inline function invertlocaloffset(d, offset, sz::Tuple{Any, Any, Vararg})
     # find the largest first coordinate `x₁` such that the number of points at distance `d`
     # with a smaller first coordinate does not exceed `offset`
     sz′ = Base.tail(sz)
     nd = num_manhattan_points_below(d + 1, sz′)
-    lo, hi = 0, min(sz[1] - 1, d)
+    lo, hi = 0, _maxcoordinate(sz[1], d)
     while lo < hi
         mid = (lo + hi + 1) >> 1
         if nd - num_manhattan_points_below(d - mid + 1, sz′) ≤ offset
@@ -109,6 +121,9 @@ invertlocaloffset(d, offset, sz::Tuple{Int}) = (d + 1,)
 end
 
 # successor of a multidimensional index in Manhattan order, assuming it exists
+# (here an unbounded size can be any size that is never reached)
+next_manhattan_index(I::Dims{N}, sz::NTuple{N, Any}) where {N} =
+    next_manhattan_index(I, map(s -> s isa Unbounded ? typemax(Int) : s, sz))
 function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
     # find the last position that can be incremented while lowering the distance of the
     # positions after it, and otherwise move to the next layer
@@ -137,9 +152,9 @@ function next_manhattan_index(I::Dims{N}, sz::Dims{N}) where {N}
     return I
 end
 
-manhattan_to_multidimensional_index(index::Int, ::Dims{0}) = ()
-manhattan_to_multidimensional_index(index::Int, ::Dims{1}) = (index,)
-function manhattan_to_multidimensional_index(index::Int, sz::Dims{N}) where {N}
+manhattan_to_multidimensional_index(index::Int, ::Tuple{}) = ()
+manhattan_to_multidimensional_index(index::Int, ::Tuple{Any}) = (index,)
+function manhattan_to_multidimensional_index(index::Int, sz::NTuple{N, Any}) where {N}
     # find the layer of the Manhattan distance, i.e. the smallest `d` such that there are at
     # least `index` points with distance `≤ d`, by exponential followed by binary search
     lo, hi = 0, 1
