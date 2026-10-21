@@ -76,6 +76,7 @@ end
     for s in rest
         i += 1
         @test !isless(s, sprev)
+        @test !isless(s, s)
         @test s == @testinferred(values(I)[i])
         @test findindex(values(I), s) == i
         sprev = s
