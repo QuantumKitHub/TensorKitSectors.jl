@@ -247,6 +247,32 @@ end
     @test_throws BoundsError values(I)[5]
 end
 
+@testset "Manhattan indexing" begin
+    TKS = TensorKitSectors
+    for sz in ((), (3,), (2, 3), (3, 1, 2), (2, 2, 2, 2))
+        # all points, ordered by their distance to the origin and then lexicographically
+        points = sort!(vec(collect(Iterators.product(map(n -> 1:n, sz)...))); by = I -> (sum(I), I))
+        for (i, I) in enumerate(points)
+            @test TKS.to_manhattan_index(I, sz) == i
+            @test TKS.manhattan_to_multidimensional_index(i, sz) == I
+            i < length(points) && @test TKS.next_manhattan_index(I, sz) == points[i + 1]
+        end
+    end
+    # with sizes of at least L, the points at distance < L are numbered as if unbounded
+    L = 6
+    for sz in ((TKS.Unbounded(),), (TKS.Unbounded(), TKS.Unbounded()), (2, TKS.Unbounded(), 3), (TKS.Unbounded(), 2, TKS.Unbounded()))
+        szL = map(n -> n isa TKS.Unbounded ? L : n, sz)
+        for I in Iterators.product(map(n -> 1:n, szL)...)
+            d = sum(I) - length(I)
+            d < L || continue
+            i = TKS.to_manhattan_index(I, szL)
+            @test TKS.to_manhattan_index(I, sz) == i
+            @test TKS.manhattan_to_multidimensional_index(i, sz) == I
+            d < L - 1 && @test TKS.next_manhattan_index(I, sz) == TKS.next_manhattan_index(I, szL)
+        end
+    end
+end
+
 @testset "Converter constructions" begin
     @test IsingAnyon(:ψ) isa IsingAnyon
     @test (IsingAnyon ⊠ IsingAnyon)(:ψ, :σ) isa (IsingAnyon ⊠ IsingAnyon)
