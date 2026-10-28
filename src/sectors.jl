@@ -966,7 +966,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                     RFR2 = conj(Race) * Facbdef * conj(Rbcf)
                 else
                     @tensor RFR1[α, β, μ, ν] := Rcae[α, λ] * Facbdef[λ, β, γ, ν] * Rcbf[γ, μ]
-                    @tensor RFR2[α, β, μ, ν] := conj(Race[α, λ]) * Facbdef[λ, β, γ, ν] * conj(Rbcf[γ, μ])
+                    @tensor RFR2[α, β, μ, ν] := conj(Race[λ, α]) * Facbdef[λ, β, γ, ν] * conj(Rbcf[μ, γ])
                 end
 
                 FRF1, FRF2 = zero(RFR1), zero(RFR2)
@@ -979,7 +979,7 @@ function hexagon_equation(a::I, b::I, c::I; kwargs...) where {I <: Sector}
                         FRF2 += Fcabdeg * conj(Rgcd) * Fabcdgf
                     else
                         @tensor FRF1[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * Rcgd[σ, ψ] * Fabcdgf[δ, ψ, μ, ν]
-                        @tensor FRF2[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * conj(Rgcd[σ, ψ]) * Fabcdgf[δ, ψ, μ, ν]
+                        @tensor FRF2[α, β, μ, ν] += Fcabdeg[α, β, δ, σ] * conj(Rgcd[ψ, σ]) * Fabcdgf[δ, ψ, μ, ν]
                     end
                 end
                 isapprox(RFR1, FRF1; kwargs...) || return false
