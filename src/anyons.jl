@@ -165,40 +165,61 @@ corresponding to the trivial sector `IsingAnyon(:I)` and the non-trivial sectors
 ``σ ⊗ σ = 1 ⊕ ψ``.
 
 ## Fields
-- `s::Symbol`: the label of the represented anyon, which can be `:I`, `:σ`, or `:ψ`.
+- `label::UInt8`: internal encoding of the anyon, with `0`, `1`, `2` corresponding to `:I`,
+  `:σ`, and `:ψ` respectively. The symbol label can be obtained as `a.s`.
 """
 struct IsingAnyon <: Sector
-    s::Symbol
+    label::UInt8
     function IsingAnyon(s::Symbol)
-        s == :sigma && (s = :σ)
-        s == :psi && (s = :ψ)
-        if !(s in (:I, :σ, :ψ))
+        label = if s === :I
+            0x00
+        elseif s === :σ || s === :sigma
+            0x01
+        elseif s === :ψ || s === :psi
+            0x02
+        else
             throw(ArgumentError("Unknown IsingAnyon $s."))
         end
-        return new(s)
+        return new(label)
+    end
+    function IsingAnyon(label::UInt8)
+        label <= 0x02 || throw(ArgumentError("Unknown IsingAnyon label $label."))
+        return new(label)
     end
 end
 
+const _isinganyon_symbols = (:I, :σ, :ψ)
+
+function Base.getproperty(a::IsingAnyon, f::Symbol)
+    f === :s && return _isinganyon_symbols[getfield(a, :label) + 1]
+    return getfield(a, f)
+end
+Base.propertynames(::IsingAnyon, private::Bool = false) =
+    private ? (:s, :label) : (:s,)
+
 type_repr(::Type{IsingAnyon}) = "IsingAnyon"
 
-const all_isinganyons = (IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ))
+# with the encoding I = 0, σ = 1, ψ = 2, σ is the only odd label, and the abelian
+# subcategory {I, ψ} ≅ Z2 fuses as `xor` of the labels.
+_isσ(a::IsingAnyon) = isodd(a.label)
 
 Base.IteratorSize(::Type{SectorValues{IsingAnyon}}) = HasLength()
-Base.length(::SectorValues{IsingAnyon}) = length(all_isinganyons)
-Base.iterate(::SectorValues{IsingAnyon}, i = 1) = iterate(all_isinganyons, i)
-Base.getindex(::SectorValues{IsingAnyon}, i::Int) = getindex(all_isinganyons, i)
-
-function findindex(::SectorValues{IsingAnyon}, a::IsingAnyon)
-    a == all_isinganyons[1] && return 1
-    a == all_isinganyons[2] && return 2
-    return 3
+Base.length(::SectorValues{IsingAnyon}) = 3
+function Base.iterate(::SectorValues{IsingAnyon}, label::UInt8 = 0x00)
+    return label > 0x02 ? nothing : (IsingAnyon(label), label + 0x01)
 end
+function Base.getindex(vals::SectorValues{IsingAnyon}, i::Int)
+    checkbounds(Bool, 1:length(vals), i) || throw(BoundsError(vals, i))
+    return IsingAnyon(i % UInt8 - 0x01)
+end
+
+findindex(::SectorValues{IsingAnyon}, a::IsingAnyon) = Int(a.label) + 1
 
 Base.convert(::Type{IsingAnyon}, s::Symbol) = IsingAnyon(s)
 unit(::Type{IsingAnyon}) = IsingAnyon(:I)
 dual(s::IsingAnyon) = s
 
-dim(a::IsingAnyon) = a.s == :σ ? sqrt(2) : 1.0
+dim(a::IsingAnyon) = _isσ(a) ? sqrt(2) : 1.0
 
 FusionStyle(::Type{IsingAnyon}) = SimpleFusion()
 fusionscalartype(::Type{IsingAnyon}) = Float64
@@ -209,37 +230,25 @@ sectorscalartype(::Type{IsingAnyon}) = ComplexF64
 const IsingAnyonProdIterator = SectorProductIterator{IsingAnyon}
 
 Base.IteratorSize(::Type{IsingAnyonProdIterator}) = Base.HasLength()
-function Base.length(iter::IsingAnyonProdIterator)
-    σ = IsingAnyon(:σ)
-    return (iter.a == σ && iter.b == σ) ? 2 : 1
-end
+Base.length(iter::IsingAnyonProdIterator) = 1 + (_isσ(iter.a) & _isσ(iter.b))
 
 function Base.iterate(iter::IsingAnyonProdIterator, state = 1)
-    I, σ, ψ = all_isinganyons
-    if state == 1 # first iteration
-        iter.a == I && return (iter.b, 2)
-        iter.b == I && return (iter.a, 2)
-        iter.a == σ && iter.b == ψ && return (σ, 2)
-        iter.a == ψ && iter.b == σ && return (σ, 2)
-        return (I, 2)
-    elseif state == 2
-        (iter.a == iter.b == σ) && return (ψ, 3)
-        return nothing
+    a, b = iter.a, iter.b
+    if state == 1
+        _isσ(a) & _isσ(b) && return (IsingAnyon(:I), 2)       # σ ⊗ σ ∋ 1
+        _isσ(a) | _isσ(b) && return (IsingAnyon(:σ), 2)       # σ ⊗ (1|ψ) = σ
+        return (IsingAnyon(xor(a.label, b.label)), 2)        # Z2 fusion of {1, ψ}
+    elseif state == 2 && _isσ(a) & _isσ(b)
+        return (IsingAnyon(:ψ), 3)                           # σ ⊗ σ ∋ ψ
     else
         return nothing
     end
 end
 
 function Nsymbol(a::IsingAnyon, b::IsingAnyon, c::IsingAnyon)
-    I, σ, ψ = all_isinganyons
-    return (
-        (a == I && b == c)
-            || (b == I && a == c)
-            || (c == I && a == b)
-            || (a == σ && b == σ && c == ψ)
-            || (a == σ && b == ψ && c == σ)
-            || (a == ψ && b == σ && c == σ)
-    )
+    # either exactly two σ's, or no σ's and the Z2 charges cancel
+    nσ = _isσ(a) + _isσ(b) + _isσ(c)
+    return (nσ == 2) | ((nσ == 0) & iszero(xor(a.label, b.label, c.label)))
 end
 
 function Fsymbol(
@@ -250,7 +259,7 @@ function Fsymbol(
     Nsymbol(e, c, d) || return 0.0
     Nsymbol(b, c, f) || return 0.0
     Nsymbol(a, f, d) || return 0.0
-    I, σ, ψ = all_isinganyons
+    σ, ψ = IsingAnyon(:σ), IsingAnyon(:ψ)
     if a == b == c == d == σ
         if e == f == ψ
             return -1.0 / sqrt(2.0)
@@ -270,7 +279,7 @@ end
 
 function Rsymbol(a::IsingAnyon, b::IsingAnyon, c::IsingAnyon)
     Nsymbol(a, b, c) || return complex(0.0)
-    I, σ, ψ = all_isinganyons
+    I, σ, ψ = IsingAnyon(:I), IsingAnyon(:σ), IsingAnyon(:ψ)
     if c == I
         if b == a == σ
             return cispi(-1 / 8)
@@ -293,9 +302,5 @@ function Base.show(io::IO, a::IsingAnyon)
     end
 end
 
-Base.hash(s::IsingAnyon, h::UInt) = hash(s.s, h)
-
-function Base.isless(a::IsingAnyon, b::IsingAnyon)
-    vals = SectorValues{IsingAnyon}()
-    return isless(findindex(vals, a), findindex(vals, b))
-end
+Base.hash(a::IsingAnyon, h::UInt) = hash(a.label, h)
+Base.isless(a::IsingAnyon, b::IsingAnyon) = isless(a.label, b.label)
