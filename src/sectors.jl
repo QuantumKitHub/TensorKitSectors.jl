@@ -852,6 +852,18 @@ function topological_central_charge(::Type{I}) where {I <: Sector}
     return rationalize(c_float; tol = tol) # rationalize uses tol = eps, whose default is too low to extract useful data.
 end
 
+"""
+    fermionparity(a::Sector)
+
+Return the fermion parity of a sector `a`, i.e. the ``ℤ₂`` quantum number which denotes
+whether the fermion is present (`true`, odd) or absent (`false`, even).
+This defaults to `false` for all non-fermionic sectors.
+"""
+function fermionparity(a::Sector)
+    BraidingStyle(a) isa Fermionic && throw(ArgumentError("Fermion parity is not defined for this fermionic sector type $(typeof(a))"))
+    return false
+end
+
 # Operations between sectors of different types
 # ------------------------------------------------------------------------------
 
