@@ -173,3 +173,9 @@ function manhattan_to_multidimensional_index(index::Int, sz::NTuple{N, Manhattan
     # find the position within the layer
     return invertlocaloffset(lo, index - 1 - num_manhattan_points_below(lo, sz), sz)
 end
+
+# pretty printing of ZNElement up to N = 4
+function subscript(i::Integer)
+    return i < 0 ? error("$i is negative") :
+        string(Iterators.reverse('₀' + d for d in digits(i))...)
+end
