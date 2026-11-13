@@ -104,7 +104,7 @@ The same convention is used for `Fsymbol`, `Rsymbol`, `Asymbol`, `Bsymbol`, and 
 
 Braiding style and scalar types are combined from the component categories.
 
-For products containing [`FermionParity`](@ref), `fermionparity` is the XOR of the component parities.
+For products containing [`FermionParity`](@ref), `fermionparity`(@ref) is the XOR of the component parities.
 
 ## Iteration
 
