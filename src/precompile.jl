@@ -7,9 +7,9 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(FusionStyle, (I,))
     precompile(BraidingStyle, (I,))
 
-    precompile(sectorscalartype, (I,))
-    precompile(fusionscalartype, (I,))
-    precompile(braidingscalartype, (I,))
+    precompile(sectorscalartype, (Type{I},))
+    precompile(fusionscalartype, (Type{I},))
+    precompile(braidingscalartype, (Type{I},))
 
     precompile(Nsymbol, (I, I, I))
     precompile(Fsymbol, (I, I, I, I, I, I))
@@ -27,7 +27,7 @@ function precompile_sector(::Type{I}) where {I <: Sector}
     precompile(invsqrtdim, (I,))
     precompile(dual, (I,))
     precompile(unit, (I,))
-    precompile(allunits, (I,))
+    precompile(allunits, (Type{I},))
     precompile(twist, (I,))
     precompile(frobenius_schur_phase, (I,))
     precompile(frobenius_schur_indicator, (I,))
