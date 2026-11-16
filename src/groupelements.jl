@@ -107,9 +107,12 @@ to the constructor, but only the value `mod(n, N)` is relevant. The second type 
 `p` should also be specified as an integer ` 0 <= p < N` and specifies the 3-cocycle
 [`cocycle`](@ref), which is then given by
 
-```julia
-cocycle(a, b, c) = cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2)
+```math
+ω_p(a, b, c) = \\exp\\left(\\frac{2π i \\, p \\, a \\, (b + c - [b + c]_N)}{N^2}\\right),
 ```
+
+where ``a``, ``b`` and ``c`` denote the integer labels `n` of the elements, and
+``[x]_N = x \\bmod N``.
 
 If `p` is not specified, it defaults to `0`, i.e. the trivial cocycle, for which `cocycle`
 returns the integer `1`.
