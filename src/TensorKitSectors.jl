@@ -90,7 +90,7 @@ include("ty.jl") # Tambara-Yamagami category for ℤ_N
 # ----------
 include("precompile.jl")
 
-function __precompile__()
+function _precompile_workload()
     for I in (
             Trivial, Z2Irrep, Z3Irrep, Z4Irrep, ZNIrrep, U1Irrep, SU2Irrep, CU1Irrep,
             FermionParity, FermionNumber, FermionSpin, PlanarTrivial, FibonacciAnyon,
@@ -100,6 +100,7 @@ function __precompile__()
     end
     return
 end
+_precompile_workload()
 
 # deprecate
 # ---------
