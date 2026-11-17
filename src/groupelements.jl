@@ -26,14 +26,20 @@ TensorKitSectors.cocycle(c1::SomeGroupElement, c2::SomeGroupElement, c3::SomeGro
 ```
 
 The methods `conj`, `dual`, `⊗`, `Nsymbol`, `Fsymbol`, `dim`, `Asymbol`, `Bsymbol` and
-`frobenius_schur_phase` will then be automatically defined. If no `cocycle` method is defined,
-the cocycle will be assumed to be trivial, i.e. equal to `1`.
+`frobenius_schur_phase` will then be automatically defined. If no [`cocycle`](@ref) method
+is defined, the cocycle will be assumed to be trivial, i.e. equal to `1`.
 """
 abstract type AbstractGroupElement{G <: Group} <: Sector end
 
 FusionStyle(::Type{<:AbstractGroupElement}) = UniqueFusion()
 BraidingStyle(::Type{<:AbstractGroupElement}) = NoBraiding()
 
+"""
+    cocycle(a::I, b::I, c::I) where {I <: AbstractGroupElement} -> Number
+
+Return the value ``ω(a, b, c)`` of the 3-cocycle ``ω : G × G × G → U(1)`` that specifies the
+associator of the group-element sectors `I <: AbstractGroupElement{G}`.
+"""
 cocycle(a::I, b::I, c::I) where {I <: AbstractGroupElement} = 1
 ⊗(a::I, b::I) where {I <: AbstractGroupElement} = (a * b,)
 dual(a::AbstractGroupElement) = inv(a)
@@ -98,14 +104,18 @@ Represents an element of the group ``ℤ_N`` for some value of `N < 64`. (We nee
 `2 * (N - 1) <= 127` in order for `a ⊗ b` to work correctly.) For `N` equals `2`, `3` or
 `4`, `ℤ{N}` can be replaced by `ℤ₂`, `ℤ₃`, `ℤ₄`. An arbitrary `Integer` `n` can be provided
 to the constructor, but only the value `mod(n, N)` is relevant. The second type parameter
-`p` should also be specified as an integer ` 0 <= p < N` and specifies the 3-cocycle, which
-is then being given by
+`p` should also be specified as an integer ` 0 <= p < N` and specifies the 3-cocycle
+[`cocycle`](@ref), which is then given by
 
-```julia
-cocycle(a, b, c) = cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2))
+```math
+ω_p(a, b, c) = \\exp\\left(\\frac{2π i \\, p \\, a \\, (b + c - [b + c]_N)}{N^2}\\right),
 ```
 
-If `p` is not specified, it defaults to `0`, i.e. the trivial cocycle.
+where ``a``, ``b`` and ``c`` denote the integer labels `n` of the elements, and
+``[x]_N = x \\bmod N``.
+
+If `p` is not specified, it defaults to `0`, i.e. the trivial cocycle, for which `cocycle`
+returns the integer `1`.
 
 ## Fields
 - `n::Int8`: the integer label of the element, modulo `N`.
@@ -132,7 +142,7 @@ Base.inv(c::ZNElement) = typeof(c)(-c.n)
 Base.:*(c1::ZNElement{N, p}, c2::ZNElement{N, p}) where {N, p} =
     ZNElement{N, p}(mod(c1.n + c2.n, N))
 
-cocycle(a::ZNElement{2, 0}, b::ZNElement{2, 0}, c::ZNElement{2, 0}) = 1
+cocycle(a::ZNElement{N, 0}, b::ZNElement{N, 0}, c::ZNElement{N, 0}) where {N} = 1
 function cocycle(a::ZNElement{N, p}, b::ZNElement{N, p}, c::ZNElement{N, p}) where {N, p}
     return cispi(2 * p * a.n * (b.n + c.n - mod(b.n + c.n, N)) / N^2)
 end
