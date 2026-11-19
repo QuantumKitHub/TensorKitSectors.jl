@@ -33,7 +33,7 @@ export TambaraYamagami
 export IsingBimodule
 
 # accessors
-export charge, modulus, cocycle
+export charge, modulus, cocycle, fermionparity
 
 # unicode exports
 # ---------------
