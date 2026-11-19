@@ -857,11 +857,17 @@ end
 
 Return the fermion parity of a sector `a`, i.e. the ``ℤ₂`` quantum number which denotes
 whether the fermion is present (`true`, odd) or absent (`false`, even).
-This defaults to `false` for all non-fermionic sectors.
+This defaults to `false` for all bosonic sectors, and will throw an error for anyonic sectors
+or sectors without a braiding. Product sectors containing sectors other than fermionic
+or bosonic ones will also throw an error.
 """
 function fermionparity(a::Sector)
-    BraidingStyle(a) isa Fermionic && throw(ArgumentError("Fermion parity is not defined for this fermionic sector type $(typeof(a))"))
-    return false
+    braidstyle = BraidingStyle(a)
+    braidstyle isa Bosonic && return false
+    braidstyle isa Fermionic &&
+        throw(ArgumentError("Fermion parity is not defined for this fermionic sector type $(typeof(a))"))
+
+    throw(ArgumentError("Fermion parity is not well-defined for this sector type $(typeof(a))"))
 end
 
 # Operations between sectors of different types
