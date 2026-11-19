@@ -42,7 +42,13 @@ All quantum dimensions are `1`.
 
 ## Associativity: the 3-cocycle and F-symbol
 
-The [`Fsymbol`](@ref) is not assumed trivial: it is given by the 3-cocycle
+The associator of group-element sectors is specified by a 3-cocycle, implemented through [`cocycle`](@ref):
+
+```@docs; canonical = false
+cocycle
+```
+
+For `ZNElement{N,p}`, the [`Fsymbol`](@ref) is not assumed trivial: it is given by the 3-cocycle
 
 ```math
 ω_p(a,b,c) = \exp\left(\frac{2π i\, p\, a\,\big(b + c - [b+c]_N\big)}{N^2}\right), \qquad [x]_N := x \bmod N,
@@ -57,6 +63,7 @@ F^{abc}_{e,d,f} = ω_p(a,b,c) \quad \text{when } e = a+b,\ d = e+c,\ f = b + c \
 
 and zero otherwise (since fusion is unique, all the other symbols such as [`Asymbol`](@ref), [`Bsymbol`](@ref) and `frobenius_schur_phase` are likewise built directly out of `ω_p`).
 For `p = 0` the cocycle is trivial and `ZNElement{N,0}` reduces to the ordinary ``ℤ_N``-graded vector spaces.
+In that case `cocycle` returns the integer `1`, such that the F-symbols are integer-valued.
 The [`pentagon_equation`](@ref) holds for every `N` and every `p ∈ 0:N-1`, i.e. every `ZNElement{N,p}` is a consistent fusion category.
 
 ## Topological Data (Braiding)
